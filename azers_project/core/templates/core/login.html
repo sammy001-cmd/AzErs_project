@@ -1,0 +1,198 @@
+{% extends 'core/base_public.html' %}
+{% block title %}Login — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[85vh] flex items-center justify-center bg-[#F9F8F3] px-6">
+    <div class="w-full max-w-md animate__animated animate__fadeIn">
+        
+        <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-yellow-900/5 p-10 md:p-14">
+            
+            <div class="text-center mb-10">
+                <span class="text-[10px] font-black uppercase tracking-[0.5em] text-[#d4af37] block mb-2">Welcome Back</span>
+                <h2 class="text-4xl font-serif font-bold text-gray-900 italic">The Squad</h2>
+            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="animate__animated animate__shakeX">
+                    {% for error in form.non_field_errors %}
+                        <div class="p-4 mb-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-center gap-3">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-red-700">{{ error }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% for field in form %}
+                <div class="relative group">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 group-focus-within:text-[#d4af37] transition-colors ml-1">
+                        {{ field.label }}
+                    </label>
+                    
+                    <div class="mt-1 relative">
+                        {{ field }}
+                        
+                        <div class="absolute bottom-0 left-0 h-[1px] w-0 bg-[#d4af37] group-focus-within:w-full transition-all duration-500"></div>
+                    </div>
+
+                    {% for error in field.errors %}
+                        <p class="text-[10px] text-red-500 font-bold uppercase tracking-tighter mt-1 animate__animated animate__headShake">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                <div class="pt-4">
+                    <button type="submit" 
+                            class="w-full py-4 bg-[#1a1a1a] text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-[#d4af37] hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-10 text-center">
+                <p class="text-[11px] text-gray-400 font-medium uppercase tracking-widest">
+                    New to the squad? 
+                    <a href="{% url 'core:member_signup' %}" class="text-[#d4af37] font-black hover:underline ml-1">Apply Now</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'core:home' %}" class="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] hover:text-[#d4af37] transition-colors">
+                ← Return Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Targeting Django's auto-generated inputs to make them look premium */
+    input {
+        width: 100%;
+        background: #fcfcfc !important;
+        border: 1px solid #f0f0f0 !important;
+        padding: 1rem !important;
+        border-radius: 12px !important;
+        font-size: 0.9rem !important;
+        color: #1a1a1a !important;
+        transition: all 0.3s ease !important;
+    }
+
+    input:focus {
+        outline: none !important;
+        background: #fff !important;
+        border-color: transparent !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03) !important;
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends 'core/base_public.html' %}
+{% block title %}Login — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <h2 class="auth-title">Login</h2>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="form-group">
+          {{ field.label_tag }}
+          {{ field }}
+          {% for error in field.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn">Login</button>
+    </form>
+    <p class="auth-footer">Don't have an account? <a href="{% url 'core:member_signup' %}">Sign up</a></p>
+  </div>
+</div>
+
+<style>
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 1rem;
+}
+
+.auth-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  width: 350px;
+  text-align: center;
+}
+
+.auth-title {
+  color: #d4af37; /* gold */
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.field-error {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.auth-footer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.auth-footer a {
+  color: #d4af37;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+</style>
+{% endblock %}
+
+
+ {% endcomment %}

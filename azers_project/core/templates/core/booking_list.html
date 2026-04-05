@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>My Bookings</h2>
+
+<table>
+    <tr>
+        <th>Artist</th>
+        <th>Event Date</th>
+        <th>Amount Paid</th>
+        <th>Status</th>
+    </tr>
+    {% for booking in bookings %}
+    <tr>
+        <td>{{ booking.artist.stage_name }}</td>
+        <td>{{ booking.event_date }}</td>
+        <td>₦{{ booking.amount_paid }}</td>
+        <td>{{ booking.payment_status }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No bookings yet.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

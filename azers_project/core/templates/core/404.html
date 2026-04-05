@@ -1,0 +1,38 @@
+{% extends "core/base_auth.html" %}
+{% block title %}404 | Lost in Excellence{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
+    <h1 class="text-[120px] md:text-[200px] font-black tracking-tighter text-black/5 absolute select-none pointer-events-none">
+        404
+    </h1>
+
+    <div class="relative z-10">
+        <p class="text-[10px] uppercase tracking-[0.6em] font-bold text-[#d4af37] mb-4">Location Unknown</p>
+        <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6">
+            Lost in the <span class="italic font-serif">Squad</span>.
+        </h2>
+        <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto leading-relaxed mb-10 font-medium">
+            The page you are looking for has been moved, deleted, or never existed. 
+            In the world of Azers Squad, we only focus on what matters.
+        </p>
+
+        <a href="/" 
+           onclick="document.getElementById('page-loader').style.width = '100%'"
+           class="inline-block bg-black text-white text-[10px] font-black uppercase tracking-[0.3em] px-10 py-5 rounded-full hover:bg-[#d4af37] hover:text-black transition-all duration-500 shadow-2xl shadow-black/20">
+            Return to Dashboard
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Subtle float animation for the main text */
+    h2 {
+        animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+{% endblock %}

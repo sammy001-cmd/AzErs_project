@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logged Out - Azers Squad</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <ul>
+            <li><a href="{% url 'core:home' %}">Home</a></li>
+            <li><a href="{% url 'core:artist_list' %}">Artists</a></li>
+            <li><a href="{% url 'core:login' %}">Login</a></li>
+            <li><a href="{% url 'core:member_signup' %}">Signup</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main content -->
+    <main>
+        <h1>You have been logged out</h1>
+        <p>Thank you for visiting Azers Squad.</p>
+        <p><a href="{% url 'core:home' %}">Return to Home</a></p>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Azers Squad. All rights reserved.</p>
+    </footer>
+</body>
+</html>

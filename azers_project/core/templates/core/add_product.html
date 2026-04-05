@@ -1,0 +1,94 @@
+{% extends "core/base_auth.html" %}
+{% block title %}Upload Drop - Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#FDFDFD] py-20 px-6">
+    <div class="max-w-2xl mx-auto">
+        
+        <a href="{% url 'core:brand_dashboard' %}" class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#d4af37] transition-colors mb-10">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
+            Back to Dashboard
+        </a>
+
+        <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+            <div class="bg-[#0F172A] p-10 text-center relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+                <div class="relative z-10">
+                    <h2 class="text-3xl font-serif font-bold text-white mb-2">New <span class="italic text-[#d4af37]">Market Drop</span></h2>
+                    <p class="text-gray-400 text-xs uppercase tracking-widest font-bold">List your item in the Elite Collective</p>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="p-10 space-y-8">
+                {% csrf_token %}
+
+                <div class="relative group">
+                    <label for="image-upload" class="cursor-pointer block">
+                        <div id="image-preview-container" class="aspect-[16/9] rounded-[2rem] border-2 border-dashed border-gray-100 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-[#d4af37]/30">
+                            <img id="image-preview" src="#" class="hidden w-full h-full object-cover">
+                            <div id="upload-placeholder" class="text-center">
+                                <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Upload Product Image</p>
+                            </div>
+                        </div>
+                    </label>
+                    {{ form.image }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Product Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Price (₦)</label>
+                        {{ form.price }}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Category</label>
+                    {{ form.category }}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Description</label>
+                    {{ form.description }}
+                </div>
+
+                <button type="submit" class="w-full py-5 bg-[#d4af37] text-black text-[11px] font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl shadow-[#d4af37]/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    Publish to Marketplace
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Image Preview Logic
+    const imageInput = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    const placeholder = document.getElementById('upload-placeholder');
+    const container = document.getElementById('image-preview-container');
+
+    imageInput.onchange = evt => {
+        const [file] = imageInput.files;
+        if (file) {
+            imagePreview.src = URL.createObjectURL(file);
+            imagePreview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            container.classList.remove('border-dashed');
+            container.classList.add('border-solid', 'border-[#d4af37]/20');
+        }
+    }
+</script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+    .font-serif { font-family: 'Playfair Display', serif; }
+</style>
+{% endblock %}

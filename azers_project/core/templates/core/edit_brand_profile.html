@@ -1,0 +1,342 @@
+{% extends "core/base_auth.html" %}
+{% block title %}Edit Brand Profile — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% if messages %}
+    <div id="toast-container" class="fixed top-10 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-6">
+        {% for message in messages %}
+            <div class="bg-[#0F172A] border border-[#d4af37]/30 backdrop-blur-xl text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-bounce-short">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#d4af37] rounded-full flex items-center justify-center shadow-lg shadow-[#d4af37]/20">
+                        <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-[#d4af37]">Identity Secured</p>
+                        <p class="text-[11px] font-bold">{{ message }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(() => {
+            const toast = document.getElementById('toast-container');
+            if (toast) {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }
+        }, 3000);
+    </script>
+{% endif %}
+
+<div class="min-h-screen bg-[#FDFDFD] py-12 px-6">
+    <div class="max-w-5xl mx-auto">
+        
+        <div class="mb-10 flex items-center justify-between">
+            <a href="{% url 'core:brand_dashboard' %}" class="group flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-all">
+                <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                Return to Workspace
+            </a>
+            
+            <a href="{% url 'core:brand_detail' brand.pk %}" target="_blank" class="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-100 rounded-xl text-[9px] font-black uppercase tracking-widest text-gray-500 hover:border-[#d4af37] hover:text-[#d4af37] transition-all shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                Preview Live Store
+            </a>
+        </div>
+
+        <div class="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/40 overflow-hidden border border-gray-100">
+            <div class="md:flex">
+                
+                <div class="md:w-1/3 bg-gray-50/50 p-10 border-r border-gray-100 flex flex-col items-center text-center">
+                    <div class="relative mb-6">
+                        <img src="{{ brand.display_picture }}" 
+                             class="w-32 h-32 rounded-[2rem] object-cover shadow-2xl border-4 border-white">
+                        <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 border-4 border-white rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path></svg>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-serif font-bold text-gray-900 leading-tight">{{ brand.brand_name }}</h3>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-black mt-3">Verified Partner</p>
+                    
+                    <div class="mt-10 w-full space-y-4">
+                        <div class="p-5 bg-white rounded-2xl border border-gray-100 text-left">
+                            <p class="text-[8px] text-gray-400 uppercase font-black tracking-widest mb-1">WhatsApp Integration</p>
+                            <p class="text-[11px] text-gray-900 font-bold truncate">
+                                {% if brand.whatsapp_number %}+{{ brand.whatsapp_number }}{% else %}Not Linked{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:w-2/3 p-10 md:p-14">
+                    <h2 class="text-3xl font-serif font-bold text-gray-900 mb-8 italic">Brand <span class="text-[#d4af37]">Identity</span> Settings</h2>
+                    
+                    <form method="post" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">{{ field.label }}</label>
+                            
+                            {% if field.name == "profile_picture" %}
+                                <div class="relative group mt-1">
+                                    <div class="flex items-center justify-center w-full px-6 py-10 border-2 border-gray-100 border-dashed rounded-[1.5rem] group-hover:border-[#d4af37]/40 transition-all cursor-pointer bg-gray-50/50">
+                                        <div class="text-center">
+                                            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">Replace Profile Asset</span>
+                                            {{ field }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+
+                            {% if field.help_text %}
+                                <p class="text-[9px] text-gray-400 mt-2 italic px-1">{{ field.help_text }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="pt-10">
+                            <button type="submit" class="w-full py-5 bg-[#0F172A] text-white text-[10px] font-black uppercase tracking-[0.4em] rounded-[1.25rem] hover:bg-[#d4af37] hover:text-black transition-all duration-500 shadow-2xl shadow-slate-900/20 active:scale-95">
+                                Secure Identity & Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+    .font-serif { font-family: 'Playfair Display', serif; }
+    
+    @keyframes bounce-short {
+        0%, 100% { transform: translateY(0) translateX(-50%); }
+        50% { transform: translateY(-5px) translateX(-50%); }
+    }
+    .animate-bounce-short { animation: bounce-short 1s ease-in-out infinite; }
+
+    /* Match the form style to your marketplace theme */
+    input[type="text"], input[type="email"], textarea, select {
+        width: 100% !important;
+        background: #F9FAFB !important;
+        border: 1px solid #F1F5F9 !important;
+        padding: 1.25rem 1.5rem !important;
+        border-radius: 1.25rem !important;
+        font-size: 0.9rem !important;
+        transition: all 0.3s ease !important;
+        color: #0F172A !important;
+        font-weight: 500;
+    }
+
+    input:focus, textarea:focus {
+        border-color: #d4af37 !important;
+        background: white !important;
+        box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1) !important;
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+{% block title %}Edit Brand Profile — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F8FAFC] py-12 px-6">
+    <div class="max-w-4xl mx-auto">
+        
+        <div class="mb-8 flex items-center justify-between">
+            <a href="{% url 'core:brand_dashboard' %}" class="group flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#0F172A] transition-colors">
+                <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                Return to Dashboard
+            </a>
+            <span class="text-[10px] font-black uppercase tracking-widest text-[#d4af37]">Account Settings</span>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 overflow-hidden border border-gray-100">
+            <div class="md:flex">
+                
+                <div class="md:w-1/3 bg-gray-50 p-10 border-r border-gray-100 flex flex-col items-center text-center">
+                    <div class="relative group">
+                        <img src="{{ form.instance.profile_picture.url|default:'/static/images/default-seller.png' }}" 
+                             class="w-32 h-32 rounded-3xl object-cover shadow-lg border-4 border-white mb-4">
+                        <div class="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="text-[8px] text-white font-bold uppercase tracking-widest">Update Logo Below</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-serif font-bold text-gray-900 leading-tight">{{ form.instance.business_name }}</h3>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mt-2">Current Brand Identity</p>
+                    
+                    <div class="mt-8 w-full space-y-3">
+                        <div class="p-3 bg-white rounded-xl border border-gray-100 text-left">
+                            <p class="text-[8px] text-gray-400 uppercase font-black tracking-tighter">Account Status</p>
+                            <p class="text-[10px] text-green-600 font-bold uppercase">Active Partner</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:w-2/3 p-10 md:p-14">
+                    <h2 class="text-2xl font-serif font-bold text-gray-900 mb-8 italic">Update Profile <span class="text-[#d4af37]">Details</span></h2>
+                    
+                    <form method="post" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                        <div class="form-group flex flex-col">
+                            <label class="label-style">{{ field.label }}</label>
+                            
+                            {% if field.name == "profile_picture" %}
+                                <div class="relative mt-1">
+                                    <div class="flex items-center justify-center w-full px-4 py-8 border-2 border-gray-100 border-dashed rounded-xl hover:border-[#d4af37] transition-colors cursor-pointer bg-gray-50/30">
+                                        <div class="text-center">
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 italic">Select New Brand Asset</span>
+                                            {{ field }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+
+                            {% if field.errors %}
+                                <div class="text-red-500 text-[9px] font-black uppercase mt-1 tracking-widest">
+                                    {% for error in field.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="pt-8 flex flex-col sm:flex-row gap-4">
+                            <button type="submit" class="flex-1 py-4 bg-[#0F172A] text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-[#d4af37] transition-all duration-500 shadow-xl shadow-slate-900/20">
+                                Save Changes
+                            </button>
+                            <a href="{% url 'core:brand_dashboard' %}" class="flex-1 py-4 bg-white border border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-gray-50 text-center transition-all">
+                                Discard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling for Django-rendered inputs */
+    input[type="text"], 
+    input[type="email"], 
+    textarea, 
+    select {
+        width: 100% !important;
+        background: #F9FAFB !important;
+        border: 1px solid #F1F5F9 !important;
+        padding: 0.85rem 1rem !important;
+        border-radius: 12px !important;
+        font-size: 0.85rem !important;
+        transition: all 0.3s ease !important;
+        color: #1e293b;
+    }
+
+    textarea {
+        min-height: 120px;
+        resize: none;
+    }
+
+    input:focus, textarea:focus {
+        outline: none !important;
+        border-color: #d4af37 !important;
+        background: white !important;
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.08) !important;
+    }
+
+    .label-style {
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #94A3B8;
+        margin-left: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Hide the ugly default file button */
+    input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+</style>
+{% endblock %} {% endcomment %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+{% block title %}Edit Brand Profile — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-start mt-5 mb-5">
+  <div class="card shadow-sm p-4" style="width: 500px; border-radius: 15px;">
+    <h3 class="text-center text-gold mb-4">Edit Brand Profile</h3>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger small mt-1">{% for error in field.errors %}{{ error }}{% endfor %}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      {% if form.instance.profile_picture %}
+        <div class="mb-3 text-center">
+          <p class="small text-muted">Current profile picture:</p>
+          <img src="{{ form.instance.profile_picture.url }}" class="img-fluid rounded" style="max-height:150px; object-fit:cover;">
+        </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-center mb-3">
+        <button type="submit" class="btn btn-gold">Save Changes</button>
+      </div>
+    </form>
+
+    <div class="d-flex justify-content-center mt-2">
+      <a href="{% url 'core:brand_dashboard' %}" class="btn btn-outline-gold w-100">Brand Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %} {% endcomment %}

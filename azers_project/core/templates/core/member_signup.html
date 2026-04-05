@@ -1,0 +1,166 @@
+{% extends 'core/base_public.html' %}
+{% block title %}Join the Squad — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[85vh] flex items-center justify-center bg-[#F9F8F3] px-6 py-12">
+    <div class="w-full max-w-4xl animate__animated animate__fadeIn">
+        
+        <div class="text-center mb-16">
+            <span class="text-[10px] font-black uppercase tracking-[0.6em] text-[#d4af37] block mb-3">Registration</span>
+            <h2 class="text-5xl font-serif font-bold text-gray-900 mb-4">Choose Your <span class="italic text-[#d4af37]">Path</span></h2>
+            <p class="text-gray-400 text-sm font-light tracking-wide">Are you looking to showcase your talent or discover it?</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            
+            <a href="{% url 'core:artist_signup' %}" class="group relative overflow-hidden rounded-[2.5rem] bg-white p-12 shadow-xl shadow-yellow-900/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 text-center">
+                <div class="mb-8 inline-flex items-center justify-center w-20 h-20 bg-[#F9F8F3] rounded-full text-3xl group-hover:bg-[#d4af37] group-hover:scale-110 transition-all duration-500">
+                    ✨
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-gray-900 mb-4 group-hover:text-[#d4af37] transition-colors">I am a Creative</h3>
+                <p class="text-xs text-gray-500 leading-relaxed uppercase tracking-widest font-medium">
+                    Musicians, Producers, DJs, and Artists looking for management and brand exposure.
+                </p>
+                <div class="mt-8 py-3 border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:bg-[#1a1a1a] group-hover:text-white transition-all">
+                    Sign Up as Artist
+                </div>
+            </a>
+
+            <a href="{% url 'core:brand_signup' %}" class="group relative overflow-hidden rounded-[2.5rem] bg-white p-12 shadow-xl shadow-yellow-900/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 text-center">
+                <div class="mb-8 inline-flex items-center justify-center w-20 h-20 bg-[#F9F8F3] rounded-full text-3xl group-hover:bg-[#d4af37] group-hover:scale-110 transition-all duration-500">
+                    🏛️
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-gray-900 mb-4 group-hover:text-[#d4af37] transition-colors">I am a Brand</h3>
+                <p class="text-xs text-gray-500 leading-relaxed uppercase tracking-widest font-medium">
+                    Agencies, Event Planners, and Companies looking to book premium talent.
+                </p>
+                <div class="mt-8 py-3 border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:bg-[#1a1a1a] group-hover:text-white transition-all">
+                    Sign Up as Brand
+                </div>
+            </a>
+
+        </div>
+
+        <div class="mt-16 text-center">
+            <p class="text-[11px] text-gray-400 font-medium uppercase tracking-[0.3em]">
+                Already a member? 
+                <a href="{% url 'core:login' %}" class="text-[#d4af37] font-black hover:underline ml-2">Sign In</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends 'core/base_public.html' %}
+{% block title %}Member Signup — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <h2 class="auth-title">Choose Signup Type</h2>
+    <p class="text-muted text-center mb-4">Select your account type to continue.</p>
+
+    <div class="signup-options">
+      <a href="{% url 'core:artist_signup' %}" class="btn btn-outline-gold">Creatives</a>
+      <a href="{% url 'core:brand_signup' %}" class="btn btn-outline-gold">Brands</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 1rem;
+}
+
+.auth-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.auth-title {
+  color: #d4af37; /* gold */
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.signup-options {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.signup-options .btn-outline-gold {
+  flex: 1 1 48%; /* ensures both buttons stay visible side by side */
+  padding: 0.6rem 0;
+  border: 2px solid #d4af37;
+  border-radius: 6px;
+  color: #d4af37;
+  font-weight: bold;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.signup-options .btn-outline-gold:hover {
+  background-color: #d4af37;
+  color: #fff;
+}
+
+.btn-outline-gold {
+  flex: 1 1 48%;
+  padding: 0.6rem 0;
+  border: 2px solid #d4af37; /* gold border */
+  border-radius: 6px;
+  color: #d4af37; /* text color explicitly set */
+  font-weight: bold;
+  text-align: center;
+  background-color: white; /* ensure background is white */
+  transition: 0.3s;
+}
+
+.btn-outline-gold:hover {
+  background-color: #d4af37; /* gold background on hover */
+  color: white; /* text color on hover */
+}
+</style>
+{% endblock %} {% endcomment %}
+
+
+
+
+

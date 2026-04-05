@@ -1,0 +1,445 @@
+{% extends "core/base_auth.html" %}
+{% block title %}Artist Intelligence — Azers Squad{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="min-h-screen bg-[#F9F8F3] text-gray-800 font-sans p-4 lg:p-12">
+    <div class="max-w-7xl mx-auto">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate__animated animate__fadeIn">
+            <div class="bg-white border-b-4 border-[#d4af37] p-8 shadow-sm rounded-2xl group hover:shadow-xl transition-all">
+                <span class="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">Total Engagements</span>
+                <p class="text-5xl font-light text-gray-900 mt-2">{{ artist.bookings.count }}</p>
+            </div>
+            <div class="bg-white border-b-4 border-green-500 p-8 shadow-sm rounded-2xl group hover:shadow-xl transition-all">
+                <span class="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">Net Revenue</span>
+                <p class="text-5xl font-light text-gray-900 mt-2">₦{{ total_revenue }}</p>
+            </div>
+            <div class="bg-white border-b-4 border-black p-8 shadow-sm rounded-2xl group hover:shadow-xl transition-all">
+                <span class="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">Base Rate</span>
+                <p class="text-5xl font-light text-gray-900 mt-2">₦{{ artist.price_tag }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-12">
+            
+            <aside class="w-full lg:w-80 flex-shrink-0 animate__animated animate__fadeInLeft">
+                <div class="sticky top-12">
+                    <div class="bg-white p-3 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 relative overflow-hidden group">
+                        <div class="w-full h-80 rounded-[2rem] overflow-hidden bg-gray-100">
+                            {% if artist.profile_picture %}
+                                <img src="{{ artist.profile_picture.url }}" 
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            {% else %}
+                                <img src="{% static 'images/default-artist.png' %}" 
+                                    class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-8 px-2">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-3xl font-black tracking-tighter text-gray-900">{{ artist.stage_name }}</h2>
+                            <span class="px-3 py-1 bg-[#d4af37]/10 text-[#d4af37] text-[9px] font-black uppercase rounded-full">Pro</span>
+                        </div>
+                        <p class="text-[#d4af37] text-xs font-bold uppercase tracking-widest mt-2">{{ artist.genre|default:"Main Talent" }}</p>
+                        
+                        <p class="mt-6 text-sm text-gray-500 leading-relaxed line-clamp-4 italic">
+                            "{{ artist.bio|default:"No biography provided." }}"
+                        </p>
+
+                        <div class="grid grid-cols-1 gap-3 mt-8">
+                            <a href="{% url 'core:edit_artist_profile' %}" 
+                               class="flex items-center justify-center py-4 bg-black text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-[#d4af37] transition-all">
+                                Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="flex-grow animate__animated animate__fadeInUp">
+                <div class="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-10 py-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+                        <div>
+                            <h3 class="text-sm font-black uppercase tracking-[0.3em] text-gray-900">Live Gig Radar</h3>
+                            <p class="text-[10px] text-gray-400 font-bold mt-1">REAL-TIME BOOKING MANAGEMENT</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            <span class="text-[10px] font-black text-gray-400 uppercase">System Active</span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        {% if artist.bookings.exists %}
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[10px] text-gray-400 uppercase tracking-widest bg-gray-50/50">
+                                    <th class="py-6 px-10 font-black">Client & Status</th>
+                                    <th class="py-6 px-10 font-black">Event Schedule</th>
+                                    <th class="py-6 px-10 text-right font-black">Financials & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {% for booking in artist.bookings.all %}
+                                <tr class="hover:bg-[#F9F8F3]/80 transition-all group">
+                                    <td class="py-8 px-10">
+                                        <div class="text-lg font-bold text-gray-900">{{ booking.customer_name }}</div>
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter
+                                                {% if booking.status == 'Pending' %}bg-amber-100 text-amber-600
+                                                {% elif booking.status == 'Accepted' %}bg-green-100 text-green-600
+                                                {% elif booking.status == 'Declined' %}bg-red-100 text-red-600
+                                                {% elif booking.status == 'Completed' %}bg-blue-100 text-blue-600
+                                                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                                                {{ booking.status }}
+                                            </span>
+                                            <span class="text-[10px] text-gray-400 font-medium">| {{ booking.payment_status }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10">
+                                        <div class="text-sm font-bold text-gray-800">{{ booking.event_date|date:"F d, Y" }}</div>
+                                        <div class="text-[11px] text-gray-400 mt-1 uppercase italic">{{ booking.notes|truncatechars:40|default:"Standard Performance" }}</div>
+                                    </td>
+                                    <td class="py-8 px-10 text-right">
+                                        <div class="text-xl font-black text-gray-900 mb-4">₦{{ booking.amount_paid }}</div>
+                                        
+                                        <div class="flex justify-end gap-3">
+                                            {% if booking.status == "Pending" %}
+                                            <form action="{% url 'core:artist_update_booking' booking.id %}" method="POST" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="accept">
+                                                <button type="submit" class="px-4 py-2 bg-green-500 text-white text-[9px] font-black uppercase rounded-lg hover:bg-green-600 transition-all shadow-lg shadow-green-100">Accept</button>
+                                            </form>
+                                            <form action="{% url 'core:artist_update_booking' booking.id %}" method="POST" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="decline">
+                                                <button type="submit" class="px-4 py-2 bg-red-50 text-red-600 text-[9px] font-black uppercase rounded-lg hover:bg-red-100 transition-all">Decline</button>
+                                            </form>
+                                            {% elif booking.status == "Accepted" %}
+                                            <a href="{% url 'core:guest_booking_detail' booking.secret_id %}" target="_blank" 
+                                               class="px-4 py-2 bg-gray-100 text-gray-600 text-[9px] font-black uppercase rounded-lg hover:bg-gray-200 transition-all mr-2">
+                                               View Portal
+                                            </a>
+                                            <form action="{% url 'core:artist_update_booking' booking.id %}" method="POST" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="complete">
+                                                <button type="submit" class="px-4 py-2 border-2 border-green-500 text-green-600 text-[9px] font-black uppercase rounded-lg hover:bg-green-500 hover:text-white transition-all">Complete</button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="py-40 text-center">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-calendar-plus text-gray-200 text-2xl"></i>
+                            </div>
+                            <p class="text-xs text-gray-400 font-black uppercase tracking-[0.3em]">No active requests on your radar</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: '{% if message.tags == "error" %}error{% else %}success{% endif %}',
+                title: '{{ message }}',
+                showConfirmButton: false,
+                timer: 3000,
+                background: '#fff',
+                color: '#000'
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+{% endblock %}
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+{% block title %}Artist Intelligence — Azers Squad{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="min-h-screen bg-[#F9F8F3] text-gray-800 font-sans p-4 lg:p-12">
+    <div class="max-w-7xl mx-auto">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate__animated animate__fadeIn">
+            <div class="bg-white border-b-4 border-[#d4af37] p-8 shadow-sm rounded-2xl group hover:shadow-xl transition-all">
+                <span class="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">Total Engagements</span>
+                <p class="text-5xl font-light text-gray-900 mt-2">{{ artist.bookings.count }}</p>
+            </div>
+            <div class="bg-white border-b-4 border-green-500 p-8 shadow-sm rounded-2xl group hover:shadow-xl transition-all">
+                <span class="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">Net Revenue</span>
+                <p class="text-5xl font-light text-gray-900 mt-2">₦{{ total_revenue|default:"0" }}</p>
+            </div>
+            <div class="bg-white border-b-4 border-black p-8 shadow-sm rounded-2xl group hover:shadow-xl transition-all">
+                <span class="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">Base Rate</span>
+                <p class="text-5xl font-light text-gray-900 mt-2">₦{{ artist.price_tag }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-12">
+            
+            <aside class="w-full lg:w-80 flex-shrink-0 animate__animated animate__fadeInLeft">
+                <div class="sticky top-12">
+                    <div class="bg-white p-3 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 relative overflow-hidden group">
+                        <div class="w-full h-80 rounded-[2rem] overflow-hidden bg-gray-100">
+                            <img src="{{ artist.profile_picture.url|default:'/static/images/default-artist.png' }}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                    </div>
+
+                    <div class="mt-8 px-2">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-3xl font-black tracking-tighter text-gray-900">{{ artist.stage_name }}</h2>
+                            <span class="px-3 py-1 bg-[#d4af37]/10 text-[#d4af37] text-[9px] font-black uppercase rounded-full">Pro</span>
+                        </div>
+                        <p class="text-[#d4af37] text-xs font-bold uppercase tracking-widest mt-2">{{ artist.genre|default:"Main Talent" }}</p>
+                        
+                        <p class="mt-6 text-sm text-gray-500 leading-relaxed line-clamp-4 italic">
+                            "{{ artist.bio|default:"No biography provided." }}"
+                        </p>
+
+                        <div class="grid grid-cols-1 gap-3 mt-8">
+                            <a href="{% url 'core:edit_artist_profile' %}" 
+                               class="flex items-center justify-center py-4 bg-black text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-[#d4af37] transition-all">
+                                Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="flex-grow animate__animated animate__fadeInUp">
+                <div class="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-10 py-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+                        <div>
+                            <h3 class="text-sm font-black uppercase tracking-[0.3em] text-gray-900">Live Gig Radar</h3>
+                            <p class="text-[10px] text-gray-400 font-bold mt-1">REAL-TIME BOOKING MANAGEMENT</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            <span class="text-[10px] font-black text-gray-400 uppercase">System Active</span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        {% if artist.bookings.exists %}
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[10px] text-gray-400 uppercase tracking-widest bg-gray-50/50">
+                                    <th class="py-6 px-10 font-black">Client & Status</th>
+                                    <th class="py-6 px-10 font-black">Event Schedule</th>
+                                    <th class="py-6 px-10 text-right font-black">Financials & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {% for booking in artist.bookings.all %}
+                                <tr class="hover:bg-[#F9F8F3]/80 transition-all group">
+                                    <td class="py-8 px-10">
+                                        <div class="text-lg font-bold text-gray-900">{{ booking.customer_name }}</div>
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter
+                                                {% if booking.status == 'Pending' %}bg-amber-100 text-amber-600
+                                                {% elif booking.status == 'Accepted' %}bg-green-100 text-green-600
+                                                {% elif booking.status == 'Declined' %}bg-red-100 text-red-600
+                                                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                                                {{ booking.status }}
+                                            </span>
+                                            <span class="text-[10px] text-gray-400 font-medium">| {{ booking.payment_status }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10">
+                                        <div class="text-sm font-bold text-gray-800">{{ booking.event_date|date:"F d, Y" }}</div>
+                                        <div class="text-[11px] text-gray-400 mt-1 uppercase italic">{{ booking.notes|truncatechars:40|default:"Standard Performance" }}</div>
+                                    </td>
+                                    <td class="py-8 px-10 text-right">
+                                        <div class="text-xl font-black text-gray-900 mb-4">₦{{ booking.amount_paid }}</div>
+                                        
+                                        {% if booking.status == "Pending" %}
+                                        <div class="flex justify-end gap-3">
+                                            <form action="{% url 'core:artist_update_booking' booking.id %}" method="POST" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="accept">
+                                                <button class="px-4 py-2 bg-green-500 text-white text-[9px] font-black uppercase rounded-lg hover:bg-green-600 transition-all">Accept</button>
+                                            </form>
+                                            <form action="{% url 'core:artist_update_booking' booking.id %}" method="POST" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="decline">
+                                                <button class="px-4 py-2 bg-red-100 text-red-600 text-[9px] font-black uppercase rounded-lg hover:bg-red-200 transition-all">Decline</button>
+                                            </form>
+                                        </div>
+                                        {% elif booking.status == "Accepted" %}
+                                        <form action="{% url 'core:artist_update_booking' booking.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="complete">
+                                            <button class="px-6 py-2 border-2 border-gray-200 text-gray-400 text-[9px] font-black uppercase rounded-lg hover:border-green-500 hover:text-green-500 transition-all">Mark Completed</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="py-40 text-center">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-calendar-plus text-gray-200 text-2xl"></i>
+                            </div>
+                            <p class="text-xs text-gray-400 font-black uppercase tracking-[0.3em]">No active requests on your radar</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Optional: Add auto-toast for status updates
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: '{% if message.tags == "error" %}error{% else %}success{% endif %}',
+                title: '{{ message }}',
+                showConfirmButton: false,
+                timer: 3000,
+                background: '#fff',
+                color: '#000'
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+{% endblock %} {% endcomment %}
+
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+{% block title %}Dashboard — Azers Squad{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F9F8F3] text-gray-800 font-sans p-6 lg:p-12">
+    <div class="max-w-6xl mx-auto">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate__animated animate__fadeIn">
+            <div class="bg-white border-b-4 border-[#d4af37] p-8 shadow-sm rounded-xl">
+                <span class="text-[11px] uppercase tracking-widest font-bold text-gray-400">Total Bookings</span>
+                <p class="text-4xl font-light text-gray-900 mt-2">{{ artist.booking_set.count }}</p>
+            </div>
+            <div class="bg-white border-b-4 border-[#d4af37] p-8 shadow-sm rounded-xl">
+                <span class="text-[11px] uppercase tracking-widest font-bold text-gray-400">Revenue</span>
+                <p class="text-4xl font-light text-[#d4af37] mt-2">₦{{ total_revenue|default:"0" }}</p>
+            </div>
+            <div class="bg-white border-b-4 border-[#d4af37] p-8 shadow-sm rounded-xl">
+                <span class="text-[11px] uppercase tracking-widest font-bold text-gray-400">Performance Rate</span>
+                <p class="text-4xl font-light text-gray-900 mt-2">₦{{ artist.price_tag }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-12">
+            
+            <aside class="w-full lg:w-72 flex-shrink-0 animate__animated animate__fadeInLeft">
+                <div class="bg-white p-2 rounded-2xl shadow-xl shadow-gray-200/50">
+                    <div class="w-full h-72 rounded-xl overflow-hidden bg-gray-100">
+                        <img src="{{ artist.profile_picture.url|default:'/static/images/default-artist.png' }}" 
+                             class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <h2 class="text-2xl font-serif font-bold text-gray-900">{{ artist.stage_name }}</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="w-2 h-2 bg-[#d4af37] rounded-full"></span>
+                        <p class="text-[#d4af37] text-xs font-bold uppercase tracking-widest">{{ artist.genre|default:"Artist" }}</p>
+                    </div>
+                    
+                    <p class="mt-6 text-sm text-gray-500 leading-relaxed italic">
+                        "{{ artist.bio|default:"No biography provided." }}"
+                    </p>
+
+                    <a href="{% url 'core:edit_artist_profile' %}" 
+                       class="mt-8 flex items-center justify-center w-full py-3 border-2 border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-white font-bold text-xs uppercase tracking-widest transition-all rounded-lg">
+                        Edit Profile
+                    </a>
+                </div>
+            </aside>
+
+            <main class="flex-grow animate__animated animate__fadeInUp">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-900">Recent Bookings</h3>
+                        <span class="text-[10px] text-gray-400 font-semibold italic uppercase">Official Squad Log</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        {% if artist.booking_set.exists %}
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[10px] text-gray-400 uppercase tracking-widest bg-gray-50/50">
+                                    <th class="py-4 px-8 font-bold">Client Name</th>
+                                    <th class="py-4 px-8 font-bold">Event Date</th>
+                                    <th class="py-4 px-8 text-right font-bold">Amount Paid</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {% for booking in artist.booking_set.all %}
+                                <tr class="hover:bg-[#F9F8F3]/50 transition-colors">
+                                    <td class="py-6 px-8">
+                                        <div class="text-sm font-bold text-gray-900">{{ booking.customer_name }}</div>
+                                        <div class="text-[11px] text-gray-400 mt-1 uppercase">{{ booking.notes|truncatechars:30|default:"No additional notes" }}</div>
+                                    </td>
+                                    <td class="py-6 px-8 text-xs text-gray-500">
+                                        {{ booking.event_date|date:"F d, Y" }}
+                                    </td>
+                                    <td class="py-6 px-8 text-right">
+                                        <span class="text-sm font-bold text-gray-900">₦{{ booking.amount_paid }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="py-32 text-center">
+                            <svg class="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5"/></svg>
+                            <p class="text-xs text-gray-400 uppercase tracking-[0.2em]">Pending your first booking</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+ {% endcomment %}

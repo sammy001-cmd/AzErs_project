@@ -1,0 +1,125 @@
+{% extends "core/base_auth.html" %}
+{% block title %}Edit {{ product.name }} — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#0F172A] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-96 h-96 bg-[#d4af37]/10 rounded-full blur-[120px] -ml-20 -mt-20"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] -mr-20 -mb-20"></div>
+
+    <div class="max-w-2xl w-full relative z-10">
+        <a href="{% url 'core:brand_dashboard' %}" class="inline-flex items-center text-slate-400 hover:text-[#d4af37] text-xs font-black uppercase tracking-widest mb-8 transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to Dashboard
+        </a>
+
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
+            <div class="mb-10">
+                <h2 class="text-3xl font-serif text-white mb-2">Edit <span class="italic text-[#d4af37]">Product</span></h2>
+                <p class="text-slate-400 text-sm">Update your listing details for <span class="text-white font-bold">{{ product.name }}</span></p>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 gap-6">
+                    {% for field in form %}
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">
+                            {{ field.label }}
+                        </label>
+                        
+                        <div class="relative">
+                            {{ field }}
+                        </div>
+
+                        {% if field.errors %}
+                            <p class="text-red-400 text-[10px] font-bold italic mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="pt-6 flex flex-col sm:flex-row gap-4">
+                    <button type="submit" class="flex-1 py-4 bg-[#d4af37] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-[#d4af37]/20">
+                        Save Changes
+                    </button>
+                    <a href="{% url 'core:brand_dashboard' %}" class="flex-1 py-4 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 text-center transition-all border border-white/5">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Targeting the auto-generated Django inputs to match the glass theme */
+    input[type="text"], input[type="number"], textarea, select {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 1rem !important;
+        padding: 1rem 1.25rem !important;
+        color: white !important;
+        font-size: 0.875rem !important;
+        outline: none !important;
+        transition: all 0.3s ease !important;
+    }
+
+    input:focus, textarea:focus {
+        border-color: #d4af37 !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.1) !important;
+    }
+
+    /* Style for the file upload button */
+    input[type="file"] {
+        color: #94a3b8;
+        font-size: 0.75rem;
+    }
+    
+    input[type="file"]::file-selector-button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 0.5rem;
+        color: white;
+        padding: 0.5rem 1rem;
+        margin-right: 1rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+    }
+
+    <style>
+    /* ... previous styles ... */
+
+    /* The Fix for the Category Dropdown */
+    select {
+        appearance: none; /* Removes default browser arrow */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23d4af37' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+        background-position: right 1rem center !important;
+        background-repeat: no-repeat !important;
+        background-size: 1.5em 1.5em !important;
+        padding-right: 2.5rem !important;
+    }
+
+    /* Force the dropdown list (options) to be visible */
+    select option {
+        background-color: #1E293B !important; /* Dark Slate background */
+        color: white !important;
+        padding: 10px !important;
+    }
+
+    /* Fix for Search/Inputs on mobile to prevent zooming */
+    @media (max-width: 640px) {
+        input, select, textarea {
+            font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
+        }
+    }
+</style>
+</style>
+{% endblock %}

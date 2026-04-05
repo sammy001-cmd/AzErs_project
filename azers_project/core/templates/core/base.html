@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Azers Squad</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <style>
+      /* --- Global --- */
+      body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+        color: #333333;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* --- Navbar --- */
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff9f0; /* soft white/gold background */
+        padding: 1rem 2rem;
+        border-bottom: 2px solid #d4af37; /* gold border */
+      }
+
+      nav .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #d4af37; /* gold logo */
+      }
+
+      nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+
+      nav ul li {
+        position: relative;
+      }
+
+      nav ul li a, nav ul li button {
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        color: #333;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      nav ul li a:hover,
+      nav ul li button:hover {
+        color: #d4af37; /* gold hover */
+      }
+
+      nav ul li form button {
+        font-weight: 600;
+      }
+
+      /* --- Main content --- */
+      main {
+        padding: 2rem 5%;
+      }
+
+      /* --- Footer --- */
+      footer {
+        text-align: center;
+        padding: 1.5rem;
+        background-color: #d4af37; /* gold footer */
+        color: #ffffff;
+        font-weight: bold;
+      }
+
+      /* --- Buttons --- */
+      .btn {
+        background-color: #d4af37;
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .btn:hover {
+        background-color: #b8952f;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+     <nav>
+    <ul>
+        <li><a href="{% url 'core:home' %}">Home</a></li>
+        <li><a href="{% url 'core:artist_list' %}">Artists</a></li>
+
+        {% if user.is_authenticated %}
+            {% if user.role == 'artist' %}
+                <li><a href="{% url 'core:artist_dashboard' %}">Artist Dashboard</a></li>
+                <li><a href="{% url 'core:portfolio_list' %}">My Portfolio</a></li>
+            {% elif user.role == 'brand' %}
+                <li><a href="{% url 'core:brand_dashboard' %}">Brand Dashboard</a></li>
+            {% endif %}
+
+            <li>
+                <form action="{% url 'core:logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Logout ({{ user.username }})</button>
+                </form>
+            </li>
+            
+            <li style="color: yellow; font-size: 10px;">Role: {{ user.role }}</li>
+
+        {% else %}
+            <li><a href="{% url 'core:login' %}" class="btn">Login</a></li>
+            <li><a href="{% url 'core:member_signup' %}" class="btn">Sign Up</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
+
+
+    {% comment %} <nav>
+      <div class="logo">Azers Squad</div>
+      <ul>
+        <li><a href="{% url 'core:home' %}">Home</a></li>
+        <li><a href="{% url 'core:artist_list' %}">Artists</a></li>
+
+        {% if user.is_authenticated %}
+          {% if user.role == 'Artist' %}
+          <li><a href="{% url 'core:edit_artist_profile' %}">Edit Artist Profile</a></li>
+          <li><a href="{% url 'core:artist_dashboard' %}">Dashboard</a></li>
+          {% elif user.role == 'brand' %}
+          <li><a href="{% url 'core:edit_seller_profile' %}">Edit Seller Profile</a></li>
+          <li><a href="{% url 'core:seller_dashboard' %}">Dashboard</a></li>
+          {% endif %}
+          <li>
+            <form method="post" action="{% url 'core:logout' %}">
+              {% csrf_token %}
+              <button class="btn" type="submit">Logout</button>
+            </form>
+          </li>
+        {% else %}
+          <li><a class="btn" href="{% url 'core:login' %}">Login</a></li>
+          <li><a class="btn" href="{% url 'core:member_signup' %}">Signup</a></li>
+        {% endif %}
+      </ul>
+    </nav> {% endcomment %}
+
+    <!-- Main content -->
+    <main>{% block content %}{% endblock %}</main>
+
+    <!-- Footer -->
+    <footer>
+      &copy; 2025 Azers Squad. All rights reserved.
+    </footer>
+  </body>
+</html>
+
+
+{% comment %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Azers Squad</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav>
+      <ul>
+        <li><a href="{% url 'core:home' %}">Home</a></li>
+        <li><a href="{% url 'core:artist_list' %}">Artists</a></li>
+
+        {% if user.is_authenticated %}
+        <form
+          method="post"
+          action="{% url 'core:logout' %}"
+          style="display: inline"
+        >
+          {% csrf_token %}
+          <button type="submit">Logout</button>
+        </form>
+
+        {% if user.role == 'artist' %}
+        <li>
+          <a href="{% url 'core:edit_artist_profile' %}">Edit Artist Profile</a>
+        </li>
+        <li><a href="{% url 'core:artist_dashboard' %}">Dashboard</a></li>
+        {% elif user.role == 'seller' %}
+        <li>
+          <a href="{% url 'core:edit_seller_profile' %}">Edit Seller Profile</a>
+        </li>
+        <li><a href="{% url 'core:seller_dashboard' %}">Dashboard</a></li>
+        {% endif %} {% else %}
+        <li><a href="{% url 'core:login' %}">Login</a></li>
+        <li><a href="{% url 'core:member_signup' %}">Signup</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <!-- Main content -->
+    <main>{% block content %}{% endblock %}</main>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 Azers Squad. All rights reserved.</p>
+    </footer>
+  </body>
+</html> {% endcomment %}

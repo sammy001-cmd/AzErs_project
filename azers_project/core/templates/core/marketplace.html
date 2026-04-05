@@ -1,0 +1,231 @@
+{% extends "core/base.html" %}
+{% block title %}The Collective — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#FDFDFD] pb-32">
+    <div class="relative py-24 px-8 overflow-hidden bg-[#0F172A] text-center mb-16">
+        <div class="absolute inset-0 opacity-20" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+        <div class="relative z-10">
+            <h1 class="text-5xl md:text-7xl font-serif text-white mb-6">The <span class="italic text-[#d4af37]">Collective</span></h1>
+            <p class="text-[10px] md:text-xs uppercase tracking-[0.5em] text-gray-400 font-black">Curated Drops from Premier Brands</p>
+        </div>
+        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-[#d4af37]/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {% for product in products %}
+            <div class="group relative bg-white rounded-[2.5rem] border border-gray-100 p-4 transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2">
+                
+                <div class="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-6 bg-gray-50">
+                    <img src="{{ product.image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    
+                    <div class="absolute top-5 left-5 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-sm">
+                        <p class="text-[9px] font-black uppercase tracking-widest text-gray-900">{{ product.get_category_display }}</p>
+                    </div>
+
+                    <div class="absolute bottom-5 right-5 bg-[#0F172A] text-white px-5 py-2 rounded-2xl shadow-xl">
+                        <p class="text-sm font-bold tracking-tighter">₦{{ product.price }}</p>
+                    </div>
+                </div>
+
+                <div class="px-4 pb-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-xl font-serif font-bold text-gray-900">{{ product.name }}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ product.brand.brand_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 line-clamp-2 mb-8 leading-relaxed">
+                        {{ product.description|default:"Exclusive drop available only at Azers Squad Collective." }}
+                    </p>
+
+                    <a href="https://wa.me/{{ product.brand.whatsapp_number }}?text=Hello {{ product.brand.brand_name }}, I am interested in '{{ product.name }}' from Azers Squad." 
+                       target="_blank"
+                       onclick="trackLead('{{ product.id }}')"
+                       class="flex items-center justify-center gap-3 w-full py-5 bg-[#0F172A] text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#d4af37] hover:text-black transition-all duration-300 shadow-xl shadow-slate-200">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.433 5.628 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Inquire on WhatsApp
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <p class="text-gray-400 font-serif italic text-2xl">The collection is being curated. Check back soon.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function trackLead(productId) {
+        // Send a background request to record the lead
+        fetch(`/track-lead/${productId}/`)
+            .then(response => response.json())
+            .then(data => console.log('Insight captured'))
+            .catch(error => console.error('Error tracking lead:', error));
+    }
+</script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+    .font-serif { font-family: 'Playfair Display', serif; }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_public.html" %}
+{% load static %}
+{% block title %}Marketplace — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#FDFDFD] pb-32">
+    <div class="relative bg-[#0F172A] pt-32 pb-24 px-6 overflow-hidden">
+        <div class="absolute inset-0 opacity-20" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-[#d4af37]/10 rounded-full blur-3xl"></div>
+        
+        <div class="max-w-7xl mx-auto text-center relative z-10">
+            <span class="text-[10px] font-black uppercase tracking-[0.6em] text-[#d4af37] mb-4 block">The Elite Collective</span>
+            <h1 class="text-4xl md:text-7xl font-serif font-bold text-white mb-8 tracking-tight">Azers Marketplace</h1>
+            
+            <form action="{% url 'core:marketplace' %}" method="GET" class="max-w-2xl mx-auto mb-10 relative group px-4">
+                <input type="text" 
+                       name="search" 
+                       value="{{ search_query|default:'' }}" 
+                       placeholder="Find products, brands, or services..." 
+                       class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-8 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30 focus:bg-white/10 transition-all text-sm">
+                
+                <button type="submit" class="absolute right-7 top-2.5 bottom-2.5 px-6 bg-[#d4af37] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-95 transition-transform active:scale-90 shadow-lg">
+                    Search
+                </button>
+                
+                {% if search_query %}
+                    <a href="{% url 'core:marketplace' %}" class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] text-gray-500 hover:text-[#d4af37] uppercase tracking-widest font-bold transition-colors">
+                        ✕ Clear Search
+                    </a>
+                {% endif %}
+            </form>
+
+            <div class="flex flex-wrap justify-center gap-3 mt-16 overflow-x-auto pb-4 no-scrollbar">
+                <a href="{% url 'core:marketplace' %}" 
+                   class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 
+                   {% if not active_category %} bg-[#d4af37] text-black shadow-lg shadow-[#d4af37]/30 {% else %} bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 {% endif %}">
+                    All Drops
+                </a>
+                
+                {% for code, name in categories %}
+                <a href="?cat={{ code }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300
+                   {% if active_category == code %} bg-[#d4af37] text-black shadow-lg shadow-[#d4af37]/30 {% else %} bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 {% endif %}">
+                    {{ name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 -mt-12 relative z-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for brand in brands|slice:":3" %}
+            <a href="{% url 'core:brand_detail' brand.pk %}" class="group bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 flex items-center gap-5 hover:scale-[1.02] transition-transform">
+                <img src="{{ brand.display_picture }}" class="w-16 h-16 rounded-2xl object-cover border-2 border-gray-50 shadow-sm">
+                <div>
+                    <h3 class="font-bold text-gray-900 group-hover:text-[#d4af37] transition-colors">{{ brand.brand_name }}</h3>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Verified Partner</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 mt-20">
+        <div class="flex items-center justify-between mb-12">
+            <h2 class="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400 flex items-center gap-4">
+                {% if search_query %}Search Results{% else %}Latest Arrivals{% endif %} <span class="h-px bg-gray-200 w-24"></span>
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for product in latest_products %}
+            <div class="group bg-white rounded-[2.5rem] p-4 border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/60 transition-all duration-500 flex flex-col h-full">
+                
+                <div class="aspect-[4/5] rounded-[1.5rem] overflow-hidden bg-gray-50 mb-6 relative shrink-0">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-1000" alt="{{ product.name }}">
+                    {% endif %}
+                    
+                    <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm">
+                        <span class="text-sm font-black text-gray-900">₦{{ product.price }}</span>
+                    </div>
+
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 gap-3">
+                        {% if product.brand.whatsapp_number %}
+                        <a href="https://wa.me/{{ product.brand.whatsapp_number }}?text=Hello%20{{ product.brand.brand_name|urlencode }},%20I'm%20interested%20in%20'{{ product.name|urlencode }}'%20listed%20on%20Azers%20Squad." 
+                           target="_blank"
+                           class="w-full py-4 bg-[#25D366] text-white text-[10px] font-black uppercase tracking-widest rounded-xl text-center shadow-lg hover:scale-105 transition-all">
+                            Chat to Buy
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'core:brand_detail' product.brand.pk %}" 
+                           class="w-full py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl text-center hover:bg-white hover:text-black transition-all">
+                            Visit Store
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col flex-grow px-2">
+                    <h4 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-[#d4af37] transition-colors truncate">{{ product.name }}</h4>
+                    <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-4">{{ product.brand.brand_name }}</p>
+                    
+                    <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5 text-[9px] font-black text-green-500 uppercase tracking-widest">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Available
+                        </span>
+                        <span class="text-[9px] font-black text-gray-300 uppercase tracking-widest">Azers Verified</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-32 text-center bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-100 px-6">
+                <p class="text-gray-400 font-serif italic text-xl mb-4">No results found for "{{ search_query|default:active_category }}".</p>
+                <a href="{% url 'core:marketplace' %}" class="text-[#d4af37] text-xs font-bold uppercase tracking-widest underline decoration-2 underline-offset-4">Browse All Products</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+    .font-serif { font-family: 'Playfair Display', serif; }
+    
+    /* Elegant category scroll for mobile */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Smooth transition for category pills */
+    .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+</style>
+{% endblock %} {% endcomment %}

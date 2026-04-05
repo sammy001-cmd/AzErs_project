@@ -1,0 +1,383 @@
+{% extends "core/base_auth.html" %}
+{% block title %}Dashboard — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F8FAFC] pb-20">
+    <div class="bg-white/80 backdrop-blur-md border-b border-gray-100 py-4 px-8 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-serif font-bold text-gray-900 tracking-tight">Azers <span class="italic text-[#d4af37]">Squad</span></h1>
+                <p class="text-[9px] uppercase tracking-[0.4em] text-gray-400 font-black">Partner Dashboard</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-bold text-gray-900">{{ brand.brand_name }}</p>
+                    <span class="px-2 py-0.5 bg-green-50 text-green-600 text-[8px] font-black uppercase tracking-tighter rounded-full border border-green-100">Verified Partner</span>
+                </div>
+                <img src="{{ brand.display_picture }}" class="w-10 h-10 rounded-full border-2 border-[#d4af37] p-0.5 object-cover shadow-sm">
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 md:px-6 mt-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+                    <div class="h-24 bg-[#0F172A] relative">
+                        <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+                    </div>
+                    <div class="px-6 pb-8 -mt-10 relative text-center">
+                        <img src="{{ brand.display_picture }}" class="w-20 h-20 rounded-2xl mx-auto object-cover border-4 border-white shadow-xl mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight">{{ brand.brand_name }}</h3>
+                        <p class="text-[11px] text-gray-500 mt-2 mb-6 leading-relaxed">{{ brand.bio|default:"Elevating digital standards." }}</p>
+                        
+                        <div class="grid grid-cols-2 gap-2 mb-6">
+                            <div class="bg-gray-50 p-3 rounded-2xl border border-gray-100 text-center">
+                                <p class="text-[9px] font-black text-gray-400 uppercase">Items</p>
+                                <p class="text-sm font-bold text-gray-900">{{ products.count|add:services.count }}</p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-2xl border border-gray-100 text-center">
+                                <p class="text-[9px] font-black text-gray-400 uppercase">Status</p>
+                                <p class="text-sm font-bold text-green-500">Active</p>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'core:edit_brand_profile' %}" class="block w-full py-3 bg-gray-900 text-[9px] font-black uppercase tracking-widest text-white rounded-xl hover:bg-[#d4af37] hover:scale-[1.02] transition-all duration-300">
+                            Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-9 space-y-8">
+                
+                <div class="bg-[#0F172A] rounded-[2.5rem] p-8 md:p-10 text-white relative overflow-hidden shadow-2xl shadow-blue-900/10">
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h2 class="text-3xl font-serif mb-2">Workspace <span class="italic text-[#d4af37]">Overview</span></h2>
+                            <p class="text-slate-400 text-sm max-w-sm">Manage your high-end inventory and track service requests.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="{% url 'core:add_product' %}" class="px-5 py-3.5 bg-[#d4af37] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-all active:scale-95 shadow-lg shadow-[#d4af37]/20">
+                                + New Product
+                            </a>
+                            <a href="{% url 'core:add_service' %}" class="px-5 py-3.5 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 backdrop-blur-sm transition-all">
+                                + Add Service
+                            </a>
+                        </div>
+                    </div>
+                    <div class="absolute -top-10 -right-10 w-64 h-64 bg-[#d4af37]/20 rounded-full blur-[80px]"></div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-between items-center px-2">
+                    <h3 class="font-bold text-gray-900 uppercase text-[10px] tracking-[0.2em] opacity-50">Active Collection</h3>
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="dashboardSearch" placeholder="Search inventory..." 
+                               class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-[#d4af37] focus:border-transparent outline-none shadow-sm transition-all">
+                        <svg class="w-4 h-4 absolute left-4 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div id="inventoryGrid" class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6">
+                    
+                    {% for product in products %}
+                    <div class="inventory-card group bg-white rounded-[1.8rem] border border-gray-100 p-2 md:p-4 hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-500">
+                        <div class="relative h-36 md:h-48 mb-3 overflow-hidden rounded-[1.3rem]">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            {% else %}
+                                <div class="w-full h-full bg-slate-50 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="absolute top-2 right-2 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'core:edit_product' product.pk %}" class="p-2 bg-white/90 backdrop-blur-md rounded-lg text-blue-600 shadow-sm border border-gray-100 hover:bg-blue-600 hover:text-white transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </a>
+                                <a href="{% url 'core:delete_product' product.pk %}" onclick="return confirm('Delete item?')" class="p-2 bg-white/90 backdrop-blur-md rounded-lg text-red-600 shadow-sm border border-gray-100 hover:bg-red-600 hover:text-white transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="px-1">
+                            <span class="text-[7px] font-black uppercase tracking-widest text-[#d4af37] bg-[#d4af37]/5 px-2 py-0.5 rounded-full">Product</span>
+                            <h4 class="text-[11px] md:text-sm font-bold text-gray-900 mt-2 truncate product-name">{{ product.name }}</h4>
+                            <p class="text-sm md:text-lg font-serif font-black text-gray-900 mt-0.5">₦{{ product.price }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% for service in services %}
+                    <div class="inventory-card group bg-slate-900 rounded-[1.8rem] md:rounded-[2.5rem] p-5 md:p-6 hover:shadow-2xl hover:shadow-[#d4af37]/10 transition-all duration-500 border border-white/5 relative overflow-hidden">
+                        <div class="relative z-10 h-full flex flex-col justify-between">
+                            <div>
+                                <div class="w-8 h-8 md:w-10 md:h-10 bg-[#d4af37]/10 rounded-xl flex items-center justify-center text-[#d4af37] mb-4">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <h4 class="text-xs md:text-md font-bold text-white mb-1 product-name">{{ service.title }}</h4>
+                                <p class="text-[9px] text-[#d4af37] font-black uppercase tracking-widest">₦{{ service.price }}</p>
+                            </div>
+
+                            <div class="flex gap-2 mt-6 justify-end">
+                                <a href="{% url 'core:delete_service' service.pk %}" onclick="return confirm('Delete this service?')" class="p-2 bg-white/90 backdrop-blur-md rounded-lg text-red-600 shadow-sm border border-gray-100 hover:bg-red-600 hover:text-white transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="absolute -bottom-4 -left-4 w-20 h-20 bg-[#d4af37]/5 rounded-full blur-2xl"></div>
+                    </div>
+                    {% endfor %}
+
+                    {% if not products and not services %}
+                    <div class="col-span-full py-20 text-center">
+                        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 uppercase tracking-widest text-[10px]">Collection Empty</h3>
+                        <p class="text-xs text-gray-400 mt-2">No items found matching your search or inventory.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('dashboardSearch').addEventListener('input', function(e) {
+        let filter = e.target.value.toLowerCase();
+        let cards = document.querySelectorAll('.inventory-card');
+        
+        cards.forEach(card => {
+            let title = card.querySelector('.product-name').innerText.toLowerCase();
+            if (title.includes(filter)) {
+                card.style.display = "";
+                card.classList.add('animate-fade-in');
+            } else {
+                card.style.display = "none";
+            }
+        });
+    });
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+{% block title %}Dashboard - Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F8FAFC] pb-20">
+    <div class="bg-white border-b border-gray-100 py-6 px-8 mb-8">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-serif font-bold text-gray-900">Brand <span class="italic text-[#d4af37]">Dashboard</span></h1>
+                <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-bold">Partner Workspace</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden md:block">
+                    <p class="text-sm font-bold text-gray-900">{{ brand.brand_name }}</p>
+                    <p class="text-[10px] text-green-500 font-black uppercase tracking-widest italic">Verified Partner</p>
+                </div>
+                <img src="{{ brand.display_picture }}" class="w-12 h-12 rounded-full border-2 border-[#d4af37] p-0.5 object-cover">
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 overflow-hidden border border-gray-50 sticky top-8">
+                    <div class="h-32 bg-[#0F172A] relative">
+                        <div class="absolute inset-0 opacity-20" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+                    </div>
+                    <div class="px-6 pb-8 -mt-12 relative text-center">
+                        <img src="{{ brand.display_picture }}" class="w-24 h-24 rounded-2xl mx-auto object-cover border-4 border-white shadow-lg mb-4">
+                        <h3 class="text-xl font-bold text-gray-900">{{ brand.brand_name }}</h3>
+                        <p class="text-xs text-gray-500 font-medium mb-6 px-4">{{ brand.bio|default:"No bio set." }}</p>
+                        
+                        <div class="space-y-2">
+                            <a href="{% url 'core:edit_brand_profile' %}" class="block w-full py-3 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-600 rounded-xl hover:bg-[#d4af37] hover:text-white transition-all">
+                                Edit Profile
+                            </a>
+                            <a href="{% url 'core:brand_detail' brand.pk %}" target="_blank" class="block w-full py-3 border border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-xl hover:bg-gray-50 transition-all">
+                                View Public Store
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 space-y-8">
+                
+                <div class="bg-gradient-to-r from-[#0F172A] to-[#1E293B] rounded-[2rem] p-8 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-serif mb-2">Welcome, <span class="italic text-[#d4af37]">{{ brand.brand_name }}</span></h2>
+                        <p class="text-slate-400 text-sm max-w-md">Manage your inventory, track your performance, and upload new drops.</p>
+                        
+                        <div class="flex flex-wrap gap-4 mt-8">
+                            <a href="{% url 'core:add_product' %}" class="px-6 py-3 bg-[#d4af37] text-black text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-white transition-colors">
+                                + Upload Product
+                            </a>
+                            <a href="{% url 'core:add_service' %}" class="px-6 py-3 bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-white/20 backdrop-blur-sm transition-colors">
+                                + Add Service
+                            </a>
+                        </div>
+                    </div>
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-[#d4af37]/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Live Products</p>
+                        <h4 class="text-3xl font-bold text-gray-900">{{ products.count }}</h4>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Active Services</p>
+                        <h4 class="text-3xl font-bold text-gray-900">{{ services.count }}</h4>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-[10px] font-black text-[#d4af37] uppercase tracking-widest mb-1">Account Status</p>
+                        <h4 class="text-xl font-bold text-gray-900">Verified</h4>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] border border-gray-100 p-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="font-bold text-gray-900 uppercase text-[12px] tracking-widest">Your Active Collection</h3>
+                    </div>
+
+                    {% if products or services %}
+                    <div class="space-y-4">
+                        
+                        {% for product in products %}
+                        <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-50 hover:bg-gray-50 transition-all">
+                            <div class="flex items-center gap-4">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="w-12 h-12 rounded-xl object-cover">
+                                {% else %}
+                                    <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900">{{ product.name }}</h4>
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">₦{{ product.price }} • Product</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <a href="{% url 'core:edit_product' product.pk %}" class="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </a>
+                                <a href="{% url 'core:delete_product' product.pk %}" onclick="return confirm('Delete this product?')" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% for service in services %}
+                        <div class="flex items-center justify-between p-4 rounded-2xl border border-gray-50 bg-slate-50/40 hover:bg-gray-50 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-[#d4af37]/10 flex items-center justify-center text-[#d4af37]">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900">{{ service.title }}</h4>
+                                    <p class="text-[10px] text-[#d4af37] font-bold uppercase tracking-widest">₦{{ service.price }} • Service</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="{% url 'core:edit_service' service.pk %}" class="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </a>
+                                <a href="{% url 'core:delete_service' service.pk %}" onclick="return confirm('Delete this service?')" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        </div>
+                        <p class="text-sm text-gray-400 italic">No active collection items found.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+ {% endcomment %}
+
+
+
+
+
+
+{% comment %} {% extends "core/base.html" %}
+{% block title %}Seller Dashboard — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center text-gold mb-4">brand Dashboard</h2>
+
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm text-center" style="border-radius:15px;">
+        <img src="{{ seller.profile_picture.url|default:'/static/images/default-seller.png' }}" 
+             class="card-img-top" style="height:200px; object-fit:cover; border-radius:15px 15px 0 0;">
+        <div class="card-body">
+          <h4 class="card-title">{{ seller.business_name }}</h4>
+          <p>{{ seller.bio|default:"No bio yet" }}</p>
+          <a href="{% url 'core:edit_brand_profile' %}" class="btn btn-gold mt-2">Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.text-gold { color: #d4af37; }
+.btn-gold { background-color: #d4af37; color: #fff; border-radius: 6px; font-weight: bold; }
+.btn-gold:hover { background-color: #b8952f; }
+</style>
+{% endblock %} {% endcomment %}
+
+
+

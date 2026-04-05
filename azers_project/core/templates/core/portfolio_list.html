@@ -1,0 +1,146 @@
+{% extends "core/base_auth.html" %}
+{% block title %}My Portfolio — Azers Squad{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F9F8F3] py-12 px-4 sm:px-6 lg:px-10">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 animate__animated animate__fadeIn">
+            <div>
+                <h2 class="text-4xl font-serif font-bold text-gray-900 leading-tight">
+                    {{ artist.stage_name }} <span class="text-[#d4af37]">Portfolio</span>
+                </h2>
+                <p class="text-[11px] text-gray-400 uppercase tracking-[0.3em] font-bold mt-2">Visual Showcase & Media Assets</p>
+            </div>
+            
+            <a href="{% url 'core:add_portfolio_item' %}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-[#d4af37] text-white text-xs font-black uppercase tracking-widest rounded-full shadow-lg shadow-yellow-600/20 hover:bg-[#c4a030] transition-all transform hover:-translate-y-1">
+                + Add New Item
+            </a>
+        </div>
+
+        {% if portfolios %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate__animated animate__fadeInUp">
+            {% for item in portfolios %}
+            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100">
+                
+                <div class="relative h-56 w-full overflow-hidden bg-gray-100">
+                    {% if item.is_image and item.file %}
+                        <img src="{{ item.file.url }}" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    {% else %}
+                        <div class="flex flex-col items-center justify-center h-full text-gray-300">
+                            <span class="text-3xl mb-2">
+                                {% if item.media_type == 'video' %}🎬{% elif item.media_type == 'audio' %}🎵{% else %}📄{% endif %}
+                            </span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">{{ item.media_type }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                         <a href="{% url 'core:delete_portfolio_item' item.id %}" 
+                            onclick="return confirm('Are you sure you want to remove this piece?');"
+                            class="bg-white/20 backdrop-blur-md text-white border border-white/30 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-tighter hover:bg-red-600 hover:border-red-600 transition-all">
+                             Remove Item
+                         </a>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-[9px] font-black text-[#d4af37] uppercase tracking-[0.2em] bg-yellow-50 px-2 py-1 rounded">
+                            {{ item.media_type }}
+                        </span>
+                        <span class="text-[10px] text-gray-300 font-mono italic">#0{{ forloop.counter }}</span>
+                    </div>
+                    
+                    <p class="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                        {{ item.description|default:"No description provided for this masterpiece." }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="py-32 text-center border-2 border-dashed border-gray-200 rounded-3xl">
+            <div class="text-5xl mb-4 text-gray-200 italic font-serif">Empty</div>
+            <p class="text-gray-400 text-xs uppercase tracking-widest">Your gallery is currently silent.</p>
+            <a href="{% url 'core:add_portfolio_item' %}" class="mt-6 inline-block text-[#d4af37] font-bold text-xs underline underline-offset-8">BEGIN UPLOADING</a>
+        </div>
+        {% endif %}
+
+        <div class="mt-16 pt-8 border-t border-gray-200 flex justify-center">
+            <a href="{% url 'core:artist_dashboard' %}" class="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] hover:text-[#d4af37] transition-colors">
+                ← Return to HQ
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+{% block title %}My Portfolio — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center text-gold mb-4">{{ artist.stage_name }}'s Portfolio</h2>
+
+  <div class="text-end mb-3">
+    <a href="{% url 'core:add_portfolio_item' %}" class="btn btn-gold">Add New Item</a>
+  </div>
+
+  {% if portfolios %}
+    <div class="row g-3">
+      {% for item in portfolios %}
+      <div class="col-md-4">
+        <div class="card shadow-sm" style="border-radius: 15px;">
+          {% if item.is_image and item.file %}
+            <img src="{{ item.file.url }}" class="card-img-top" style="height:200px; object-fit:cover; border-radius:15px 15px 0 0;">
+          {% else %}
+            <div class="d-flex justify-content-center align-items-center" style="height:200px; background:#f8f9fa; border-radius:15px 15px 0 0;">
+              <span class="text-muted">{{ item.media_type|title }}</span>
+            </div>
+          {% endif %}
+          <div class="card-body">
+            <p>{{ item.description }}</p>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">{{ item.media_type|title }}</span>
+              <a href="{% url 'core:delete_portfolio_item' item.id %}" class="text-danger" onclick="return confirm('Are you sure?');">Delete</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted text-center">No portfolio items yet.</p>
+  {% endif %}
+</div>
+
+<style>
+.text-gold { color: #d4af37; }
+.btn-gold { background-color: #d4af37; color: #fff; border-radius:6px; font-weight:bold; }
+.btn-gold:hover { background-color: #b8952f; }
+</style>
+{% endblock %} {% endcomment %}

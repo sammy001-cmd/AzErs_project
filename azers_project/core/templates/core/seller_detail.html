@@ -1,0 +1,61 @@
+{% extends 'core/base_public.html' %}
+{% block title %}{{ seller.business_name }} — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card shadow-sm p-4">
+      <h2 style="color:var(--gold);">{{ seller.business_name }}</h2>
+      <p><strong>Owner:</strong> {{ seller.user.get_full_name|default:seller.user.username }}</p>
+      <p><strong>Email:</strong> {{ seller.user.email }}</p>
+      <p><strong>Category:</strong> {{ seller.category|default:"—" }}</p>
+      <p><strong>Description:</strong> {{ seller.description|default:"No description yet." }}</p>
+
+      <hr>
+      <h5>Products / Portfolio</h5>
+      <div class="row">
+        {% for item in seller.portfolio_set.all %}
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              {% if item.is_image and item.file %}
+                <img src="{{ item.file.url }}" class="img-fluid" style="max-height:160px; object-fit:cover;" loading="lazy">
+                <div class="card-body">
+                  <p class="small">{{ item.description }}</p>
+                </div>
+              {% else %}
+                <div class="card-body text-center" style="height:160px; display:flex; flex-direction:column; justify-content:center; background:#f8f9fa;">
+                  <p class="small">{{ item.description }}</p>
+                  {% if item.file %}
+                    <a href="{{ item.file.url }}" target="_blank" class="small mt-1">Open {{ item.media_type|title }}</a>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12"><p class="text-muted">No portfolio items yet.</p></div>
+        {% endfor %}
+      </div>
+
+      {% if user.is_authenticated %}
+        <a href="#" class="btn btn-gold mt-3"
+           {% if not seller.user.is_approved %}disabled title="Seller not approved yet"{% endif %}>
+          Contact Brand
+        </a>
+      {% else %}
+        <p class="text-muted mt-3">Please <a href="{% url 'core:login' %}">login</a> to contact this brand.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="col-md-4">
+    <div class="card p-3 shadow-sm mb-3">
+      <h6>Contact</h6>
+      <p class="small">Use the button to connect with the seller.</p>
+      {% if not seller.user.is_approved %}
+        <div class="alert alert-warning">This seller is not approved yet — contact disabled.</div>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

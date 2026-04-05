@@ -1,0 +1,253 @@
+{% extends 'core/base_public.html' %}
+{% block title %}Brand Signup — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F4F7F6] py-20 px-6 flex items-center justify-center">
+    <div class="max-w-5xl w-full grid md:grid-cols-5 bg-white rounded-[3rem] shadow-2xl overflow-hidden animate__animated animate__fadeIn">
+        
+        <div class="md:col-span-2 bg-[#0F172A] p-12 text-white flex flex-col justify-between relative overflow-hidden">
+            <div class="relative z-10">
+                <span class="text-[#94A3B8] text-[10px] font-black uppercase tracking-[0.5em] mb-4 block">Institutional Access</span>
+                <h2 class="text-4xl font-serif font-bold mb-6 italic text-white">Brand <br>Registration</h2>
+                <p class="text-slate-400 text-sm font-light leading-relaxed">
+                    Gain exclusive access to Nigeria's top-tier creative talent. Manage bookings, track campaigns, and scale your brand presence.
+                </p>
+            </div>
+            
+            <div class="relative z-10 mt-12 space-y-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-[#d4af37]">✓</div>
+                    <p class="text-[10px] uppercase tracking-widest font-bold text-slate-300">Verified Business Status</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-[#d4af37]">✓</div>
+                    <p class="text-[10px] uppercase tracking-widest font-bold text-slate-300">Direct Talent Booking</p>
+                </div>
+            </div>
+
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-slate-500/10 rounded-full blur-[100px]"></div>
+        </div>
+
+        <div class="md:col-span-3 p-10 md:p-16 bg-white">
+            <form method="post" enctype="multipart/form-data" class="space-y-5">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="p-4 bg-red-50 rounded-xl border border-red-100 animate__animated animate__shakeX">
+                    {% for error in form.non_field_errors %}
+                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-tight">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="form-field-wrapper">
+                        <label class="label-style">Admin Username</label>
+                        {{ form.username }}
+                        {% for error in form.username.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div class="form-field-wrapper">
+                        <label class="label-style">Corporate Email</label>
+                        {{ form.email }}
+                        {% for error in form.email.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-field-wrapper">
+                    <label class="label-style">Registered Business Name</label>
+                    {{ form.business_name }}
+                    {% for error in form.business_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="form-field-wrapper">
+                        <label class="label-style">Secure Password</label>
+                        {{ form.password1 }}
+                        {% for error in form.password1.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div class="form-field-wrapper">
+                        <label class="label-style">Confirm Password</label>
+                        {{ form.password2 }}
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="label-style">Brand Logo / Display Picture</label>
+                    <div class="mt-2 group relative flex items-center justify-center w-full h-32 border-2 border-slate-100 border-dashed rounded-2xl hover:border-slate-300 transition-all cursor-pointer bg-slate-50/50">
+                        <div class="text-center">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-600 transition-colors">Click to upload logo</span>
+                            {{ form.profile_picture }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit" class="w-full py-4 bg-[#0F172A] text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-[#d4af37] transition-all duration-500 shadow-2xl shadow-slate-900/20">
+                        Register Brand Account
+                    </button>
+                </div>
+            </form>
+
+            <p class="mt-8 text-center text-[11px] text-slate-400 font-medium uppercase tracking-widest">
+                Need to manage an artist? <a href="{% url 'core:artist_signup' %}" class="text-[#0F172A] font-black hover:underline">Switch to Artist</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Premium Input Overrides */
+    .form-field-wrapper { display: flex; flex-direction: column; }
+    
+    .label-style {
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #64748b;
+        margin-left: 4px;
+        margin-bottom: 6px;
+    }
+
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"], 
+    select {
+        width: 100%;
+        background: #F8FAFC !important;
+        border: 1px solid #E2E8F0 !important;
+        padding: 0.85rem !important;
+        border-radius: 12px !important;
+        font-size: 0.9rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    input:focus {
+        outline: none !important;
+        border-color: #0F172A !important;
+        background: white !important;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-top: 4px;
+        letter-spacing: 0.05em;
+    }
+
+    input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends 'core/base_public.html' %}
+{% block title %}Seller Signup — Azers Squad{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:center; align-items:center; min-height:80vh;">
+  <div style="background:white; padding:2.5rem; border-radius:12px; box-shadow:0 0 25px rgba(0,0,0,0.1); width:400px;">
+    <h2 style="color:#d4af37; text-align:center; margin-bottom:1.5rem;">Seller Signup</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% if form.non_field_errors %}
+  <div style="color:red; margin-bottom:1rem; font-size:0.85rem;">
+    {% for error in form.non_field_errors %}
+      <p>{{ error }}</p>
+    {% endfor %}
+  </div>
+{% endif %}
+
+      {% csrf_token %}
+      
+      <!-- Username -->
+      <div style="margin-bottom:1rem;">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {% for error in form.username.errors %}
+          <div style="color:red; font-size:0.8rem;">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Email -->
+      <div style="margin-bottom:1rem;">
+        {{ form.email.label_tag }}
+        {{ form.email }}
+        {% for error in form.email.errors %}
+          <div style="color:red; font-size:0.8rem;">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Business Name -->
+      <div style="margin-bottom:1rem;">
+        {{ form.business_name.label_tag }}
+        {{ form.business_name }}
+        {% for error in form.business_name.errors %}
+          <div style="color:red; font-size:0.8rem;">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Profile Picture -->
+      <div style="margin-bottom:1rem;">
+        {{ form.profile_picture.label_tag }}
+        {{ form.profile_picture }}
+        {% for error in form.profile_picture.errors %}
+          <div style="color:red; font-size:0.8rem;">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Passwords -->
+      <div style="margin-bottom:1rem;">
+        {{ form.password1.label_tag }}
+        {{ form.password1 }}
+        {% for error in form.password1.errors %}
+          <div style="color:red; font-size:0.8rem;">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div style="margin-bottom:1rem;">
+        {{ form.password2.label_tag }}
+        {{ form.password2 }}
+        {% for error in form.password2.errors %}
+          <div style="color:red; font-size:0.8rem;">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn" style="width:100%; margin-top:0.5rem;">Sign Up</button>
+    </form>
+
+    <p style="margin-top:1rem; text-align:center; font-size:0.9rem;">
+      Already have an account? <a href="{% url 'core:login' %}">Login</a>
+    </p>
+  </div>
+</div>
+{% endblock %} {% endcomment %}
+
+
+

@@ -1,0 +1,201 @@
+{% extends "core/base_auth.html" %}
+{% block title %}Edit Artist Profile — Azers Squad{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F9F8F3] py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto animate__animated animate__fadeInUp">
+        
+        <div class="text-center mb-10">
+            <h3 class="text-3xl font-serif font-bold text-gray-900">Refine Your Brand</h3>
+            <p class="text-[#d4af37] text-xs font-bold uppercase tracking-[0.2em] mt-2">Artist Profile Settings</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/50 overflow-hidden border border-gray-100">
+            <div class="p-8 lg:p-12">
+                
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="flex flex-col items-center mb-10 pb-8 border-b border-gray-50">
+                        <div class="relative group">
+                            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-[#F9F8F3] shadow-lg bg-gray-100">
+                                {% if form.instance.profile_picture %}
+                                    <img src="{{ form.instance.profile_picture.url }}" class="w-full h-full object-cover group-hover:opacity-75 transition-opacity">
+                                {% else %}
+                                    <div class="flex items-center justify-center h-full text-gray-300">
+                                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                <span class="bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">Change Photo</span>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-4 uppercase tracking-widest">Profile Visual</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-y-6">
+                        {% for field in form %}
+                        <div class="space-y-1">
+                            <label class="block text-[11px] font-black text-gray-500 uppercase tracking-widest">
+                                {{ field.label }}
+                            </label>
+                            
+                            <div class="relative">
+                                {{ field }}
+                            </div>
+
+                            {% if field.help_text %}
+                                <p class="text-[10px] text-gray-400 italic mt-1 leading-tight">{{ field.help_text }}</p>
+                            {% endif %}
+                            
+                            {% if field.errors %}
+                                <div class="text-red-500 text-[10px] font-bold mt-1 bg-red-50 p-2 rounded border border-red-100">
+                                    {% for error in field.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="pt-8 space-y-4">
+                        <button type="submit" 
+                                class="w-full py-4 bg-[#d4af37] text-white text-xs font-black uppercase tracking-[0.2em] rounded-lg shadow-lg shadow-yellow-600/20 hover:bg-[#c4a030] active:scale-[0.98] transition-all">
+                            Save Changes
+                        </button>
+                        
+                        <a href="{% url 'core:portfolio_list' %}" 
+                           class="flex items-center justify-center w-full py-4 border-2 border-gray-100 text-gray-400 text-xs font-black uppercase tracking-[0.2em] rounded-lg hover:border-[#d4af37] hover:text-[#d4af37] transition-all">
+                            Manage Portfolio
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="{% url 'core:artist_dashboard' %}" class="text-gray-400 text-[10px] uppercase font-bold tracking-widest hover:text-[#d4af37] transition-colors">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling the Django-generated inputs without editing forms.py */
+    input[type="text"], input[type="number"], input[type="email"], textarea, select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #fcfcfc;
+        border: 1px solid #f0f0f0;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #1a1a1a;
+        transition: all 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #d4af37;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+    /* Specifically for file upload button */
+    input[type="file"] {
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+{% block title %}Edit Artist Profile — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-start mt-5 mb-5">
+  <div class="card shadow-sm p-4" style="width: 100%; max-width: 500px; border-radius: 15px;">
+    <h3 class="text-center text-gold mb-4">Edit Your Profile</h3>
+    
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      {% for field in form %}
+        <div class="mb-3">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+          {% endif %}
+          {% if field.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in field.errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      {% if form.instance.profile_picture %}
+        <div class="mb-3 text-center">
+          <p class="small text-muted">Current profile picture:</p>
+          <img src="{{ form.instance.profile_picture.url }}" class="img-fluid rounded" style="max-height:150px; object-fit:cover;">
+        </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-center mb-3">
+        <button type="submit" class="btn btn-gold w-100">Save Changes</button>
+      </div>
+    </form>
+
+    <div class="d-flex justify-content-center mt-2">
+      <a href="{% url 'core:portfolio_list' %}" class="btn btn-outline-gold w-100">Manage Portfolio</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.btn-outline-gold {
+    border: 2px solid #d4af37;
+    color: #d4af37;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+.btn-outline-gold:hover {
+    background-color: #d4af37;
+    color: #fff;
+}
+</style>
+{% endblock %} {% endcomment %}
+
+
+

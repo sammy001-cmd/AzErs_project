@@ -1,0 +1,139 @@
+{% extends "core/base_public.html" %}
+
+{% block content %}
+<div class="approval-container">
+    <div class="approval-card">
+        <div class="status-icon">
+            <div class="pulse"></div>
+            <i class="fas fa-clock"></i> 
+        </div>
+
+        <h1>Awaiting Approval</h1>
+        <div class="divider"></div>
+        
+        <p class="status-text">Your account is currently <strong>under review</strong> by the Azers Squad admin team.</p>
+        <p class="sub-text">We're verifying your details to maintain the community's quality. You'll receive an email the moment you're cleared for takeoff.</p>
+
+        <div class="button-group">
+            <a href="{% url 'core:home' %}" class="btn-primary">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .approval-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        padding: 20px;
+    }
+
+    .approval-card {
+        max-width: 550px;
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #eaeaea;
+        padding: 3rem 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .approval-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .status-icon {
+        position: relative;
+        font-size: 3rem;
+        color: #f39c12; /* Gold/Amber */
+        margin-bottom: 1.5rem;
+    }
+
+    /* Cool Pulse Effect */
+    .pulse {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        background: rgba(243, 156, 18, 0.2);
+        border-radius: 50%;
+        animation: pulse-animation 2s infinite;
+    }
+
+    @keyframes pulse-animation {
+        0% { scale: 0.8; opacity: 1; }
+        100% { scale: 1.5; opacity: 0; }
+    }
+
+    h1 {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+    }
+
+    .divider {
+        width: 50px;
+        height: 4px;
+        background: #f39c12;
+        margin: 1rem auto 1.5rem;
+        border-radius: 2px;
+    }
+
+    .status-text {
+        font-size: 1.1rem;
+        color: #4a4a4a;
+        line-height: 1.6;
+    }
+
+    .sub-text {
+        font-size: 0.9rem;
+        color: #888;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-primary {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        background: #1a1a1a;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: #333;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_public.html" %}
+
+{% block content %}
+<div style="max-width:600px; margin:3rem auto; text-align:center; border:1px solid #ddd; padding:2rem; border-radius:8px;">
+  <h1> Awaiting Approval</h1>
+  <p>Your account is under review by the Azers Squad admin team.</p>
+  <p>You will receive an email once your account has been approved.</p>
+  <a href="{% url 'core:home' %}" class="btn">Back to Home</a>
+</div>
+{% endblock %}  {% endcomment %}

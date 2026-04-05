@@ -1,0 +1,132 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-[#F9F8F3] py-16 px-6 lg:px-12">
+    <div class="max-w-7xl mx-auto">
+        
+        <div class="text-center mb-16 animate__animated animate__fadeIn">
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-[#d4af37]">Discover</span>
+            <h2 class="text-5xl font-serif font-bold text-gray-900 mt-2">Available <span class="italic text-[#d4af37]">Artists</span></h2>
+            <div class="h-1 w-12 bg-[#d4af37] mx-auto mt-6"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {% for artist in artists %}
+            <div class="group relative bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 animate__animated animate__fadeInUp" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                
+                <div class="relative h-[300px] overflow-hidden">
+                    {% if artist.profile_picture %}
+                        <img src="{{ artist.profile_picture.url }}" alt="{{ artist.stage_name }}" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    {% else %}
+                        <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <span class="text-gray-300 text-6xl">👤</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="absolute top-4 left-4">
+                        <span class="bg-white/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-gray-800 shadow-sm">
+                            {{ artist.genre|default:"Vocalist" }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-8 text-center">
+                    <h3 class="text-2xl font-serif font-bold text-gray-900 mb-1 tracking-tight">{{ artist.stage_name }}</h3>
+                    <p class="text-[10px] text-[#d4af37] font-black uppercase tracking-[0.2em] mb-4">
+                        Starting from ₦{{ artist.price_tag|default:"0" }}
+                    </p>
+                    
+                    <p class="text-sm text-gray-500 line-clamp-2 mb-6 italic leading-relaxed">
+                        "{{ artist.bio|default:"Professional artist ready to elevate your event with a unique performance." }}"
+                    </p>
+
+                    <a href="{% url 'core:artist_detail' artist.id %}" 
+                       class="inline-block w-full py-4 border border-gray-100 rounded-xl text-[11px] font-black uppercase tracking-widest text-gray-400 group-hover:bg-[#d4af37] group-hover:text-white group-hover:border-[#d4af37] transition-all duration-300">
+                        View Full Portfolio
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <p class="text-gray-400 font-serif italic text-xl">The stage is currently quiet. Check back soon.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Ensures the bio doesn't break the card height */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends "core/base_public.html" %}
+{% load static %}
+{% block content %}
+<h2 class="mb-4">Available Artists</h2>
+
+<div class="row">
+  {% for artist in artists %}
+  <div class="col-md-4 mb-4">
+    <div class="card h-100 shadow-sm">
+      {% if artist.profile_picture %}
+      <img
+        src="{{ artist.profile_picture.url }}"
+        alt="{{ artist.stage_name }}"
+        style="height: 150px; border-radius: 10px"
+      />
+      {% else %}
+      <img
+        src="{% static 'images/default-artist.png' %}"
+        alt="Default Artist"
+        style="height: 150px; border-radius: 10px"
+      />
+      {% endif %}
+
+      <div class="card-body">
+        <h5 class="card-title">{{ artist.stage_name }}</h5>
+        <p class="card-text">
+          <strong>Genre:</strong> {{ artist.genre }} <br />
+          <strong>Price:</strong> ₦{{ artist.price_tag }} <br />
+          <em>{{ artist.bio|default:"No bio yet" }}</em>
+        </p>
+        <a href="{% url 'core:artist_detail' artist.id %}" class="btn btn-primary"
+          >View Profile</a
+        >
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>No artists available.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+ {% endcomment %}

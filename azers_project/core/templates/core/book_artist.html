@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>Book {{ artist.stage_name }}</h2>
+
+<p>Price tag: ₦{{ artist.price_tag }}</p>
+<p><b>Note:</b> You must pay at least 50% upfront.</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <a href="{% url 'core:book_artist' artist.id %}">Book Now</a>   
+</form>
+{% endblock %}

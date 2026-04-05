@@ -1,0 +1,88 @@
+{% extends 'core/base_public.html' %}
+{% block title %}Member Signup — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm p-4">
+      <h3 class="mb-3" style="color: var(--gold);">Member Signup</h3>
+      <p class="text-muted">Enter your pre-assigned AzErs code and details. Admin will approve your account.</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="mb-3">
+            {{ field.label_tag }} {{ field }}
+            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="btn btn-gold" type="submit">Sign Up</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const roleEl = document.querySelector('[name="role"]');
+  const stageEl = document.querySelector('[name="stage_name"]');
+  if (!roleEl || !stageEl) return;
+  const wrapper = stageEl.closest('.mb-3');
+  wrapper.style.transition = 'all 0.3s ease';
+  function toggle(){
+    wrapper.style.display = (roleEl.value === 'artist') ? 'block' : 'none';
+  }
+  toggle();
+  roleEl.addEventListener('change', toggle);
+});
+</script>
+{% endblock %}
+
+
+{% comment %} {% extends 'core/base.html' %}
+{% block title %}Member Signup — Azers Squad{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm p-4">
+      <h3 class="mb-3" style="color:var(--gold);">Member Signup</h3>
+      <p class="text-muted">Enter your pre-assigned AzErs code and details. Admin will approve your account.</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="mb-3">
+            {{ field.label_tag }} {{ field }}
+            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+        <button class="btn btn-gold" type="submit">Sign Up</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  // Show/hide stage_name if present
+  document.addEventListener('DOMContentLoaded', function(){
+    const roleEl = document.querySelector('[name="role"]');
+    const stageEl = document.querySelector('[name="stage_name"]');
+    if (!roleEl || !stageEl) return;
+    function toggle(){
+      const p = stageEl.closest('.mb-3');
+      if (roleEl.value === 'artist') p.style.display = 'block'; else p.style.display='none';
+    }
+    toggle();
+    roleEl.addEventListener('change', toggle);
+  });
+</script>
+{% endblock %}
+{% endblock %} {% endcomment %}
+
+

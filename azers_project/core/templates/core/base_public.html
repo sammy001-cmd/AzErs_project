@@ -1,0 +1,397 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Azers Squad | Premium Talent Agency{% endblock %}</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --gold: #d4af37;
+            --pearl: #F9F8F3;
+            --charcoal: #1a1a1a;
+        }
+
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: var(--pearl); 
+            color: var(--charcoal);
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, .font-serif { 
+            font-family: 'Playfair Display', serif; 
+        }
+
+        /* Navigation Glass Effect */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .btn-luxury {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .btn-luxury:hover {
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .alert-pop {
+            animation: slideInRight 0.5s ease forwards;
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Smooth custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--pearl); }
+        ::-webkit-scrollbar-thumb { background: #e2e0d5; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <nav class="glass-nav sticky top-0 z-50 px-6 py-4 lg:px-12">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            
+            <a href="{% url 'core:home' %}" class="group">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl font-serif font-bold tracking-tighter group-hover:text-[#d4af37] transition-colors">
+                        AZERS<span class="text-[#d4af37]">SQUAD</span>
+                    </span>
+                </div>
+                <div class="h-0.5 w-0 group-hover:w-full bg-[#d4af37] transition-all duration-300"></div>
+            </a>
+
+            <ul class="hidden md:flex items-center gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">
+                <li><a href="{% url 'core:home' %}" class="hover:text-[#d4af37] transition-colors">Home</a></li>
+                <li><a href="{% url 'core:artist_list' %}" class="hover:text-[#d4af37] transition-colors">Talent</a></li>
+                
+                {% if user.is_authenticated %}
+                    <li class="pl-4 border-l border-gray-200">
+                        <form method="post" action="{% url 'core:logout' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-gray-400 hover:text-red-400 transition-colors cursor-pointer uppercase tracking-[0.2em]">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'core:login' %}" class="hover:text-[#d4af37] transition-colors">Sign In</a></li>
+                    <li>
+                        <a href="{% url 'core:member_signup' %}" class="btn-luxury bg-[#d4af37] text-white px-6 py-3 rounded-full shadow-lg shadow-yellow-600/10">
+                            Join the Family
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <button id="menu-open" class="md:hidden text-[#d4af37] focus:outline-none p-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 8h16M8 16h12"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div id="menu-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <div id="side-drawer" class="fixed top-0 right-0 w-[85%] max-w-xs h-full bg-white z-[70] translate-x-full transition-transform duration-500 ease-in-out shadow-2xl flex flex-col">
+        <div class="p-8 flex flex-col h-full">
+            <div class="flex justify-end mb-12">
+                <button id="menu-close" class="text-gray-400 hover:text-[#d4af37] transition-colors">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <ul class="space-y-8 text-sm font-black uppercase tracking-[0.3em] text-gray-800">
+                <li><a href="{% url 'core:home' %}" class="block hover:text-[#d4af37] transition-colors">Home</a></li>
+                <li><a href="{% url 'core:artist_list' %}" class="block hover:text-[#d4af37] transition-colors">Talent</a></li>
+                <hr class="border-gray-100">
+                {% if user.is_authenticated %}
+                    <li>
+                        <form method="post" action="{% url 'core:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-400 uppercase tracking-[0.3em] font-black">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'core:login' %}" class="block">Sign In</a></li>
+                    <li>
+                        <a href="{% url 'core:member_signup' %}" class="block text-[#d4af37] font-black">
+                            Join the Squad
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <div class="mt-auto pb-8 border-t border-gray-100 pt-8">
+                <div class="flex gap-4 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#d4af37] transition-colors cursor-pointer">IG</div>
+                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#d4af37] transition-colors cursor-pointer">TW</div>
+                </div>
+                <p class="text-[10px] text-gray-300 uppercase tracking-widest font-medium">© 2026 AZERS SQUAD</p>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div id="msg-container" class="fixed top-24 right-6 z-[100] space-y-3 max-w-sm pointer-events-none">
+        {% for message in messages %}
+        <div class="alert-pop p-4 rounded-xl shadow-2xl border-l-4 flex items-center gap-3 bg-white pointer-events-auto transition-all duration-500
+            {% if message.tags == 'success' %}border-green-500{% elif message.tags == 'error' %}border-red-500{% else %}border-[#d4af37]{% endif %}"
+             role="alert">
+            <span class="text-lg">
+                {% if message.tags == 'success' %}✨{% else %}🔔{% endif %}
+            </span>
+            <div class="flex-1">
+                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">
+                    {% if message.tags == 'success' %}Success{% else %}Notification{% endif %}
+                </p>
+                <p class="text-xs font-bold text-gray-800 tracking-tight">{{ message }}</p>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-gray-300 hover:text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Auto-dismiss logic: Removes each message after 5 seconds
+        setTimeout(() => {
+            const container = document.getElementById('msg-container');
+            if (container) {
+                const alerts = container.querySelectorAll('.alert-pop');
+                alerts.forEach((alert, index) => {
+                    setTimeout(() => {
+                        alert.style.opacity = '0';
+                        alert.style.transform = 'translateX(20px)';
+                        setTimeout(() => alert.remove(), 500);
+                    }, index * 200); // Staggered removal
+                });
+            }
+        }, 5000);
+    </script>
+    {% endif %}
+
+    <main class="relative min-h-[70vh]">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 py-16 px-6 mt-20">
+        <div class="max-w-7xl mx-auto text-center">
+            <h2 class="font-serif text-3xl font-bold mb-4 italic">Azers Squad</h2>
+            <div class="flex justify-center gap-6 mb-8 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+                <a href="#" class="hover:text-[#d4af37]">Instagram</a>
+                <a href="#" class="hover:text-[#d4af37]">Twitter</a>
+                <a href="#" class="hover:text-[#d4af37]">Privacy</a>
+            </div>
+            <p class="text-[10px] text-gray-300 uppercase tracking-widest font-medium">
+                &copy; 2026 Azers Squad. Managed for Excellence.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const openBtn = document.getElementById('menu-open');
+        const closeBtn = document.getElementById('menu-close');
+        const drawer = document.getElementById('side-drawer');
+        const overlay = document.getElementById('menu-overlay');
+
+        function toggleMenu() {
+            const isOpen = !drawer.classList.contains('translate-x-full');
+            
+            if (isOpen) {
+                // Close
+                drawer.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = 'auto';
+            } else {
+                // Open
+                drawer.classList.remove('translate-x-full');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        openBtn.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !drawer.classList.contains('translate-x-full')) {
+                toggleMenu();
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Azers Squad{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+  <style>
+    /* --- Global --- */
+    body { font-family: 'Arial', sans-serif; margin:0; padding:0; background:#fff; color:#333; }
+    a { text-decoration:none; color:inherit; }
+
+    /* --- Navbar --- */
+    nav { display:flex; justify-content:space-between; align-items:center; background:#fff9f0; padding:1rem 2rem; border-bottom:2px solid #d4af37; }
+    nav .logo { font-size:1.8rem; font-weight:bold; color:#d4af37; }
+    nav ul { list-style:none; display:flex; gap:1.5rem; margin:0; padding:0; }
+    nav ul li { position:relative; }
+    nav ul li a, nav ul li button { font-weight:600; padding:0.5rem 1rem; color:#333; background:none; border:none; cursor:pointer; transition:0.3s; }
+    nav ul li a:hover, nav ul li button:hover { color:#d4af37; }
+
+    /* --- Buttons --- */
+    .btn { background:#d4af37; color:#fff; padding:0.6rem 1.2rem; border-radius:6px; font-weight:bold; border:none; cursor:pointer; transition:0.3s; }
+    .btn:hover { background:#b8952f; }
+
+    main { padding:2rem 5%; }
+
+    footer { text-align:center; padding:1.5rem; background:#d4af37; color:#fff; font-weight:bold; }
+
+    /* --- Messages --- */
+    .messages { margin:1rem 0; }
+    .alert { padding:10px; border-radius:6px; font-weight:bold; margin-bottom:10px; }
+    .alert-success { background:#d4edda; color:#155724; }
+    .alert-error, .alert-danger { background:#f8d7da; color:#721c24; }
+    .alert-warning { background:#fff3cd; color:#856404; }
+    .alert-info { background:#d1ecf1; color:#0c5460; }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="logo">Azers Squad</div>
+    <ul>
+      <li><a href="{% url 'core:home' %}">Home</a></li>
+      <li><a href="{% url 'core:artist_list' %}">Artists</a></li>
+
+      {% if user.is_authenticated %}
+        <li>
+          <form method="post" action="{% url 'core:logout' %}">
+            {% csrf_token %}
+            <button class="btn" type="submit">Logout</button>
+          </form>
+        </li>
+      {% else %}
+        <li><a class="btn" href="{% url 'core:login' %}">Login</a></li>
+        <li><a class="btn" href="{% url 'core:member_signup' %}">Signup</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <!--  Messages block -->
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>&copy; 2025 Azers Squad. All rights reserved.</footer>
+</body>
+</html> {% endcomment %}
+
+
+
+
+{% comment %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Azers Squad{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+  <style>
+    /* --- Global --- */
+    body { font-family: 'Arial', sans-serif; margin:0; padding:0; background:#fff; color:#333; }
+    a { text-decoration:none; color:inherit; }
+
+    /* --- Navbar --- */
+    nav { display:flex; justify-content:space-between; align-items:center; background:#fff9f0; padding:1rem 2rem; border-bottom:2px solid #d4af37; }
+    nav .logo { font-size:1.8rem; font-weight:bold; color:#d4af37; }
+    nav ul { list-style:none; display:flex; gap:1.5rem; margin:0; padding:0; }
+    nav ul li { position:relative; }
+    nav ul li a, nav ul li button { font-weight:600; padding:0.5rem 1rem; color:#333; background:none; border:none; cursor:pointer; transition:0.3s; }
+    nav ul li a:hover, nav ul li button:hover { color:#d4af37; }
+
+    /* --- Buttons --- */
+    .btn { background:#d4af37; color:#fff; padding:0.6rem 1.2rem; border-radius:6px; font-weight:bold; border:none; cursor:pointer; transition:0.3s; }
+    .btn:hover { background:#b8952f; }
+
+    main { padding:2rem 5%; }
+
+    footer { text-align:center; padding:1.5rem; background:#d4af37; color:#fff; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="logo">Azers Squad</div>
+    <ul>
+      <li><a href="{% url 'core:home' %}">Home</a></li>
+      <li><a href="{% url 'core:artist_list' %}">Artists</a></li>
+      <li><a class="btn" href="{% url 'core:login' %}">Login</a></li>
+      <li><a class="btn" href="{% url 'core:member_signup' %}">Signup</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <main>{% block content %}{% endblock %}</main>
+
+  <!-- Footer -->
+  <footer>&copy; 2025 Azers Squad. All rights reserved.</footer>
+</body>
+</html> {% endcomment %}

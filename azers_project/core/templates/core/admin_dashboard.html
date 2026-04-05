@@ -1,0 +1,343 @@
+{% extends "core/base_auth.html" %}
+
+{% block title %}Azers Squad | System Intelligence{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row bg-[#0d0d0e] min-h-screen text-gray-300 font-['Inter',sans-serif] selection:bg-[#d4af37] selection:text-black">
+    
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-black/80 backdrop-blur-2xl border-r border-white/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="sidebar">
+        <div class="p-8 flex flex-col h-full">
+            <div class="flex items-center gap-4 mb-12">
+                <div class="w-10 h-10 bg-[#d4af37] rounded-2xl flex items-center justify-center text-black font-black shadow-[0_0_20px_rgba(212,175,55,0.2)]">A</div>
+                <div class="flex flex-col leading-tight">
+                    <span class="text-xs font-black tracking-[0.3em] uppercase text-white">Azers Squad</span>
+                    <span class="text-[9px] text-[#d4af37] font-bold uppercase tracking-widest">Command Center</span>
+                </div>
+            </div>
+            
+            <nav class="space-y-1 flex-1">
+                <a href="{% url 'core:admin_dashboard' %}" class="nav-link active"><i class="fas fa-chart-pie mr-3"></i> Intelligence</a>
+                <a href="{% url 'core:home' %}" class="nav-link"><i class="fas fa-external-link-alt mr-3"></i> Public Site</a>
+            </nav>
+
+            <div class="mt-auto p-5 bg-white/5 rounded-3xl border border-white/5">
+                <p class="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">System Health</p>
+                <div class="flex items-center gap-2 text-[10px] text-green-400 font-bold">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    Core Operational
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 lg:ml-64 p-5 md:p-10 lg:pr-[380px]">
+        
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div>
+                <h1 class="text-3xl md:text-5xl font-black tracking-tighter text-white">Dashboard</h1>
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mt-2">March 2026 • Production Environment</p>
+            </div>
+            
+            <div class="relative w-full md:w-80 group">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                <input type="text" id="masterSearch" placeholder="Search ID, Name, or Role..." 
+                       class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-sm text-white outline-none focus:border-[#d4af37]/50 focus:ring-4 focus:ring-[#d4af37]/5 transition-all">
+            </div>
+        </header>
+
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white/[0.02] p-4 rounded-[30px] border border-white/5">
+            <div class="flex p-1 bg-black/40 rounded-2xl border border-white/5">
+                <button onclick="filterRole('all', this)" class="filter-btn active">All</button>
+                <button onclick="filterRole('artist', this)" class="filter-btn">Artists</button>
+                <button onclick="filterRole('brand', this)" class="filter-btn">Brands</button>
+            </div>
+            <div class="px-6 py-2 bg-[#d4af37]/10 rounded-xl border border-[#d4af37]/20">
+                <span class="text-[10px] font-black text-[#d4af37] uppercase tracking-widest">Pending Verification: {{ pending_users }}</span>
+            </div>
+        </div>
+
+        <div id="memberContainer" class="space-y-4">
+            {% for u in recent_users %}
+            <div class="member-card group" data-role="{{ u.role }}">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#d4af37] text-xl font-black group-hover:bg-[#d4af37] group-hover:text-black transition-all duration-500">
+                            {{ u.username|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg mb-0.5">{{ u.username }}</h4>
+                            <p class="text-xs text-gray-500 font-medium">{{ u.email }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 md:gap-8">
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-black uppercase text-gray-600 tracking-widest mb-1">Entity Type</span>
+                            <span class="role-pill {% if u.role == 'artist' %}artist{% else %}brand{% endif %}">{{ u.role }}</span>
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-black uppercase text-gray-600 tracking-widest mb-1">Status</span>
+                            {% if u.is_approved %}
+                                <span class="text-green-400 text-[10px] font-black uppercase tracking-widest"><i class="fas fa-check-double mr-1"></i> Verified</span>
+                            {% else %}
+                                <span class="text-amber-500 text-[10px] font-black uppercase tracking-widest animate-pulse"><i class="fas fa-clock mr-1"></i> Awaiting</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="md:ml-4">
+                            {% if not u.is_approved %}
+                                <a href="{% url 'core:approve_user' u.id %}" class="approve-btn">Verify Node</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-20 text-center bg-white/5 rounded-[40px] border border-dashed border-white/10">
+                <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">No members found in the database</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <aside class="hidden lg:block w-[380px] fixed right-0 inset-y-0 bg-[#0d0d0e] border-l border-white/5 p-10 overflow-y-auto">
+        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mb-10">Live Intelligence Feed</h3>
+        <div class="space-y-10">
+            {% for u in recent_users|slice:":6" %}
+            <div class="relative pl-6 border-l border-white/10">
+                <div class="absolute -left-[4px] top-0 w-2 h-2 rounded-full bg-[#d4af37] shadow-[0_0_10px_#d4af37]"></div>
+                <p class="text-xs text-white font-bold mb-1">{% if u.is_approved %}Verification Complete{% else %}New Registration{% endif %}</p>
+                <p class="text-[11px] text-gray-500 leading-relaxed">Member <strong>{{ u.username }}</strong> joined as <strong>{{ u.role }}</strong>.</p>
+                <span class="text-[9px] text-gray-700 font-black mt-3 block tracking-tighter">{{ u.date_joined|timesince|upper }} AGO</span>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+</div>
+
+<style>
+    /* Premium UI Components */
+    .nav-link { display: flex; align-items: center; padding: 16px 24px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #555; transition: 0.4s; }
+    .nav-link.active { background: #d4af37; color: black; box-shadow: 0 15px 35px rgba(212,175,55,0.2); }
+    .nav-link:hover:not(.active) { color: white; background: white/5; }
+
+    .filter-btn { padding: 10px 24px; font-size: 10px; font-weight: 900; text-transform: uppercase; border-radius: 12px; color: #555; transition: 0.3s; }
+    .filter-btn.active { background: #d4af37; color: black; }
+
+    .member-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 35px; padding: 24px 32px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .member-card:hover { background: rgba(255,255,255,0.04); border-color: rgba(212,175,55,0.2); transform: translateY(-3px); }
+
+    .role-pill { padding: 4px 12px; border-radius: 8px; font-[9px]; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; font-size: 9px; }
+    .role-pill.artist { background: rgba(251,191,36,0.1); color: #fbbf24; }
+    .role-pill.brand { background: rgba(99,102,241,0.1); color: #818cf8; }
+
+    .approve-btn { background: #d4af37; color: black; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 24px; border-radius: 15px; display: inline-block; transition: 0.3s; }
+    .approve-btn:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(212,175,55,0.2); }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+    .swal2-timer-progress-bar {
+    background: #d4af37 !important;
+}
+</style>
+
+<script>
+    // DEEP SEARCH: Scans IDs, Names, and Emails
+    document.getElementById('masterSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.member-card').forEach(card => {
+            const content = card.textContent.toLowerCase();
+            card.style.display = content.includes(query) ? 'block' : 'none';
+        });
+    });
+
+    // ROLE FILTER: Instant Identity Split
+    function filterRole(role, btn) {
+        // Update Buttons
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Filter Content
+        document.querySelectorAll('.member-card').forEach(card => {
+            if (role === 'all' || card.dataset.role === role) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+
+{% comment %} {% extends "core/base_auth.html" %}
+
+{% block title %}Azers Squad | Elite Command Center{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper flex flex-col lg:flex-row bg-[#0d0d0e] min-h-screen text-gray-300 font-['Inter']">
+    
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-black/60 backdrop-blur-2xl border-r border-white/5 transform -translate-x-full lg:translate-x-0 transition-all duration-500">
+        <div class="p-8 flex flex-col h-full">
+            <div class="flex items-center gap-4 mb-12">
+                <div class="w-10 h-10 bg-[#d4af37] rounded-2xl flex items-center justify-center text-black font-black">A</div>
+                <div class="flex flex-col leading-tight">
+                    <span class="text-xs font-black tracking-[0.3em] uppercase text-white">Azers Squad</span>
+                    <span class="text-[9px] text-[#d4af37] font-bold uppercase tracking-widest">Command Center</span>
+                </div>
+            </div>
+            <nav class="space-y-1 flex-1">
+                <a href="{% url 'core:admin_dashboard' %}" class="nav-item active"><i class="fas fa-chart-line mr-3"></i> Intelligence</a>
+                <a href="{% url 'core:home' %}" class="nav-item"><i class="fas fa-home mr-3"></i> View Site</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 lg:ml-64 p-4 md:p-10 lg:pr-[350px]">
+        
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
+            <div>
+                <h1 class="text-4xl font-black tracking-tighter text-white">Intelligence</h1>
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mt-2">March 2026 • Monitoring</p>
+            </div>
+            
+            <div class="relative group">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                <input type="text" id="masterSearch" placeholder="Search members..." 
+                       class="bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-8 text-sm w-full md:w-80 text-white outline-none focus:border-[#d4af37]/50 transition-all">
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-10">
+            <div class="bg-white/5 border border-white/5 rounded-[40px] p-8">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-6">Revenue Stream</h3>
+                <div class="h-[200px]"><canvas id="revenueChart"></canvas></div>
+            </div>
+            <div class="bg-white/5 border border-white/5 rounded-[40px] p-8">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-6">Growth Pulse</h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-4xl font-black text-white">{{ total_artists }}</p>
+                        <p class="text-[10px] font-black uppercase text-gray-500">Artists</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-black text-[#d4af37]">{{ total_brands }}</p>
+                        <p class="text-[10px] font-black uppercase text-gray-500">Brands</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white/5 border border-white/5 rounded-[40px] overflow-hidden">
+            <div class="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex p-1.5 bg-black/40 rounded-2xl border border-white/5">
+                    <button onclick="toggleDatabase('all', this)" class="db-tab active">All Nodes</button>
+                    <button onclick="toggleDatabase('artist', this)" class="db-tab">Artists</button>
+                    <button onclick="toggleDatabase('brand', this)" class="db-tab">Brands</button>
+                </div>
+                <div class="text-[11px] font-black uppercase text-gray-500">Pending: <span class="text-[#d4af37]">{{ pending_users }}</span></div>
+            </div>
+
+            <div class="hidden md:block">
+                <table class="w-full text-left" id="masterTable">
+                    <tbody class="divide-y divide-white/5">
+                        {% for u in recent_users %}
+                        <tr class="user-row group" data-role="{{ u.role }}">
+                            <td class="py-6 px-10">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center font-black">{{ u.username|slice:":1"|upper }}</div>
+                                    <div>
+                                        <p class="text-sm font-bold text-white mb-0.5">{{ u.username }}</p>
+                                        <p class="text-[11px] text-gray-500">{{ u.email }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="role-badge {% if u.role == 'artist' %}text-amber-400{% else %}text-indigo-400{% endif %}">{{ u.role }}</span></td>
+                            <td class="status-cell">
+                                {% if u.is_approved %}
+                                    <span class="text-green-400 text-[9px] font-black uppercase">Verified</span>
+                                {% else %}
+                                    <a href="{% url 'core:approve_user' u.id %}" class="bg-[#d4af37] text-black text-[9px] font-black uppercase px-4 py-2 rounded-lg">Approve</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <aside class="w-full lg:w-[350px] lg:fixed lg:right-0 lg:inset-y-0 bg-[#0d0d0e] border-l border-white/5 p-8 overflow-y-auto">
+        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mb-8">Live Feed</h3>
+        <div class="space-y-6">
+            {% for u in recent_users|slice:":5" %}
+            <div class="flex gap-4">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#d4af37] mt-1.5"></div>
+                <div>
+                    <p class="text-[11px] text-white font-bold">{{ u.username }} joined</p>
+                    <p class="text-[10px] text-gray-500 uppercase">{{ u.role }} • {{ u.date_joined|timesince }} ago</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+</div>
+
+<style>
+    .nav-item { display: flex; align-items: center; padding: 14px 20px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; transition: 0.3s; }
+    .nav-item.active { background: #d4af37; color: black; }
+    .db-tab { padding: 10px 24px; font-size: 10px; font-weight: 900; text-transform: uppercase; border-radius: 12px; color: #555; }
+    .db-tab.active { background: #d4af37; color: black; }
+    .role-badge { font-size: 9px; font-weight: 900; text-transform: uppercase; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // FIX FOR SEARCH
+    document.getElementById('masterSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.user-row').forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+        });
+    });
+
+    // Toggle Role Filter
+    function toggleDatabase(role, btn) {
+        document.querySelectorAll('.db-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.user-row').forEach(item => {
+            item.style.display = (role === 'all' || item.dataset.role === role) ? '' : 'none';
+        });
+    }
+
+    // Simple Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['W1', 'W2', 'W3', 'W4'],
+            datasets: [{
+                data: [10, 25, 15, 40],
+                borderColor: '#d4af37',
+                borderWidth: 2,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+    });
+</script>
+{% endblock %}
+
+
+
+
+
+ {% endcomment %}

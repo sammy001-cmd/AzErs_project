@@ -1,0 +1,38 @@
+{% extends "core/base_auth.html" %}
+
+{% block title %}500 | Technical Refinement{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex flex-col items-center justify-center px-6 text-center">
+    
+    <div class="relative mb-12">
+        <div class="absolute inset-0 rounded-full bg-[#d4af37]/20 animate-ping"></div>
+        <div class="relative w-24 h-24 rounded-full border border-[#d4af37]/30 flex items-center justify-center bg-white shadow-xl">
+            <svg class="w-10 h-10 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
+                <circle cx="12" cy="12" r="3" stroke-width="1.5"></circle>
+            </svg>
+        </div>
+    </div>
+
+    <div class="relative z-10">
+        <p class="text-[10px] uppercase tracking-[0.6em] font-black text-gray-400 mb-4">Error Code: 500</p>
+        <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6 text-[#1a1a1a]">
+            Technical <span class="text-[#d4af37] italic font-serif">Excellence</span> <br>In Progress.
+        </h2>
+        <p class="text-gray-400 text-xs md:text-sm max-w-sm mx-auto leading-relaxed mb-10 font-medium">
+            Our servers are currently undergoing a high-performance adjustment. We’ll be back to our standard of excellence shortly.
+        </p>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+            <a href="javascript:location.reload();" 
+               class="inline-block bg-[#d4af37] text-white text-[10px] font-bold uppercase tracking-[0.3em] px-10 py-5 rounded-xl hover:bg-black transition-all duration-500">
+                Retry Connection
+            </a>
+            <a href="/" class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-colors">
+                Return Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

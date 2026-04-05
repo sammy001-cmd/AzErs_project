@@ -1,0 +1,94 @@
+{% extends "core/base_public.html" %}
+{% block title %}Book {{ artist.stage_name }} — Azers Squad{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<div class="min-h-screen bg-[#F9F8F3] py-20 px-6">
+    <div class="max-w-xl mx-auto">
+        
+        <div class="text-center mb-12 animate__animated animate__fadeIn">
+            <span class="text-[10px] font-black text-[#d4af37] uppercase tracking-[0.4em]">Secure Reservation</span>
+            <h1 class="text-4xl font-serif font-bold text-gray-900 mt-4 tracking-tighter">
+                Request {{ artist.stage_name }}
+            </h1>
+            <p class="text-xs text-gray-400 mt-2 font-medium uppercase tracking-widest">
+                No account required to book
+            </p>
+        </div>
+
+        <div class="bg-white rounded-[40px] p-10 lg:p-14 shadow-2xl shadow-gray-200/50 border border-gray-50 animate__animated animate__fadeInUp">
+            
+            <form method="POST" class="space-y-8">
+                {% csrf_token %}
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Full Name</label>
+                        <input type="text" name="name" required placeholder="John Doe" 
+                            class="w-full mt-2 px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#d4af37] transition-all text-sm font-medium">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Email Address</label>
+                        <input type="email" name="email" required placeholder="john@example.com" 
+                            class="w-full mt-2 px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#d4af37] transition-all text-sm font-medium">
+                        <p class="text-[9px] text-gray-400 mt-2 ml-2 italic">We will send your tracking link here.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Event Date</label>
+                        <input type="date" name="date" required 
+                            class="w-full mt-2 px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#d4af37] transition-all text-sm font-medium text-gray-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Deposit (₦)</label>
+                        <input type="number" name="amount" required step="0.01" value="{{ artist.price_tag|default:'0' }}"
+                            class="w-full mt-2 px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#d4af37] transition-all text-sm font-bold text-gray-900">
+                        <p class="text-[9px] text-amber-600 mt-2 ml-2 font-bold uppercase">Min. 50% Required</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Event Details & Requests</label>
+                    <textarea name="notes" rows="4" placeholder="Tell the artist about the venue, time, and specific needs..." 
+                        class="w-full mt-2 px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#d4af37] transition-all text-sm font-medium"></textarea>
+                </div>
+
+                <div class="pt-6">
+                    {% comment %} <button type="submit" 
+                        class="w-full py-5 bg-black text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl hover:bg-[#d4af37] transition-all transform hover:-translate-y-1">
+                        Submit Booking Request
+                    </button> {% endcomment %}
+                    <button type="submit" onclick="this.innerHTML='Processing Reservation...'; this.style.opacity='0.7';" 
+                        class="w-full py-5 bg-black text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl hover:bg-[#d4af37] transition-all transform hover:-translate-y-1">
+                          Submit Booking Request
+                    </button>
+                    
+                    <div class="mt-8 flex items-center justify-center gap-4 py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-gray-200 border-2 border-white"></div>
+                            <div class="w-6 h-6 rounded-full bg-gray-300 border-2 border-white"></div>
+                        </div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Joined by 40+ Top Artists this month</p>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+        <div class="mt-12 text-center">
+            <a href="{% url 'core:artist_detail' artist.id %}" class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-[#d4af37] transition-colors">
+                ← Back to Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementsByName("date")[0].setAttribute('min', today);
+</script>
+{% endblock %}

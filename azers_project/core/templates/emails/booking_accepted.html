@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: 'Helvetica', Arial, sans-serif; background-color: #F9F8F3; margin: 0; padding: 0; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #F9F8F3; padding-bottom: 40px; }
+        .main { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-spacing: 0; color: #000000; border-radius: 20px; overflow: hidden; margin-top: 40px; border: 1px solid #eeeeee; }
+        .header { background-color: #000000; padding: 40px; text-align: center; }
+        .content { padding: 40px; text-align: center; }
+        .status-badge { display: inline-block; padding: 8px 20px; background-color: #d4af37; color: #ffffff; text-transform: uppercase; font-size: 10px; font-weight: 900; letter-spacing: 3px; border-radius: 50px; margin-bottom: 20px; }
+        .title { font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 10px; }
+        .body-text { font-size: 14px; color: #666666; line-height: 1.6; margin-bottom: 30px; }
+        .details-box { background-color: #F9F8F3; padding: 25px; border-radius: 15px; margin-bottom: 30px; text-align: left; }
+        .detail-row { margin-bottom: 10px; font-size: 13px; }
+        .detail-label { font-weight: 900; text-transform: uppercase; color: #999999; font-size: 9px; letter-spacing: 1px; }
+        .cta-button { display: inline-block; padding: 18px 35px; background-color: #000000; color: #ffffff !important; text-decoration: none; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-radius: 12px; transition: all 0.3s; }
+        .footer { padding: 30px; text-align: center; font-size: 10px; color: #bbbbbb; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <table class="main">
+            <tr>
+                <td class="header">
+                    <h1 style="color: #ffffff; margin: 0; letter-spacing: 5px; font-size: 20px;">AZERS SQUAD</h1>
+                </td>
+            </tr>
+            <tr>
+                <td class="content">
+                    <div class="status-badge">Confirmed</div>
+                    <h2 class="title">Booking Approved</h2>
+                    <p class="body-text">Excellent news. <strong>{{ booking.artist.stage_name }}</strong> has officially accepted your booking request for the upcoming event.</p>
+                    
+                    <div class="details-box">
+                        <div class="detail-row">
+                            <div class="detail-label">Event Date</div>
+                            <div style="font-weight: bold;">{{ booking.event_date|date:"F d, Y" }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Talent</div>
+                            <div style="font-weight: bold;">{{ booking.artist.stage_name }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Remaining Balance</div>
+                            <div style="font-weight: bold; color: #d4af37;">₦{{ booking.balance_due }}</div>
+                        </div>
+                    </div>
+
+                    <a href="{{ full_url }}" class="cta-button">Access Guest Portal & Pay</a>
+                </td>
+            </tr>
+            <tr>
+                <td class="footer">
+                    &copy; 2026 Azers Squad Premium Talent Agency <br>
+                     Nigeria
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
