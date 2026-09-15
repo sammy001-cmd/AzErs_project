@@ -36,6 +36,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -43,11 +44,25 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "core",
+    "channels",
 ]
+
+# Point to your ASGI file
+ASGI_APPLICATION = "azers_project.asgi.application"
+
+# Channel Layer (using Redis for production-level speed)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware", 
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -102,13 +117,18 @@ LOGIN_URL = '/login/'     # path for @login_required decorator to redirect
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
+EMAIL_TIMEOUT = 30      
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'azerrss001@gmail.com' 
 EMAIL_HOST_PASSWORD = 'sscd wgth eyjj lezz' 
 DEFAULT_FROM_EMAIL = 'Azers Squad <azerrss001@gmail.com>'
 PAYSTACK_PUBLIC_KEY = "pk_test_5186157b8b21a86803afb3cf8f855e3f5ac3e7ef" 
 PAYSTACK_SECRET_KEY = "sk_test_6a6bb169c9768b0fca1efadd2e418cbaae2ebdde"
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 

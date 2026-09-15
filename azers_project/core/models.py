@@ -85,104 +85,8 @@ class Portfolio(models.Model):
 
 
 
-# -------------------------
-# Booking model
-# -------------------------
-class Booking(models.Model):
-    STATUS_CHOICES = (
-        ("Pending", "Pending Approval"),
-        ("Accepted", "Accepted & Active"),
-        ("Declined", "Declined"),
-        ("Completed", "Gig Finished"),
-        ("Cancelled", "Cancelled"),
-    )
-
-    PAYMENT_STATUS_CHOICES = (
-        ("Unpaid", "Unpaid"),
-        ("Partially Paid", "Partially Paid (50%)"),
-        ("Paid", "Fully Paid"),
-    )
-
-    # Core Relations
-    artist = models.ForeignKey('Artist', on_delete=models.CASCADE, related_name="bookings")
-    
-    # Secret ID for Guest Access (Non-Guessable URL)
-    secret_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    
-    # Client Info
-    customer_name = models.CharField(max_length=100)
-    customer_email = models.EmailField()
-    event_date = models.DateField()
-    event_location = models.CharField(max_length=255, blank=True)
-    notes = models.TextField(blank=True, help_text="Event details, duration, etc.")
-    
-    # Financials
-    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    total_quote = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    
-    # Workflow States
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default="Unpaid")
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.customer_name} -> {self.artist.stage_name} ({self.event_date})"
-
-    def get_absolute_url(self):
-        # The URL sent to the fan's email
-        return reverse('core:guest_booking_detail', kwargs={'secret_id': self.secret_id})
-
-    @property
-    def balance_due(self):
-        return self.total_quote - self.amount_paid
-
-    def update_payment_logic(self):
-        """Auto-calculate payment status based on amounts"""
-        if self.amount_paid >= self.total_quote and self.total_quote > 0:
-            self.payment_status = "Paid"
-        elif self.amount_paid > 0:
-            self.payment_status = "Partially Paid"
-        else:
-            self.payment_status = "Unpaid"
-        self.save()
 
 
-# class Booking(models.Model):
-#     PAYMENT_STATUS_CHOICES = (
-#         ("Pending", "Pending"),
-#         ("Partially Paid", "Partially Paid"),
-#         ("Paid", "Paid"),
-#     )
-
-#     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
-#     customer_name = models.CharField(max_length=100)
-#     customer_email = models.EmailField()
-#     event_date = models.DateField()
-#     notes = models.TextField(blank=True)
-#     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-#     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default="Pending")
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return f"Booking for {self.artist.stage_name} by {self.customer_name}"
-
-#     def is_half_paid(self):
-#         return self.amount_paid >= (self.artist.price_tag / 2)
-
-
-
-# class Seller(BaseProfile):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     business_name = models.CharField(max_length=150, blank=True)
-
-#     def __str__(self):
-        
-#         return self.business_name or self.user.username
 
 
 class Brand(BaseProfile):
@@ -194,6 +98,8 @@ class Brand(BaseProfile):
     brand_name = models.CharField(max_length=150, blank=True)
     website = models.URLField(blank=True)
     phone = models.CharField(max_length=30, blank=True)
+    account_number = models.CharField(max_length=20, blank=True)
+    bank_name = models.CharField(max_length=100, blank=True)
     address = models.CharField(max_length=255, blank=True)
     profile_picture = models.ImageField(upload_to="brands/", blank=True, null=True)
 
@@ -282,8 +188,14 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 
 
+    
 
 class BrandInquiry(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('responded', 'Responded'),
+        ('closed', 'Closed'),
+    ]
     # Who sent it (Talent or Public User)
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_inquiries")
     
@@ -292,7 +204,7 @@ class BrandInquiry(models.Model):
     
     # The actual message
     message = models.TextField()
-    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     # Meta info
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
@@ -311,3 +223,134 @@ class Lead(models.Model):
 
     def __str__(self):
         return f"Lead for {self.brand.brand_name} at {self.created_at}"
+    
+
+class Conversation(models.Model):
+    # For registered Brands/Users chatting with Artists
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="conversations", blank=True)
+    
+    # The Professional (Artist or Brand) who "owns" this chat channel
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="managed_chats")
+    
+    # Guest Access Logic (The "Secret Link" feature)
+    is_guest_chat = models.BooleanField(default=False)
+    guest_uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    guest_name = models.CharField(max_length=100, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    subject_type = models.CharField(max_length=100, blank=True, null=True)
+    visitor_email = models.EmailField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"Chat for {self.receiver.username} (Guest: {self.is_guest_chat})"
+
+class ChatMessage(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
+    # sender is NULL if a guest is sending the message
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    
+    # Explicitly track guest messages
+    is_from_guest = models.BooleanField(default=False)
+    image = models.ImageField(upload_to="chat_images/", blank=True, null=True)
+    text = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+
+
+# -------------------------
+# Booking model
+# -------------------------
+class Booking(models.Model):
+    STATUS_CHOICES = (
+        ("Pending", "Pending Approval"),
+        ("Accepted", "Accepted & Active"),
+        ("Declined", "Declined"),
+        ("Completed", "Gig Finished"),
+        ("Cancelled", "Cancelled"),
+    )
+
+    PAYMENT_STATUS_CHOICES = (
+        ("Unpaid", "Unpaid"),
+        ("Partially Paid", "Partially Paid (50%)"),
+        ("Paid", "Fully Paid"),
+    )
+
+    # --- THE LINK TO THE CHAT ---
+    # Every booking now HAS a chat room. 
+    conversation = models.OneToOneField(
+        Conversation,   
+        on_delete=models.CASCADE, 
+        related_name="booking",
+        help_text="The chat room dedicated to this specific booking",
+        null=True,
+        blank=True
+       )
+
+    artist = models.ForeignKey('Artist', on_delete=models.CASCADE, related_name="bookings")
+    
+    # Client Info (copied from conversation if guest)
+    customer_name = models.CharField(max_length=100)
+    customer_email = models.EmailField()
+    event_date = models.DateField()
+    event_location = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
+    
+    # Financials (Negotiable inside the chat!)
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    total_quote = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default="Unpaid")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Booking: {self.customer_name} -> {self.artist.stage_name}"
+    
+
+class Ticket(models.Model):
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="tickets")
+    event_name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Ticket Specifics
+    event_date = models.DateTimeField()
+    location = models.CharField(max_length=255, blank=True, help_text="Physical or Virtual Link")
+    total_capacity = models.PositiveIntegerField(default=100)
+    is_active = models.BooleanField(default=True)
+    
+    # The "Cool" Factor
+    requires_photo = models.BooleanField(default=True, help_text="If true, users must upload a photo for the digital pass")
+    ticket_template = models.ImageField(upload_to="tickets/templates/", blank=True, null=True, help_text="The blank design we will paste the user face onto")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-event_date",)
+
+    def __str__(self):
+        return f"{self.event_name} - {self.brand.brand_name}"
+    
+    
+class TicketPurchase(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="purchases")
+    user_name = models.CharField(max_length=200)
+    email = models.EmailField(max_length=255, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    user_photo = models.ImageField(upload_to="ticket_holders/")
+    payment_receipt = models.ImageField(upload_to="payment_proofs/")
+    status = models.CharField(max_length=20, default="pending", choices=[
+        ('pending', 'Verifying'),
+        ('approved', 'Issued'),
+        ('declined', 'Failed')
+    ])
+    issued_pass_id = models.CharField(max_length=50, blank=True) # e.g. AZR-WEB-001

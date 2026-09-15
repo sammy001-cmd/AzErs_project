@@ -26,9 +26,9 @@
                         <span class="px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
                             Genre: <span class="text-gray-900 ml-1">{{ artist.genre|default:"All-Rounder" }}</span>
                         </span>
-                        <span class="px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
+                        {% comment %} <span class="px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
                             Rate: <span class="text-gray-900 ml-1">₦{{ artist.price_tag|default:"Contact for Quote" }}</span>
-                        </span>
+                        </span> {% endcomment %}
                     </div>
 
                     <div class="mt-10">

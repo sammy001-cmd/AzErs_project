@@ -57,7 +57,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="form-field-wrapper {% if form.username.errors %}field-danger{% endif %}">
-                        <label class="label-style">Full Name</label>
+                        <label class="label-style">Username</label>
                         {{ form.username }}
                         {% for error in form.username.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
                     </div>

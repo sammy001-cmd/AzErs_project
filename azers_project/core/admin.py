@@ -5,7 +5,9 @@ from .models import User, AzersCode, Artist, Booking, Brand
 from django.core.mail import send_mail
 
 from django.contrib import admin
-from .models import Brand, BrandInquiry 
+from .models import Brand, BrandInquiry, Conversation, ChatMessage
+
+
 
 # Custom User Admin
 class UserAdmin(BaseUserAdmin):
@@ -123,83 +125,55 @@ class BrandInquiryAdmin(admin.ModelAdmin):
         queryset.update(is_read=True)
     mark_as_read.short_description = "Mark selected inquiries as read"
 
-# If you haven't registered Brand yet, you can do it simply:
-# admin.site.register(Brand)
 
-# from django.contrib import admin
-# from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-# from .models import User, Artist, Portfolio, Booking, AzersCode, Seller
+# Basic registration
+admin.site.register(Conversation)
 
-
-# # Customize User Admin
-# class UserAdmin(BaseUserAdmin):
-#     list_display = ("username", "email", "role", "azers_code", "is_approved", "is_staff")
-#     list_filter = ("role", "is_approved", "is_staff", "is_superuser")
-#     search_fields = ("username", "email", "azers_code")
-#     ordering = ("username",)
-#     fieldsets = BaseUserAdmin.fieldsets + (
-#         ("AzErs Info", {"fields": ("role", "azers_code", "is_approved")}),
-#     )
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    # This makes the list view much more useful
+    list_display = ('sender', 'conversation', 'text', 'timestamp', 'is_read')
+    list_filter = ('timestamp', 'is_from_guest', 'is_read')
+    search_fields = ('text', 'sender__username')
 
 
-# # Artist Admin
-# @admin.register(Artist)
-# class ArtistAdmin(admin.ModelAdmin):
-#     list_display = ("stage_name", "user", "price_tag", "genre", "created_at", "profile_picture_preview")
-#     list_editable = ("price_tag",)  # admin can quickly set/update price
-#     search_fields = ("stage_name", "genre")
-#     list_filter = ("genre", "created_at")
-#     readonly_fields = ("profile_picture_preview",)
+from django.contrib import admin
+from .models import Ticket, TicketPurchase
 
-#     # Show preview of profile picture inside admin
-#     def profile_picture_preview(self, obj):
-#         if obj.profile_picture:
-#             return f'<img src="{obj.profile_picture.url}" style="height:60px; border-radius:5px;" />'
-#         return "No image"
-#     profile_picture_preview.allow_tags = True
-#     profile_picture_preview.short_description = "Profile Picture"
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ('event_name', 'brand', 'price', 'event_date', 'total_capacity')
+    list_filter = ('brand', 'event_date')
+    search_fields = ('event_name', 'brand__brand_name')
+    # This allows you to edit the price and capacity directly from the list view
+    list_editable = ('price', 'total_capacity')
 
+@admin.register(TicketPurchase)
+class TicketPurchaseAdmin(admin.ModelAdmin):
+    list_display = ('user_name', 'email', 'ticket', 'status', 'created_at')
+    list_filter = ('status', 'ticket__brand', 'created_at')
+    search_fields = ('user_name', 'email', 'issued_pass_id')
+    readonly_fields = ('created_at', 'issued_pass_id')
+    
+    # This organizes the details when you click into a purchase
+    fieldsets = (
+        ('Attendee Info', {
+            'fields': ('user_name', 'email', 'user_photo')
+        }),
+        ('Event & Payment', {
+            'fields': ('ticket', 'payment_receipt', 'status')
+        }),
+        ('System Details', {
+            'fields': ('issued_pass_id', 'created_at'),
+            'classes': ('collapse',),
+        }),
+    )
 
-# # Seller Admin
-# @admin.register(Seller)
-# class SellerAdmin(admin.ModelAdmin):
-#     list_display = ("business_name", "user", "created_at", "profile_picture_preview")
-#     search_fields = ("business_name", "user__username")
-#     list_filter = ("created_at",)
-#     readonly_fields = ("profile_picture_preview",)
-
-#     def profile_picture_preview(self, obj):
-#         if obj.profile_picture:
-#             return f'<img src="{obj.profile_picture.url}" style="height:60px; border-radius:5px;" />'
-#         return "No image"
-#     profile_picture_preview.allow_tags = True
-#     profile_picture_preview.short_description = "Profile Picture"
-
-
-# # Portfolio Admin
-# @admin.register(Portfolio)
-# class PortfolioAdmin(admin.ModelAdmin):
-#     list_display = ("artist", "description")
-#     search_fields = ("description",)
-#     list_filter = ("artist",)
-
-
-# # Booking Admin
-# @admin.register(Booking)
-# class BookingAdmin(admin.ModelAdmin):
-#     list_display = ("artist", "customer_name", "event_date", "payment_status", "amount_paid")
-#     search_fields = ("customer_name", "artist__stage_name")
-#     list_filter = ("payment_status", "event_date", "created_at")
-#     date_hierarchy = "event_date"
-
-
-# # AzersCode Admin
-# @admin.register(AzersCode)
-# class AzersCodeAdmin(admin.ModelAdmin):
-#     list_display = ("code", "is_claimed", "assigned_to", "note")
-#     search_fields = ("code",)
-#     list_filter = ("is_claimed",)
-
-
-# # Register User separately
-# admin.site.register(User, UserAdmin)
+    def save_model(self, request, obj, form, change):
+        """
+        Optional: If you approve a ticket via admin, this ensures
+        a serial number is generated if it doesn't have one.
+        """
+        if obj.status == 'approved' and not obj.issued_pass_id:
+            obj.issued_pass_id = f"AZR-{obj.ticket.id}-{obj.id}"
+        super().save_model(request, obj, form, change)

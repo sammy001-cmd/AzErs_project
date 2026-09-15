@@ -1,343 +1,2661 @@
-{% extends "core/base_auth.html" %}
-
-{% block title %}Azers Squad | System Intelligence{% endblock %}
-
-{% block content %}
-<div class="flex flex-col lg:flex-row bg-[#0d0d0e] min-h-screen text-gray-300 font-['Inter',sans-serif] selection:bg-[#d4af37] selection:text-black">
-    
-    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-black/80 backdrop-blur-2xl border-r border-white/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="sidebar">
-        <div class="p-8 flex flex-col h-full">
-            <div class="flex items-center gap-4 mb-12">
-                <div class="w-10 h-10 bg-[#d4af37] rounded-2xl flex items-center justify-center text-black font-black shadow-[0_0_20px_rgba(212,175,55,0.2)]">A</div>
-                <div class="flex flex-col leading-tight">
-                    <span class="text-xs font-black tracking-[0.3em] uppercase text-white">Azers Squad</span>
-                    <span class="text-[9px] text-[#d4af37] font-bold uppercase tracking-widest">Command Center</span>
-                </div>
-            </div>
-            
-            <nav class="space-y-1 flex-1">
-                <a href="{% url 'core:admin_dashboard' %}" class="nav-link active"><i class="fas fa-chart-pie mr-3"></i> Intelligence</a>
-                <a href="{% url 'core:home' %}" class="nav-link"><i class="fas fa-external-link-alt mr-3"></i> Public Site</a>
-            </nav>
-
-            <div class="mt-auto p-5 bg-white/5 rounded-3xl border border-white/5">
-                <p class="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">System Health</p>
-                <div class="flex items-center gap-2 text-[10px] text-green-400 font-bold">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    Core Operational
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <main class="flex-1 lg:ml-64 p-5 md:p-10 lg:pr-[380px]">
-        
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-            <div>
-                <h1 class="text-3xl md:text-5xl font-black tracking-tighter text-white">Dashboard</h1>
-                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mt-2">March 2026 • Production Environment</p>
-            </div>
-            
-            <div class="relative w-full md:w-80 group">
-                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
-                <input type="text" id="masterSearch" placeholder="Search ID, Name, or Role..." 
-                       class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-sm text-white outline-none focus:border-[#d4af37]/50 focus:ring-4 focus:ring-[#d4af37]/5 transition-all">
-            </div>
-        </header>
-
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white/[0.02] p-4 rounded-[30px] border border-white/5">
-            <div class="flex p-1 bg-black/40 rounded-2xl border border-white/5">
-                <button onclick="filterRole('all', this)" class="filter-btn active">All</button>
-                <button onclick="filterRole('artist', this)" class="filter-btn">Artists</button>
-                <button onclick="filterRole('brand', this)" class="filter-btn">Brands</button>
-            </div>
-            <div class="px-6 py-2 bg-[#d4af37]/10 rounded-xl border border-[#d4af37]/20">
-                <span class="text-[10px] font-black text-[#d4af37] uppercase tracking-widest">Pending Verification: {{ pending_users }}</span>
-            </div>
-        </div>
-
-        <div id="memberContainer" class="space-y-4">
-            {% for u in recent_users %}
-            <div class="member-card group" data-role="{{ u.role }}">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#d4af37] text-xl font-black group-hover:bg-[#d4af37] group-hover:text-black transition-all duration-500">
-                            {{ u.username|slice:":1"|upper }}
-                        </div>
-                        <div>
-                            <h4 class="text-white font-bold text-lg mb-0.5">{{ u.username }}</h4>
-                            <p class="text-xs text-gray-500 font-medium">{{ u.email }}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-3 md:gap-8">
-                        <div class="flex flex-col">
-                            <span class="text-[9px] font-black uppercase text-gray-600 tracking-widest mb-1">Entity Type</span>
-                            <span class="role-pill {% if u.role == 'artist' %}artist{% else %}brand{% endif %}">{{ u.role }}</span>
-                        </div>
-                        
-                        <div class="flex flex-col">
-                            <span class="text-[9px] font-black uppercase text-gray-600 tracking-widest mb-1">Status</span>
-                            {% if u.is_approved %}
-                                <span class="text-green-400 text-[10px] font-black uppercase tracking-widest"><i class="fas fa-check-double mr-1"></i> Verified</span>
-                            {% else %}
-                                <span class="text-amber-500 text-[10px] font-black uppercase tracking-widest animate-pulse"><i class="fas fa-clock mr-1"></i> Awaiting</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="md:ml-4">
-                            {% if not u.is_approved %}
-                                <a href="{% url 'core:approve_user' u.id %}" class="approve-btn">Verify Node</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="p-20 text-center bg-white/5 rounded-[40px] border border-dashed border-white/10">
-                <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">No members found in the database</p>
-            </div>
-            {% endfor %}
-        </div>
-    </main>
-
-    <aside class="hidden lg:block w-[380px] fixed right-0 inset-y-0 bg-[#0d0d0e] border-l border-white/5 p-10 overflow-y-auto">
-        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mb-10">Live Intelligence Feed</h3>
-        <div class="space-y-10">
-            {% for u in recent_users|slice:":6" %}
-            <div class="relative pl-6 border-l border-white/10">
-                <div class="absolute -left-[4px] top-0 w-2 h-2 rounded-full bg-[#d4af37] shadow-[0_0_10px_#d4af37]"></div>
-                <p class="text-xs text-white font-bold mb-1">{% if u.is_approved %}Verification Complete{% else %}New Registration{% endif %}</p>
-                <p class="text-[11px] text-gray-500 leading-relaxed">Member <strong>{{ u.username }}</strong> joined as <strong>{{ u.role }}</strong>.</p>
-                <span class="text-[9px] text-gray-700 font-black mt-3 block tracking-tighter">{{ u.date_joined|timesince|upper }} AGO</span>
-            </div>
-            {% endfor %}
-        </div>
-    </aside>
-</div>
-
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azers Squad | Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-    /* Premium UI Components */
-    .nav-link { display: flex; align-items: center; padding: 16px 24px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: #555; transition: 0.4s; }
-    .nav-link.active { background: #d4af37; color: black; box-shadow: 0 15px 35px rgba(212,175,55,0.2); }
-    .nav-link:hover:not(.active) { color: white; background: white/5; }
+/* ══════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════ */
+:root[data-theme="dark"] {
+    --bg:         #07070a;
+    --s1:         #0e0e13;
+    --s2:         #14141a;
+    --s3:         #1b1b24;
+    --s4:         #22222e;
+    --bd:         rgba(255,255,255,0.06);
+    --bd2:        rgba(255,255,255,0.11);
+    --t1:         #f0f0f4;
+    --t2:         #8e8ea0;
+    --t3:         #44445a;
+    --gold:       #d4af37;
+    --gold-s:     rgba(212,175,55,0.08);
+    --gold-b:     rgba(212,175,55,0.2);
+    --green:      #34d399;  --green-s: rgba(52,211,153,0.08);
+    --amber:      #fbbf24;  --amber-s: rgba(251,191,36,0.08);
+    --red:        #f87171;  --red-s:   rgba(248,113,113,0.08);
+    --blue:       #60a5fa;  --blue-s:  rgba(96,165,250,0.08);
+    --violet:     #c084fc;  --violet-s:rgba(192,132,252,0.08);
+    --sh:         0 4px 24px rgba(0,0,0,0.4);
+    --sh-xl:      0 24px 64px rgba(0,0,0,0.65);
+}
+:root[data-theme="light"] {
+    --bg:         #f0f0f5;
+    --s1:         #ffffff;
+    --s2:         #f7f7fc;
+    --s3:         #ededf4;
+    --s4:         #e4e4ee;
+    --bd:         rgba(0,0,0,0.07);
+    --bd2:        rgba(0,0,0,0.12);
+    --t1:         #16161e;
+    --t2:         #5a5a72;
+    --t3:         #a0a0b8;
+    --gold:       #9a7520;  --gold-s: rgba(154,117,32,0.09); --gold-b: rgba(154,117,32,0.22);
+    --green:      #059669;  --green-s: rgba(5,150,105,0.09);
+    --amber:      #d97706;  --amber-s: rgba(217,119,6,0.09);
+    --red:        #ef4444;  --red-s:   rgba(239,68,68,0.09);
+    --blue:       #3b82f6;  --blue-s:  rgba(59,130,246,0.09);
+    --violet:     #9333ea;  --violet-s:rgba(147,51,234,0.09);
+    --sh:         0 2px 16px rgba(0,0,0,0.07);
+    --sh-xl:      0 16px 48px rgba(0,0,0,0.13);
+}
 
-    .filter-btn { padding: 10px 24px; font-size: 10px; font-weight: 900; text-transform: uppercase; border-radius: 12px; color: #555; transition: 0.3s; }
-    .filter-btn.active { background: #d4af37; color: black; }
+/* ══════════════════════════════
+   BASE
+══════════════════════════════ */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--t1);
+    min-height: 100vh;
+    transition: background .28s, color .28s;
+    overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input { font-family: inherit; }
 
-    .member-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 35px; padding: 24px 32px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    .member-card:hover { background: rgba(255,255,255,0.04); border-color: rgba(212,175,55,0.2); transform: translateY(-3px); }
+/* ══════════════════════════════
+   LAYOUT
+══════════════════════════════ */
+.shell { display: flex; min-height: 100vh; }
 
-    .role-pill { padding: 4px 12px; border-radius: 8px; font-[9px]; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; font-size: 9px; }
-    .role-pill.artist { background: rgba(251,191,36,0.1); color: #fbbf24; }
-    .role-pill.brand { background: rgba(99,102,241,0.1); color: #818cf8; }
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+.sb {
+    width: 224px; flex-shrink: 0;
+    background: var(--s1);
+    border-right: 1px solid var(--bd);
+    position: fixed; top: 0; left: 0; bottom: 0;
+    z-index: 60; display: flex; flex-direction: column;
+    transition: transform .3s cubic-bezier(.4,0,.2,1), background .28s;
+    overflow-y: auto; overflow-x: hidden;
+}
+.sb-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--bd);
+    flex-shrink: 0;
+}
+.logo-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--t1); letter-spacing: .02em; line-height: 1;
+}
+.logo-mark em { color: var(--gold); font-style: italic; }
+.logo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; color: var(--t3);
+    letter-spacing: .28em; text-transform: uppercase; margin-top: 5px;
+}
+.sb-nav { flex: 1; padding: 16px 10px; }
+.ng { margin-bottom: 20px; }
+.ng-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; color: var(--t3);
+    letter-spacing: .32em; text-transform: uppercase;
+    padding: 0 9px; margin-bottom: 6px;
+}
+.ni {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 11px; border-radius: 10px;
+    font-size: 13px; font-weight: 500; color: var(--t2);
+    transition: all .16s; margin-bottom: 2px;
+    border: 1px solid transparent;
+    width: 100%; text-align: left;
+}
+.ni i { width: 15px; font-size: 11px; flex-shrink: 0; }
+.ni:hover { background: var(--s2); color: var(--t1); }
+.ni.on {
+    background: var(--gold-s); color: var(--gold);
+    border-color: var(--gold-b); font-weight: 600;
+}
+.np {
+    margin-left: auto; font-size: 9px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px;
+    background: var(--red); color: #fff;
+}
+.np.am { background: var(--amber); color: #000; }
 
-    .approve-btn { background: #d4af37; color: black; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 24px; border-radius: 15px; display: inline-block; transition: 0.3s; }
-    .approve-btn:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(212,175,55,0.2); }
+.sb-foot { padding: 10px; border-top: 1px solid var(--bd); flex-shrink: 0; }
+.sys-dot {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 13px; background: var(--s2);
+    border-radius: 10px; border: 1px solid var(--bd);
+}
+.pulse {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); position: relative; flex-shrink: 0;
+}
+.pulse::after {
+    content: ''; position: absolute; inset: -3px;
+    border-radius: 50%; background: var(--green); opacity: .2;
+    animation: pr 2.2s ease-in-out infinite;
+}
+@keyframes pr { 0%,100%{transform:scale(1);opacity:.2} 50%{transform:scale(2.1);opacity:0} }
+.sys-txt { font-size: 11px; font-weight: 600; color: var(--t1); }
+.sys-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; color: var(--t3); margin-top: 1px;
+}
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-    .swal2-timer-progress-bar {
-    background: #d4af37 !important;
+/* ══════════════════════════════
+   TOP NAV
+══════════════════════════════ */
+.tnav {
+    position: fixed; top: 0; left: 224px; right: 0; height: 56px;
+    background: var(--s1); border-bottom: 1px solid var(--bd);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; z-index: 50;
+    transition: background .28s, left .3s;
+}
+.tnav-l { display: flex; align-items: center; gap: 12px; }
+.hbtn { display: none; color: var(--t2); font-size: 16px; padding: 5px; }
+.bc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--t3); letter-spacing: .06em;
+}
+.tnav-r { display: flex; align-items: center; gap: 8px; }
+.ic-btn {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--s2); border: 1px solid var(--bd2);
+    color: var(--t2); font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .18s;
+}
+.ic-btn:hover { color: var(--gold); border-color: var(--gold-b); }
+.logout {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 9px;
+    background: var(--red-s); border: 1px solid rgba(248,113,113,.18);
+    color: var(--red); font-size: 11px; font-weight: 600;
+    transition: all .18s;
+}
+.logout:hover { background: var(--red); color: #fff; }
+
+/* ══════════════════════════════
+   MAIN
+══════════════════════════════ */
+.main { flex: 1; margin-left: 224px; padding-top: 56px; min-width: 0; transition: margin-left .3s; }
+.wi { padding: 24px 26px; }
+
+/* PAGE HEAD */
+.ph { margin-bottom: 22px; }
+.ph h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px; font-weight: 700;
+    color: var(--t1); line-height: 1.1;
+}
+.ph p { font-size: 13px; color: var(--t3); margin-top: 5px; }
+
+/* SECTION SEARCH */
+.ssrch { margin-bottom: 14px; }
+.sbox { position: relative; max-width: 380px; }
+.sbox i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--t3); font-size: 11px; pointer-events: none; }
+.sbox input {
+    width: 100%; padding: 9px 14px 9px 34px;
+    background: var(--s1); border: 1px solid var(--bd2);
+    border-radius: 9px; font-size: 12px; color: var(--t1);
+    outline: none; transition: border-color .2s;
+}
+.sbox input::placeholder { color: var(--t3); }
+.sbox input:focus { border-color: var(--gold-b); }
+
+/* STATS */
+.stats-row {
+    display: grid; grid-template-columns: repeat(5,1fr);
+    gap: 12px; margin-bottom: 18px;
+}
+.sc {
+    background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 14px; padding: 16px 16px 14px;
+    position: relative; overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+}
+.sc:hover { transform: translateY(-3px); box-shadow: var(--sh); }
+.sc-stripe { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.sc-ico {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; margin-bottom: 12px;
+}
+.sc-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; color: var(--t3); letter-spacing: .22em;
+    text-transform: uppercase; margin-bottom: 4px;
+}
+.sc-val {
+    font-family: 'Fraunces', serif;
+    font-size: 28px; font-weight: 700; line-height: 1; color: var(--t1);
+}
+.sc-sub { font-size: 10px; color: var(--t3); margin-top: 5px; }
+
+/* PANEL */
+.panel {
+    background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 14px; overflow: hidden;
+    transition: background .28s, border-color .28s;
+}
+.phd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--bd);
+}
+.pt {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 700; color: var(--t1);
+}
+.ps { font-size: 10px; color: var(--t3); margin-top: 2px; }
+.pc { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--t3); }
+
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.gms { display: grid; grid-template-columns: 1fr 290px; gap: 16px; }
+.mb4 { margin-bottom: 14px; }
+.mb5 { margin-bottom: 18px; }
+
+/* FILTER TABS */
+.ftabs {
+    display: flex; gap: 3px; padding: 10px 14px;
+    border-bottom: 1px solid var(--bd); background: var(--s2);
+    flex-wrap: wrap;
+}
+.ftab {
+    padding: 5px 12px; border-radius: 7px;
+    font-size: 11px; font-weight: 600; color: var(--t3);
+    border: 1px solid transparent; transition: all .15s;
+}
+.ftab:hover { color: var(--t1); background: var(--s3); }
+.ftab.on { background: var(--gold-s); color: var(--gold); border-color: var(--gold-b); }
+
+/* BADGES */
+.badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 8px;
+    border-radius: 5px; white-space: nowrap; font-weight: 500;
+}
+.b-artist  { background: var(--gold-s);   color: var(--gold);   border: 1px solid var(--gold-b); }
+.b-brand   { background: var(--violet-s); color: var(--violet); border: 1px solid rgba(192,132,252,.22); }
+.b-ok      { background: var(--green-s);  color: var(--green);  border: 1px solid rgba(52,211,153,.22); }
+.b-pend    { background: var(--amber-s);  color: var(--amber);  border: 1px solid rgba(251,191,36,.22); }
+.b-dis     { background: var(--red-s);    color: var(--red);    border: 1px solid rgba(248,113,113,.22); }
+.b-accept  { background: var(--green-s);  color: var(--green);  border: 1px solid rgba(52,211,153,.22); }
+.b-decline { background: var(--red-s);    color: var(--red);    border: 1px solid rgba(248,113,113,.22); }
+.b-guest   { background: var(--blue-s);   color: var(--blue);   border: 1px solid rgba(96,165,250,.22); }
+.b-member  { background: var(--green-s);  color: var(--green);  border: 1px solid rgba(52,211,153,.22); }
+
+/* ACTION BUTTONS */
+.btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 11px; border-radius: 7px;
+    font-size: 10px; font-weight: 600; letter-spacing: .02em;
+    transition: all .15s; cursor: pointer; white-space: nowrap;
+}
+.btn-approve { background: var(--gold); color: #000; }
+.btn-approve:hover { background: #e8c93d; transform: scale(1.04); }
+.btn-disable { background: var(--amber-s); color: var(--amber); border: 1px solid rgba(251,191,36,.22); }
+.btn-disable:hover { background: var(--amber); color: #000; }
+.btn-enable  { background: var(--green-s); color: var(--green); border: 1px solid rgba(52,211,153,.22); }
+.btn-enable:hover  { background: var(--green); color: #fff; }
+.btn-delete  { background: var(--red-s); color: var(--red); border: 1px solid rgba(248,113,113,.2); }
+.btn-delete:hover  { background: var(--red); color: #fff; }
+
+/* MEMBER ROWS */
+.mlist { max-height: 520px; overflow-y: auto; }
+.mr {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 18px; border-bottom: 1px solid var(--bd);
+    transition: background .14s;
+}
+.mr:last-child { border-bottom: none; }
+.mr:hover { background: var(--s2); }
+.av {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--s3); border: 1px solid var(--bd2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 13px; font-weight: 600;
+    color: var(--gold); flex-shrink: 0;
+}
+.av.dim { color: var(--t3); }
+.mi2 { flex: 1; min-width: 0; }
+.mn { font-size: 13px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mn.crossed { color: var(--t3); text-decoration: line-through; }
+.me { font-size: 11px; color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.macts { display: flex; align-items: center; gap: 5px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+/* PIPELINE */
+.pipeline { padding: 14px 18px; }
+.prow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.prow:last-child { margin-bottom: 0; }
+.plbl { font-size: 12px; color: var(--t2); width: 68px; flex-shrink: 0; }
+.ptrack { flex: 1; height: 6px; background: var(--s3); border-radius: 3px; overflow: hidden; }
+.pfill { height: 100%; border-radius: 3px; transition: width 1.3s cubic-bezier(.4,0,.2,1); width: 0; }
+.pnum { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--t1); width: 18px; text-align: right; flex-shrink: 0; }
+
+/* BOOKING ROWS */
+.bkr {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 18px; border-bottom: 1px solid var(--bd);
+    transition: background .14s;
+}
+.bkr:last-child { border-bottom: none; }
+.bkr:hover { background: var(--s2); }
+.bkdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.bki { flex: 1; min-width: 0; }
+.bkt { font-size: 12px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bks { font-size: 10px; color: var(--t3); margin-top: 1px; }
+.bkq { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); flex-shrink: 0; }
+
+/* INQUIRY ROWS */
+.inqr {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px; border-bottom: 1px solid var(--bd);
+    transition: background .14s;
+}
+.inqr:last-child { border-bottom: none; }
+.inqr:hover { background: var(--s2); }
+.inq-ico {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--violet-s); border: 1px solid rgba(192,132,252,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--violet); flex-shrink: 0; margin-top: 1px;
+}
+.inq-body { flex: 1; min-width: 0; }
+.inq-who { font-size: 13px; font-weight: 600; color: var(--t1); }
+.inq-who span { color: var(--t3); font-weight: 400; }
+.inq-brand { font-size: 12px; color: var(--violet); font-weight: 500; }
+.inq-msg {
+    font-size: 12px; color: var(--t2); line-height: 1.55;
+    margin-top: 5px; padding: 8px 10px;
+    background: var(--s2); border-radius: 8px;
+    border-left: 2px solid var(--bd2);
+}
+.inq-meta { font-size: 10px; color: var(--t3); margin-top: 5px; }
+
+/* EMPTY INQUIRY HINT */
+.inq-hint {
+    padding: 48px 28px; text-align: center;
+}
+.inq-hint i { font-size: 28px; color: var(--t3); margin-bottom: 10px; display: block; }
+.inq-hint h4 { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; color: var(--t2); margin-bottom: 6px; }
+.inq-hint p { font-size: 12px; color: var(--t3); line-height: 1.7; max-width: 340px; margin: 0 auto; }
+.inq-hint code { font-family: 'JetBrains Mono', monospace; font-size: 10px; background: var(--s3); padding: 1px 5px; border-radius: 4px; color: var(--gold); }
+
+/* CONVERSATION ROWS */
+.cvr {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 18px; border-bottom: 1px solid var(--bd);
+    transition: background .14s; cursor: pointer;
+}
+.cvr:last-child { border-bottom: none; }
+.cvr:hover { background: var(--s2); }
+.cv-av {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--blue-s); border: 1px solid rgba(96,165,250,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 13px; font-weight: 700;
+    color: var(--blue); flex-shrink: 0;
+}
+.cv-body { flex: 1; min-width: 0; }
+.cv-name { font-size: 12px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cv-sub { font-size: 10px; color: var(--t3); margin-top: 1px; }
+.cv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+
+/* CHAT SLIDE PANEL */
+.cpanel {
+    position: fixed; top: 0; right: -480px; bottom: 0;
+    width: 460px; max-width: 94vw;
+    background: var(--s1); border-left: 1px solid var(--bd);
+    z-index: 150; display: flex; flex-direction: column;
+    transition: right .33s cubic-bezier(.4,0,.2,1);
+    box-shadow: var(--sh-xl);
+}
+.cpanel.open { right: 0; }
+.cp-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px; border-bottom: 1px solid var(--bd);
+    flex-shrink: 0; background: var(--s2);
+}
+.cp-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: var(--t1); }
+.cp-sub { font-size: 11px; color: var(--t3); margin-top: 2px; }
+.cp-close {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--s3); color: var(--t2); font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+}
+.cp-close:hover { background: var(--red-s); color: var(--red); }
+.cp-msgs {
+    flex: 1; overflow-y: auto;
+    padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.bwrap { display: flex; gap: 8px; align-items: flex-end; }
+.bwrap.r { flex-direction: row-reverse; }
+.bav {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--s3); border: 1px solid var(--bd2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 10px; font-weight: 700;
+    color: var(--t3); flex-shrink: 0;
+}
+.bbl {
+    max-width: 76%; padding: 9px 12px; border-radius: 12px;
+    font-size: 12px; line-height: 1.6; color: var(--t1);
+    background: var(--s3);
+}
+.bbl.sent {
+    background: var(--gold-s); border: 1px solid var(--gold-b);
+    border-radius: 12px 12px 2px 12px;
+}
+.bbl.recv { border-radius: 12px 12px 12px 2px; }
+.btime { font-size: 9px; color: var(--t3); margin-top: 3px; }
+.cp-empty {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 8px; color: var(--t3); text-align: center;
+    padding: 24px;
+}
+.cp-empty i { font-size: 28px; }
+.cp-empty p { font-size: 12px; line-height: 1.6; }
+.chat-ov {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.55); z-index: 140;
+    backdrop-filter: blur(2px);
+}
+.chat-ov.show { display: block; }
+
+/* PENDING */
+.pdi {
+    padding: 14px 16px; border-bottom: 1px solid var(--bd);
+    transition: background .14s;
+}
+.pdi:last-child { border-bottom: none; }
+.pdi:hover { background: var(--s2); }
+.pdi-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+.pdi-name { font-size: 13px; font-weight: 700; color: var(--t1); }
+.pdi-role { font-size: 10px; color: var(--t3); }
+.pdi-email { font-size: 11px; color: var(--t3); margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdi-acts { display: flex; gap: 6px; }
+.pda {
+    flex: 1; padding: 7px; background: var(--gold); color: #000;
+    font-size: 10px; font-weight: 700; border-radius: 8px;
+    text-align: center; transition: all .18s; display: block;
+}
+.pda:hover { background: #e8c93d; }
+.pdr2 {
+    padding: 7px 12px; background: var(--red-s); color: var(--red);
+    border: 1px solid rgba(248,113,113,.2); font-size: 10px;
+    font-weight: 700; border-radius: 8px; transition: all .18s; display: block;
+}
+.pdr2:hover { background: var(--red); color: #fff; }
+
+/* STAT LIST */
+.sli { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--bd); }
+.sli:last-child { border-bottom: none; }
+.sll { font-size: 12px; color: var(--t2); }
+.slv { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--t1); font-weight: 500; }
+
+/* DELETE MODAL */
+.modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.72); z-index: 200;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.modal-bg.show { display: flex; }
+.modal-box {
+    background: var(--s1); border: 1px solid var(--bd2);
+    border-radius: 16px; padding: 26px; width: 340px; max-width: 90vw;
+    box-shadow: var(--sh-xl); animation: mIn .2s ease;
+}
+@keyframes mIn { from{opacity:0;transform:scale(.94)translateY(8px)} to{opacity:1;transform:scale(1)translateY(0)} }
+.m-ico {
+    width: 44px; height: 44px; border-radius: 11px;
+    background: var(--red-s); border: 1px solid rgba(248,113,113,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--red); margin-bottom: 14px;
+}
+.m-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; color: var(--t1); margin-bottom: 7px; }
+.m-msg { font-size: 13px; color: var(--t2); line-height: 1.6; margin-bottom: 18px; }
+.m-acts { display: flex; gap: 8px; }
+.m-cancel { flex: 1; padding: 10px; background: var(--s2); border: 1px solid var(--bd2); border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--t2); transition: all .15s; }
+.m-cancel:hover { color: var(--t1); }
+.m-confirm { flex: 1; padding: 10px; background: var(--red); border: none; border-radius: 9px; font-size: 13px; font-weight: 700; color: #fff; transition: all .15s; }
+.m-confirm:hover { background: #ef4444; }
+
+/* CHART */
+.chart-wrap { padding: 12px 18px 18px; height: 175px; position: relative; }
+
+/* MOB */
+.mob-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.52); z-index: 55; }
+.mob-ov.show { display: block; }
+.empty { padding: 32px 18px; text-align: center; font-size: 12px; color: var(--t3); }
+.fade-up { opacity: 0; transform: translateY(13px); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 4px; }
+
+/* RESPONSIVE */
+@media(max-width:1200px) { .stats-row{grid-template-columns:repeat(3,1fr);} .gms{grid-template-columns:1fr;} }
+@media(max-width:900px) { .g2{grid-template-columns:1fr;} .stats-row{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:768px) {
+    .sb{transform:translateX(-100%);} .sb.open{transform:translateX(0);}
+    .tnav{left:0;} .main{margin-left:0;}
+    .hbtn{display:flex;} .wi{padding:14px;}
+    .macts{margin-top:6px;width:100%;}
+    .cpanel{width:100%;max-width:100%;right:-100%;}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
 }
 </style>
 
-<script>
-    // DEEP SEARCH: Scans IDs, Names, and Emails
-    document.getElementById('masterSearch').addEventListener('input', function(e) {
-        const query = e.target.value.toLowerCase();
-        document.querySelectorAll('.member-card').forEach(card => {
-            const content = card.textContent.toLowerCase();
-            card.style.display = content.includes(query) ? 'block' : 'none';
-        });
-    });
-
-    // ROLE FILTER: Instant Identity Split
-    function filterRole(role, btn) {
-        // Update Buttons
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        // Filter Content
-        document.querySelectorAll('.member-card').forEach(card => {
-            if (role === 'all' || card.dataset.role === role) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    }
-</script>
-{% endblock %}
-
-
-{% comment %} {% extends "core/base_auth.html" %}
-
-{% block title %}Azers Squad | Elite Command Center{% endblock %}
-
-{% block content %}
-<div class="dashboard-wrapper flex flex-col lg:flex-row bg-[#0d0d0e] min-h-screen text-gray-300 font-['Inter']">
-    
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-black/60 backdrop-blur-2xl border-r border-white/5 transform -translate-x-full lg:translate-x-0 transition-all duration-500">
-        <div class="p-8 flex flex-col h-full">
-            <div class="flex items-center gap-4 mb-12">
-                <div class="w-10 h-10 bg-[#d4af37] rounded-2xl flex items-center justify-center text-black font-black">A</div>
-                <div class="flex flex-col leading-tight">
-                    <span class="text-xs font-black tracking-[0.3em] uppercase text-white">Azers Squad</span>
-                    <span class="text-[9px] text-[#d4af37] font-bold uppercase tracking-widest">Command Center</span>
-                </div>
-            </div>
-            <nav class="space-y-1 flex-1">
-                <a href="{% url 'core:admin_dashboard' %}" class="nav-item active"><i class="fas fa-chart-line mr-3"></i> Intelligence</a>
-                <a href="{% url 'core:home' %}" class="nav-item"><i class="fas fa-home mr-3"></i> View Site</a>
-            </nav>
+<!-- DELETE MODAL -->
+<div class="modal-bg" id="delModal">
+    <div class="modal-box">
+        <div class="m-ico"><i class="fas fa-trash-alt"></i></div>
+        <div class="m-title">Delete Account</div>
+        <div class="m-msg" id="delMsg">Permanently delete this account?</div>
+        <div class="m-acts">
+            <button class="m-cancel" onclick="closeDel()">Cancel</button>
+            <form id="delForm" method="POST" style="flex:1;display:flex;">
+                {% csrf_token %}
+                <button type="submit" class="m-confirm" style="width:100%;">Delete Forever</button>
+            </form>
         </div>
-    </aside>
+    </div>
+</div>
 
-    <main class="flex-1 lg:ml-64 p-4 md:p-10 lg:pr-[350px]">
-        
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
+<!-- CHAT PANEL -->
+<div class="chat-ov" id="chatOv" onclick="closeChat()"></div>
+<div class="cpanel" id="cpanel">
+    <div class="cp-hd">
+        <div>
+            <div class="cp-title" id="cpTitle">Conversation</div>
+            <div class="cp-sub" id="cpSub"></div>
+        </div>
+        <button class="cp-close" onclick="closeChat()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cp-msgs" id="cpMsgs">
+        <div class="cp-empty">
+            <i class="fas fa-comments"></i>
+            <p>Select a conversation to read messages</p>
+        </div>
+    </div>
+</div>
+
+<div class="mob-ov" id="mobOv" onclick="closeSb()"></div>
+
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sb">
+    <div class="sb-logo">
+        <div class="logo-mark">Azers<em>Squad</em></div>
+        <div class="logo-sub">Command Center</div>
+    </div>
+    <nav class="sb-nav">
+        <div class="ng">
+            <div class="ng-lbl">Overview</div>
+            <button class="ni on" onclick="goSec('overview',this)"><i class="fas fa-chart-line"></i>Dashboard</button>
+        </div>
+        <div class="ng">
+            <div class="ng-lbl">Members</div>
+            <button class="ni" onclick="goSec('members',this)">
+                <i class="fas fa-users"></i>All Members
+                {% if pending_users %}<span class="np am">{{ pending_users }}</span>{% endif %}
+            </button>
+            <button class="ni" onclick="goSec('pending',this)">
+                <i class="fas fa-clock"></i>Approval Queue
+                {% if pending_users %}<span class="np">{{ pending_users }}</span>{% endif %}
+            </button>
+        </div>
+        <div class="ng">
+            <div class="ng-lbl">Activity</div>
+            <button class="ni" onclick="goSec('bookings',this)"><i class="fas fa-calendar-alt"></i>Bookings</button>
+            <button class="ni" onclick="goSec('inquiries',this)"><i class="fas fa-envelope"></i>Brand Inquiries</button>
+            <button class="ni" onclick="goSec('chats',this)"><i class="fas fa-comments"></i>Conversations</button>
+        </div>
+        <div class="ng">
+            <div class="ng-lbl">Site</div>
+            <a class="ni" href="{% url 'core:home' %}" target="_blank"><i class="fas fa-external-link-alt"></i>Public Site</a>
+            <a class="ni" href="{% url 'core:artist_list' %}" target="_blank"><i class="fas fa-music"></i>Talent Roster</a>
+            <a class="ni" href="{% url 'core:brand_list' %}" target="_blank"><i class="fas fa-store"></i>Brands</a>
+        </div>
+    </nav>
+    <div class="sb-foot">
+        <div class="sys-dot">
+            <div class="pulse"></div>
             <div>
-                <h1 class="text-4xl font-black tracking-tighter text-white">Intelligence</h1>
-                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mt-2">March 2026 • Monitoring</p>
-            </div>
-            
-            <div class="relative group">
-                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
-                <input type="text" id="masterSearch" placeholder="Search members..." 
-                       class="bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-8 text-sm w-full md:w-80 text-white outline-none focus:border-[#d4af37]/50 transition-all">
-            </div>
-        </header>
-
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-10">
-            <div class="bg-white/5 border border-white/5 rounded-[40px] p-8">
-                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-6">Revenue Stream</h3>
-                <div class="h-[200px]"><canvas id="revenueChart"></canvas></div>
-            </div>
-            <div class="bg-white/5 border border-white/5 rounded-[40px] p-8">
-                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-6">Growth Pulse</h3>
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-4xl font-black text-white">{{ total_artists }}</p>
-                        <p class="text-[10px] font-black uppercase text-gray-500">Artists</p>
-                    </div>
-                    <div>
-                        <p class="text-4xl font-black text-[#d4af37]">{{ total_brands }}</p>
-                        <p class="text-[10px] font-black uppercase text-gray-500">Brands</p>
-                    </div>
-                </div>
+                <div class="sys-txt">System Online</div>
+                <div class="sys-sub">All services running</div>
             </div>
         </div>
+    </div>
+</aside>
 
-        <div class="bg-white/5 border border-white/5 rounded-[40px] overflow-hidden">
-            <div class="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex p-1.5 bg-black/40 rounded-2xl border border-white/5">
-                    <button onclick="toggleDatabase('all', this)" class="db-tab active">All Nodes</button>
-                    <button onclick="toggleDatabase('artist', this)" class="db-tab">Artists</button>
-                    <button onclick="toggleDatabase('brand', this)" class="db-tab">Brands</button>
-                </div>
-                <div class="text-[11px] font-black uppercase text-gray-500">Pending: <span class="text-[#d4af37]">{{ pending_users }}</span></div>
-            </div>
+<!-- TOP NAV -->
+<div class="tnav" id="tnav">
+    <div class="tnav-l">
+        <button class="ic-btn hbtn" onclick="openSb()"><i class="fas fa-bars"></i></button>
+        <span class="bc" id="bcrumb">Admin › Dashboard</span>
+    </div>
+    <div class="tnav-r">
+        <button class="ic-btn" id="themeBtn" title="Toggle theme"><i class="fas fa-sun" id="themeIco"></i></button>
+        <form method="post" action="{% url 'core:logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="logout"><i class="fas fa-sign-out-alt"></i>Logout</button>
+        </form>
+    </div>
+</div>
 
-            <div class="hidden md:block">
-                <table class="w-full text-left" id="masterTable">
-                    <tbody class="divide-y divide-white/5">
-                        {% for u in recent_users %}
-                        <tr class="user-row group" data-role="{{ u.role }}">
-                            <td class="py-6 px-10">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center font-black">{{ u.username|slice:":1"|upper }}</div>
-                                    <div>
-                                        <p class="text-sm font-bold text-white mb-0.5">{{ u.username }}</p>
-                                        <p class="text-[11px] text-gray-500">{{ u.email }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="role-badge {% if u.role == 'artist' %}text-amber-400{% else %}text-indigo-400{% endif %}">{{ u.role }}</span></td>
-                            <td class="status-cell">
-                                {% if u.is_approved %}
-                                    <span class="text-green-400 text-[9px] font-black uppercase">Verified</span>
-                                {% else %}
-                                    <a href="{% url 'core:approve_user' u.id %}" class="bg-[#d4af37] text-black text-[9px] font-black uppercase px-4 py-2 rounded-lg">Approve</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+<!-- MAIN -->
+<main class="main"><div class="wi">
+
+<!-- ═══ OVERVIEW ═══ -->
+<div id="sec-overview" class="sec">
+    <div class="ph fade-up">
+        <h1>Welcome back, {{ request.user.username|title }} 👋</h1>
+        <p>Here's everything happening across Azers Squad right now.</p>
+    </div>
+
+    <div class="stats-row fade-up">
+        <div class="sc">
+            <div class="sc-stripe" style="background:var(--gold);"></div>
+            <div class="sc-ico" style="background:var(--gold-s);color:var(--gold);"><i class="fas fa-microphone-alt"></i></div>
+            <div class="sc-lbl">Artists</div>
+            <div class="sc-val">{{ total_artists }}</div>
+            <div class="sc-sub">{{ pending_users }} pending approval</div>
         </div>
-    </main>
+        <div class="sc">
+            <div class="sc-stripe" style="background:var(--violet);"></div>
+            <div class="sc-ico" style="background:var(--violet-s);color:var(--violet);"><i class="fas fa-store"></i></div>
+            <div class="sc-lbl">Brands</div>
+            <div class="sc-val">{{ total_brands }}</div>
+            <div class="sc-sub">{{ new_this_month }} joined this month</div>
+        </div>
+        <div class="sc">
+            <div class="sc-stripe" style="background:var(--amber);"></div>
+            <div class="sc-ico" style="background:var(--amber-s);color:var(--amber);"><i class="fas fa-calendar-check"></i></div>
+            <div class="sc-lbl">Bookings</div>
+            <div class="sc-val">{{ total_bookings }}</div>
+            <div class="sc-sub">{{ pending_bookings }} pending</div>
+        </div>
+        <div class="sc">
+            <div class="sc-stripe" style="background:var(--blue);"></div>
+            <div class="sc-ico" style="background:var(--blue-s);color:var(--blue);"><i class="fas fa-comments"></i></div>
+            <div class="sc-lbl">Conversations</div>
+            <div class="sc-val">{{ total_conversations }}</div>
+            <div class="sc-sub">{{ guest_conversations }} guest chats</div>
+        </div>
+        <div class="sc">
+            <div class="sc-stripe" style="background:var(--violet);"></div>
+            <div class="sc-ico" style="background:var(--violet-s);color:var(--violet);"><i class="fas fa-envelope-open-text"></i></div>
+            <div class="sc-lbl">Inquiries</div>
+            <div class="sc-val">{{ total_inquiries }}</div>
+            <div class="sc-sub">Brand messages</div>
+        </div>
+    </div>
 
-    <aside class="w-full lg:w-[350px] lg:fixed lg:right-0 lg:inset-y-0 bg-[#0d0d0e] border-l border-white/5 p-8 overflow-y-auto">
-        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 mb-8">Live Feed</h3>
-        <div class="space-y-6">
-            {% for u in recent_users|slice:":5" %}
-            <div class="flex gap-4">
-                <div class="w-1.5 h-1.5 rounded-full bg-[#d4af37] mt-1.5"></div>
-                <div>
-                    <p class="text-[11px] text-white font-bold">{{ u.username }} joined</p>
-                    <p class="text-[10px] text-gray-500 uppercase">{{ u.role }} • {{ u.date_joined|timesince }} ago</p>
+    <div class="g2 mb5">
+        <div class="panel fade-up">
+            <div class="phd">
+                <div><div class="pt">Booking Pipeline</div><div class="ps">Artist booking breakdown</div></div>
+                <span class="pc">{{ total_bookings }} total</span>
+            </div>
+            <div class="pipeline">
+                {% if total_bookings > 0 %}
+                <div class="prow"><span class="plbl">Pending</span><div class="ptrack"><div class="pfill" data-pct="{% widthratio pending_bookings total_bookings 100 %}" style="background:var(--amber);"></div></div><span class="pnum">{{ pending_bookings }}</span></div>
+                <div class="prow"><span class="plbl">Accepted</span><div class="ptrack"><div class="pfill" data-pct="{% widthratio accepted_bookings total_bookings 100 %}" style="background:var(--green);"></div></div><span class="pnum">{{ accepted_bookings }}</span></div>
+                <div class="prow"><span class="plbl">Declined</span><div class="ptrack"><div class="pfill" data-pct="{% widthratio declined_bookings total_bookings 100 %}" style="background:var(--red);"></div></div><span class="pnum">{{ declined_bookings }}</span></div>
+                {% else %}<div class="empty">No bookings yet.</div>{% endif %}
+            </div>
+            {% if total_bookings > 0 %}<div class="chart-wrap"><canvas id="donut"></canvas></div>{% endif %}
+        </div>
+
+        <div class="panel fade-up">
+            <div class="phd"><div><div class="pt">Recent Bookings</div><div class="ps">Latest artist requests</div></div></div>
+            {% for bk in recent_bookings %}
+            <div class="bkr">
+                <div class="bkdot" style="background:{% if bk.status == 'Accepted' %}var(--green){% elif bk.status == 'Declined' %}var(--red){% else %}var(--amber){% endif %};"></div>
+                <div class="bki">
+                    <div class="bkt">{{ bk.customer_name }} → {{ bk.artist.stage_name }}</div>
+                    <div class="bks">{{ bk.event_date }} · {{ bk.customer_email }}</div>
+                </div>
+                <span class="badge {% if bk.status == 'Accepted' %}b-accept{% elif bk.status == 'Declined' %}b-decline{% else %}b-pend{% endif %}">{{ bk.status }}</span>
+                <span class="bkq">₦{{ bk.total_quote|floatformat:0 }}</span>
+            </div>
+            {% empty %}<div class="empty">No bookings yet.</div>{% endfor %}
+        </div>
+    </div>
+
+    <div class="g2 mb5">
+        <!-- BRAND INQUIRIES -->
+        <div class="panel fade-up">
+            <div class="phd">
+                <div><div class="pt">Brand Inquiries</div><div class="ps">Messages sent to brands</div></div>
+                <span class="pc">{{ total_inquiries }}</span>
+            </div>
+            {% if total_inquiries == 0 %}
+            <div class="inq-hint">
+                <i class="fas fa-envelope-open"></i>
+                <h4>No inquiries recorded yet</h4>
+                {% comment %} <p>
+                    Check two things:<br>
+                    1. Your <code>send_inquiry</code> view redirects to <code>core:brand_public_profile</code> — this URL probably doesn't exist, so the POST fails silently and no record is ever saved.<br><br>
+                    2. Fix the redirect to <code>core:brand_detail</code> and inquiries will start appearing here.
+                </p> {% endcomment %}
+            </div>
+            {% else %}
+            {% for inq in recent_inquiries %}
+            <div class="inqr">
+                <div class="inq-ico"><i class="fas fa-envelope"></i></div>
+                <div class="inq-body">
+                    <div class="inq-who">
+                        {% if inq.sender %}{{ inq.sender.username }}{% else %}Guest{% endif %}
+                        <span>→</span>
+                    </div>
+                    <div class="inq-brand">{{ inq.brand.brand_name }}</div>
+                    <div class="inq-msg">{{ inq.message }}</div>
+                    {% if inq.sender %}<div class="inq-meta">{{ inq.sender.email }}</div>{% endif %}
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
         </div>
-    </aside>
+
+        <!-- CONVERSATIONS -->
+        <div class="panel fade-up">
+            <div class="phd">
+                <div><div class="pt">Recent Chats</div><div class="ps">Click any row to read messages</div></div>
+                <span class="pc">{{ total_conversations }}</span>
+            </div>
+            {% for convo in all_conversations|slice:":7" %}
+            {% with msgs=convo.messages.all %}
+            <div class="cvr" onclick="openChat(
+                '{% if convo.is_guest_chat %}{{ convo.guest_name|default:'Guest'|escapejs }}{% else %}{% with convo.participants.first as p %}{{ p.username|default:'User'|escapejs }}{% endwith %}{% endif %}',
+                '{{ convo.receiver.username|escapejs }}',
+                {{ convo.is_guest_chat|yesno:'true,false' }},
+                {{ convo.messages.count }},
+                [{% for msg in msgs %}{s:'{{ msg.sender.username|default:'Guest'|escapejs }}',t:'{{ msg.text|default:'(image message)'|escapejs }}',a:{% if msg.sender == convo.receiver %}true{% else %}false{% endif %}}{% if not forloop.last %},{% endif %}{% endfor %}]
+            )">
+                <div class="cv-av">
+                    {% if convo.is_guest_chat %}{{ convo.guest_name|slice:":1"|upper|default:"?" }}
+                    {% else %}{% with convo.participants.first as p %}{% if p %}{{ p.username|slice:":1"|upper }}{% else %}U{% endif %}{% endwith %}{% endif %}
+                </div>
+                <div class="cv-body">
+                    <div class="cv-name">
+                        {% if convo.is_guest_chat %}{{ convo.guest_name|default:"Anonymous" }}
+                        {% else %}{% with convo.participants.first as p %}{{ p.username|default:"User" }}{% endwith %}{% endif %}
+                        <span style="color:var(--t3);font-weight:400;"> ↔ </span>{{ convo.receiver.username }}
+                    </div>
+                    <div class="cv-sub">{{ convo.messages.count }} message{{ convo.messages.count|pluralize }}</div>
+                </div>
+                <div class="cv-meta">
+                    {% if convo.is_guest_chat %}<span class="badge b-guest">Guest</span>{% else %}<span class="badge b-member">Member</span>{% endif %}
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);">{{ convo.messages.count }}msg</span>
+                </div>
+            </div>
+            {% endwith %}
+            {% empty %}<div class="empty">No conversations yet.</div>{% endfor %}
+        </div>
+    </div>
 </div>
 
-<style>
-    .nav-item { display: flex; align-items: center; padding: 14px 20px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; transition: 0.3s; }
-    .nav-item.active { background: #d4af37; color: black; }
-    .db-tab { padding: 10px 24px; font-size: 10px; font-weight: 900; text-transform: uppercase; border-radius: 12px; color: #555; }
-    .db-tab.active { background: #d4af37; color: black; }
-    .role-badge { font-size: 9px; font-weight: 900; text-transform: uppercase; }
-</style>
+<!-- ═══ MEMBERS ═══ -->
+<div id="sec-members" class="sec" style="display:none;">
+    <div class="ph"><h1>Members</h1><p>Approve, disable, or permanently remove accounts.</p></div>
+    <div class="ssrch"><div class="sbox"><i class="fas fa-search"></i><input type="text" id="memberSearch" placeholder="Search by name, email or role..." oninput="srchMem(this.value)"></div></div>
+    <div class="panel mb4">
+        <div class="ftabs">
+            <button class="ftab on" onclick="filtMem('all',this)">All</button>
+            <button class="ftab" onclick="filtMem('artist',this)">Artists</button>
+            <button class="ftab" onclick="filtMem('brand',this)">Brands</button>
+            <button class="ftab" onclick="filtMem('pending',this)">Pending {% if pending_users %}<span style="color:var(--amber);">({{ pending_users }})</span>{% endif %}</button>
+            <button class="ftab" onclick="filtMem('disabled',this)">Disabled {% if disabled_users %}<span style="color:var(--red);">({{ disabled_users }})</span>{% endif %}</button>
+        </div>
+        <div class="mlist" id="memberList">
+            {% for u in recent_users %}
+            <div class="mr"
+                 data-role="{{ u.role }}"
+                 data-approved="{{ u.is_approved|yesno:'1,0' }}"
+                 data-active="{{ u.is_active|yesno:'1,0' }}"
+                 data-search="{{ u.username|lower }} {{ u.email|lower }} {{ u.role|lower }}">
+                <div class="av {% if not u.is_active %}dim{% endif %}">{{ u.username|slice:":1"|upper }}</div>
+                <div class="mi2">
+                    <div class="mn {% if not u.is_active %}crossed{% endif %}">{{ u.username }}</div>
+                    <div class="me">{{ u.email }}</div>
+                </div>
+                <div class="macts">
+                    <span class="badge {% if u.role == 'artist' %}b-artist{% else %}b-brand{% endif %}">{{ u.role }}</span>
+                    {% if not u.is_active %}<span class="badge b-dis">Disabled</span>
+                    {% elif u.is_approved %}<span class="badge b-ok">Verified</span>
+                    {% else %}<span class="badge b-pend">Pending</span>{% endif %}
+                    {% if not u.is_approved and u.is_active %}
+                    <a href="{% url 'core:approve_user' u.id %}" class="btn btn-approve"><i class="fas fa-check"></i> Approve</a>
+                    {% endif %}
+                    {% if u.is_active %}
+                    <a href="{% url 'core:toggle_user_active' u.id %}" class="btn btn-disable"><i class="fas fa-ban"></i> Disable</a>
+                    {% else %}
+                    <a href="{% url 'core:toggle_user_active' u.id %}" class="btn btn-enable"><i class="fas fa-circle-check"></i> Enable</a>
+                    {% endif %}
+                    <button class="btn btn-delete" onclick="openDel('{% url 'core:delete_user' u.id %}','{{ u.username }}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+            {% empty %}<div class="empty">No members found.</div>{% endfor %}
+        </div>
+    </div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ═══ PENDING ═══ -->
+<div id="sec-pending" class="sec" style="display:none;">
+    <div class="ph"><h1>Approval Queue</h1><p>{{ pending_users }} account{{ pending_users|pluralize }} waiting for your review.</p></div>
+    <div class="gms">
+        <div class="panel">
+            {% for u in pending_user_list %}
+            <div class="pdi">
+                <div class="pdi-top">
+                    <div><div class="pdi-name">{{ u.username }}</div><div class="pdi-role">{{ u.role }}</div></div>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);">{{ u.date_joined|timesince }} ago</span>
+                </div>
+                <div class="pdi-email">{{ u.email }}</div>
+                <div class="pdi-acts">
+                    <a href="{% url 'core:approve_user' u.id %}" class="pda"><i class="fas fa-check"></i> Approve</a>
+                    <a href="{% url 'core:toggle_user_active' u.id %}" class="pdr2"><i class="fas fa-times"></i> Reject</a>
+                </div>
+            </div>
+            {% empty %}<div class="empty" style="padding:60px 18px;">🎉 All caught up — no pending approvals.</div>{% endfor %}
+        </div>
+        <div class="panel" style="align-self:start;">
+            <div class="phd"><div><div class="pt">Summary</div></div></div>
+            <div style="padding:12px 16px;">
+                <div class="sli"><span class="sll">Pending approval</span><span class="slv" style="color:var(--amber);">{{ pending_users }}</span></div>
+                <div class="sli"><span class="sll">Total artists</span><span class="slv">{{ total_artists }}</span></div>
+                <div class="sli"><span class="sll">Total brands</span><span class="slv">{{ total_brands }}</span></div>
+                <div class="sli"><span class="sll">Disabled accounts</span><span class="slv" style="color:var(--red);">{{ disabled_users }}</span></div>
+                <div class="sli"><span class="sll">New this month</span><span class="slv" style="color:var(--green);">{{ new_this_month }}</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ BOOKINGS ═══ -->
+<div id="sec-bookings" class="sec" style="display:none;">
+    <div class="ph"><h1>Artist Bookings</h1><p>All booking requests across the platform.</p></div>
+    <div class="ssrch"><div class="sbox"><i class="fas fa-search"></i><input type="text" placeholder="Search by name, artist or email..." oninput="srchBk(this.value)"></div></div>
+    <div class="panel">
+        <div class="ftabs">
+            <button class="ftab on" onclick="filtBk('all',this)">All ({{ total_bookings }})</button>
+            <button class="ftab" onclick="filtBk('Pending',this)">Pending ({{ pending_bookings }})</button>
+            <button class="ftab" onclick="filtBk('Accepted',this)">Accepted ({{ accepted_bookings }})</button>
+            <button class="ftab" onclick="filtBk('Declined',this)">Declined ({{ declined_bookings }})</button>
+        </div>
+        <div id="bkList">
+            {% for bk in recent_bookings %}
+            <div class="bkr" data-status="{{ bk.status }}" data-search="{{ bk.customer_name|lower }} {{ bk.customer_email|lower }} {{ bk.artist.stage_name|lower }}">
+                <div class="bkdot" style="background:{% if bk.status == 'Accepted' %}var(--green){% elif bk.status == 'Declined' %}var(--red){% else %}var(--amber){% endif %};"></div>
+                <div class="bki">
+                    <div class="bkt">{{ bk.customer_name }} → {{ bk.artist.stage_name }}</div>
+                    <div class="bks">{{ bk.customer_email }} · Event: {{ bk.event_date }}</div>
+                </div>
+                <span class="badge {% if bk.status == 'Accepted' %}b-accept{% elif bk.status == 'Declined' %}b-decline{% else %}b-pend{% endif %}">{{ bk.status }}</span>
+                <span class="badge {% if bk.payment_status == 'Paid' %}b-ok{% elif bk.payment_status == 'Partially Paid' %}b-pend{% else %}b-dis{% endif %}">{{ bk.payment_status|default:"Unpaid" }}</span>
+                <span class="bkq">₦{{ bk.total_quote|floatformat:0 }}</span>
+            </div>
+            {% empty %}<div class="empty">No bookings yet.</div>{% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ═══ INQUIRIES ═══ -->
+<div id="sec-inquiries" class="sec" style="display:none;">
+    <div class="ph"><h1>Brand Inquiries</h1><p>All messages sent to brands through the platform.</p></div>
+    <div class="ssrch"><div class="sbox"><i class="fas fa-search"></i><input type="text" placeholder="Search by sender or brand..." oninput="srchInq(this.value)"></div></div>
+    <div class="panel">
+        <div class="phd"><div><div class="pt">All Inquiries</div><div class="ps">{{ total_inquiries }} total</div></div></div>
+        {% if total_inquiries == 0 %}
+        <div class="inq-hint" style="padding:60px 24px;">
+            <i class="fas fa-envelope-open"></i>
+            <h4>No brand inquiries yet</h4>
+            {% comment %} <p>
+                Most likely cause: your <code>send_inquiry</code> view redirects to
+                <code>core:brand_public_profile</code> which doesn't exist as a URL name,
+                so the POST errors out before saving.<br><br>
+                Fix: change the redirect to <code>core:brand_detail</code> and inquiries
+                will start showing here immediately.
+            </p> {% endcomment %}
+        </div>
+        {% else %}
+        {% for inq in recent_inquiries %}
+        <div class="inqr" data-search="{% if inq.sender %}{{ inq.sender.username|lower }}{% endif %} {{ inq.brand.brand_name|lower }}">
+            <div class="inq-ico"><i class="fas fa-envelope"></i></div>
+            <div class="inq-body">
+                <div class="inq-who">{% if inq.sender %}{{ inq.sender.username }}{% else %}Guest{% endif %} <span>→</span></div>
+                <div class="inq-brand">{{ inq.brand.brand_name }}</div>
+                <div class="inq-msg">{{ inq.message }}</div>
+                {% if inq.sender %}<div class="inq-meta">{{ inq.sender.email }}</div>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══ CHATS ═══ -->
+<div id="sec-chats" class="sec" style="display:none;">
+    <div class="ph"><h1>All Conversations</h1><p>Every chat thread — click any row to read the full messages.</p></div>
+    <div class="ssrch"><div class="sbox"><i class="fas fa-search"></i><input type="text" placeholder="Search conversations..." oninput="srchChat(this.value)"></div></div>
+    <div class="panel">
+        <div class="ftabs">
+            <button class="ftab on" onclick="filtChat('all',this)">All ({{ total_conversations }})</button>
+            <button class="ftab" onclick="filtChat('guest',this)">Guest ({{ guest_conversations }})</button>
+            <button class="ftab" onclick="filtChat('member',this)">Member</button>
+        </div>
+        <div id="chatList">
+            {% for convo in all_conversations %}
+            {% with msgs=convo.messages.all %}
+            <div class="cvr"
+                 data-guest="{{ convo.is_guest_chat|yesno:'1,0' }}"
+                 data-search="{% if convo.is_guest_chat %}{{ convo.guest_name|lower|default:'' }}{% else %}{% with convo.participants.first as p %}{% if p %}{{ p.username|lower }}{% endif %}{% endwith %}{% endif %} {{ convo.receiver.username|lower }}"
+                 onclick="openChat(
+                    '{% if convo.is_guest_chat %}{{ convo.guest_name|default:'Guest'|escapejs }}{% else %}{% with convo.participants.first as p %}{{ p.username|default:'User'|escapejs }}{% endwith %}{% endif %}',
+                    '{{ convo.receiver.username|escapejs }}',
+                    {{ convo.is_guest_chat|yesno:'true,false' }},
+                    {{ convo.messages.count }},
+                    [{% for msg in msgs %}{s:'{{ msg.sender.username|default:'Guest'|escapejs }}',t:'{{ msg.text|default:'(image message)'|escapejs }}',a:{% if msg.sender == convo.receiver %}true{% else %}false{% endif %}}{% if not forloop.last %},{% endif %}{% endfor %}]
+                 )">
+                <div class="cv-av">
+                    {% if convo.is_guest_chat %}{{ convo.guest_name|slice:":1"|upper|default:"?" }}
+                    {% else %}{% with convo.participants.first as p %}{% if p %}{{ p.username|slice:":1"|upper }}{% else %}U{% endif %}{% endwith %}{% endif %}
+                </div>
+                <div class="cv-body">
+                    <div class="cv-name">
+                        {% if convo.is_guest_chat %}{{ convo.guest_name|default:"Anonymous" }}
+                        {% else %}{% with convo.participants.first as p %}{{ p.username|default:"User" }}{% endwith %}{% endif %}
+                        <span style="color:var(--t3);font-weight:400;"> ↔ </span>{{ convo.receiver.username }}
+                    </div>
+                    <div class="cv-sub">{{ convo.messages.count }} message{{ convo.messages.count|pluralize }} · {% if convo.is_guest_chat %}Guest session{% else %}Member chat{% endif %}</div>
+                </div>
+                <div class="cv-meta">
+                    {% if convo.is_guest_chat %}<span class="badge b-guest">Guest</span>{% else %}<span class="badge b-member">Member</span>{% endif %}
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);">{{ convo.messages.count }}msg</span>
+                </div>
+            </div>
+            {% endwith %}
+            {% empty %}<div class="empty">No conversations yet.</div>{% endfor %}
+        </div>
+    </div>
+</div>
+
+</div></main>
+</div><!-- /shell -->
+
 <script>
-    // FIX FOR SEARCH
-    document.getElementById('masterSearch').addEventListener('input', function(e) {
-        const query = e.target.value.toLowerCase();
-        document.querySelectorAll('.user-row').forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
-        });
+// ── THEME ──
+const R = document.documentElement;
+const st = localStorage.getItem('azers_theme') || 'dark';
+R.setAttribute('data-theme', st);
+setThemeIcon(st);
+document.getElementById('themeBtn').addEventListener('click', () => {
+    const n = R.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    R.setAttribute('data-theme', n);
+    localStorage.setItem('azers_theme', n);
+    setThemeIcon(n);
+    rebuildChart();
+});
+function setThemeIcon(t) {
+    document.getElementById('themeIco').className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+// ── SECTION NAV ──
+const BC = {
+    overview: 'Admin › Dashboard', members: 'Admin › Members',
+    pending: 'Admin › Approval Queue', bookings: 'Admin › Bookings',
+    inquiries: 'Admin › Brand Inquiries', chats: 'Admin › Conversations'
+};
+function goSec(n, btn) {
+    document.querySelectorAll('.sec').forEach(s => s.style.display = 'none');
+    document.getElementById('sec-' + n).style.display = 'block';
+    document.querySelectorAll('.ni').forEach(i => i.classList.remove('on'));
+    if (btn) btn.classList.add('on');
+    document.getElementById('bcrumb').textContent = BC[n] || 'Admin';
+    if (window.innerWidth < 768) closeSb();
+    window.scrollTo(0, 0);
+}
+
+// ── SIDEBAR ──
+function openSb()  { document.getElementById('sb').classList.add('open'); document.getElementById('mobOv').classList.add('show'); }
+function closeSb() { document.getElementById('sb').classList.remove('open'); document.getElementById('mobOv').classList.remove('show'); }
+
+// ── SECTION SEARCHES ──
+function srchMem(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.mr').forEach(r => { r.style.display = (r.dataset.search || '').includes(q) ? '' : 'none'; });
+}
+function srchBk(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#bkList .bkr').forEach(r => { r.style.display = (r.dataset.search || '').includes(q) ? '' : 'none'; });
+}
+function srchInq(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#sec-inquiries .inqr').forEach(r => { r.style.display = (r.dataset.search || '').includes(q) ? '' : 'none'; });
+}
+function srchChat(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#chatList .cvr').forEach(r => { r.style.display = (r.dataset.search || '').includes(q) ? '' : 'none'; });
+}
+
+// ── FILTERS ──
+function filtMem(t, btn) {
+    document.querySelectorAll('#sec-members .ftab').forEach(b => b.classList.remove('on'));
+    if (btn) btn.classList.add('on');
+    document.getElementById('memberSearch').value = '';
+    document.querySelectorAll('.mr').forEach(r => {
+        const ok = t === 'all' ? true
+            : t === 'artist' ? r.dataset.role === 'artist'
+            : t === 'brand' ? r.dataset.role === 'brand'
+            : t === 'pending' ? (r.dataset.approved === '0' && r.dataset.active === '1')
+            : t === 'disabled' ? r.dataset.active === '0' : true;
+        r.style.display = ok ? '' : 'none';
     });
+}
+function filtBk(s, btn) {
+    document.querySelectorAll('#sec-bookings .ftab').forEach(b => b.classList.remove('on'));
+    if (btn) btn.classList.add('on');
+    document.querySelectorAll('#bkList .bkr').forEach(r => { r.style.display = (s === 'all' || r.dataset.status === s) ? '' : 'none'; });
+}
+function filtChat(t, btn) {
+    document.querySelectorAll('#sec-chats .ftab').forEach(b => b.classList.remove('on'));
+    if (btn) btn.classList.add('on');
+    document.querySelectorAll('#chatList .cvr').forEach(r => {
+        const g = r.dataset.guest === '1';
+        r.style.display = (t === 'all' || (t === 'guest' && g) || (t === 'member' && !g)) ? '' : 'none';
+    });
+}
 
-    // Toggle Role Filter
-    function toggleDatabase(role, btn) {
-        document.querySelectorAll('.db-tab').forEach(t => t.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.user-row').forEach(item => {
-            item.style.display = (role === 'all' || item.dataset.role === role) ? '' : 'none';
-        });
+// ── CHAT PANEL ──
+function openChat(from, to, isGuest, count, msgs) {
+    document.getElementById('cpTitle').textContent = from + ' ↔ ' + to;
+    document.getElementById('cpSub').textContent = (isGuest ? 'Guest chat' : 'Member chat') + ' · ' + count + ' messages';
+    const box = document.getElementById('cpMsgs');
+    if (!msgs || msgs.length === 0) {
+        box.innerHTML = '<div class="cp-empty"><i class="fas fa-comment-slash"></i><p>No messages in this conversation yet.</p></div>';
+    } else {
+        box.innerHTML = msgs.map(m => `
+            <div class="bwrap ${m.a ? 'r' : ''}">
+                <div class="bav">${(m.s || '?').slice(0,1).toUpperCase()}</div>
+                <div>
+                    <div class="bbl ${m.a ? 'sent' : 'recv'}">${m.t || ''}</div>
+                    <div class="btime">${m.s || 'Guest'}</div>
+                </div>
+            </div>`).join('');
+        setTimeout(() => { box.scrollTop = box.scrollHeight; }, 50);
     }
+    document.getElementById('cpanel').classList.add('open');
+    document.getElementById('chatOv').classList.add('show');
+}
+function closeChat() {
+    document.getElementById('cpanel').classList.remove('open');
+    document.getElementById('chatOv').classList.remove('show');
+}
 
-    // Simple Chart
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
+// ── DELETE MODAL ──
+function openDel(url, name) {
+    document.getElementById('delModal').classList.add('show');
+    document.getElementById('delForm').action = url;
+    document.getElementById('delMsg').innerHTML = `Permanently delete <strong>"${name}"</strong> and all their data? This cannot be undone.`;
+}
+function closeDel() { document.getElementById('delModal').classList.remove('show'); }
+document.getElementById('delModal').addEventListener('click', function(e) { if (e.target === this) closeDel(); });
+
+// ── GSAP ENTRANCE ──
+gsap.to('.fade-up', { opacity: 1, y: 0, duration: 0.55, stagger: 0.09, delay: 0.08, ease: 'power3.out' });
+
+// ── PIPELINE BARS ──
+setTimeout(() => {
+    document.querySelectorAll('.pfill').forEach(el => { el.style.width = (el.dataset.pct || 0) + '%'; });
+}, 350);
+
+// ── DONUT CHART ──
+function rebuildChart() {
+    const ctx = document.getElementById('donut');
+    if (!ctx) return;
+    if (window._donut) window._donut.destroy();
+    const tc = getComputedStyle(R).getPropertyValue('--t2').trim();
+    window._donut = new Chart(ctx, {
+        type: 'doughnut',
         data: {
-            labels: ['W1', 'W2', 'W3', 'W4'],
+            labels: ['Pending', 'Accepted', 'Declined'],
             datasets: [{
-                data: [10, 25, 15, 40],
-                borderColor: '#d4af37',
-                borderWidth: 2,
-                tension: 0.4,
-                pointRadius: 0
+                data: [{{ pending_bookings }}, {{ accepted_bookings }}, {{ declined_bookings }}],
+                backgroundColor: ['#fbbf24', '#34d399', '#f87171'],
+                borderWidth: 0, hoverOffset: 6,
             }]
         },
-        options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '72%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: tc, font: { family: 'Plus Jakarta Sans', size: 11 }, boxWidth: 9, padding: 12 }
+                }
+            }
+        }
     });
+}
+rebuildChart();
 </script>
-{% endblock %}
 
 
 
 
+{% comment %} {% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azers Squad | Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
- {% endcomment %}
+<style>
+/* ═══════════════════════════════════════
+   TOKENS — DARK / LIGHT
+═══════════════════════════════════════ */
+:root[data-theme="dark"] {
+    --bg:        #08080a;
+    --surface:   #0f0f12;
+    --surface2:  #16161b;
+    --surface3:  #1c1c23;
+    --border:    rgba(255,255,255,0.05);
+    --border2:   rgba(255,255,255,0.09);
+    --text:      #e4e4e7;
+    --text2:     #a1a1aa;
+    --text3:     #52525b;
+    --gold:      #d4af37;
+    --gold-bg:   rgba(212,175,55,0.08);
+    --gold-bd:   rgba(212,175,55,0.2);
+    --green:     #22c55e;
+    --green-bg:  rgba(34,197,94,0.08);
+    --amber:     #f59e0b;
+    --amber-bg:  rgba(245,158,11,0.08);
+    --red:       #ef4444;
+    --red-bg:    rgba(239,68,68,0.08);
+    --blue:      #60a5fa;
+    --blue-bg:   rgba(96,165,250,0.08);
+    --purple:    #a78bfa;
+    --purple-bg: rgba(167,139,250,0.08);
+    --shadow:    0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 12px 48px rgba(0,0,0,0.6);
+}
+:root[data-theme="light"] {
+    --bg:        #f4f4f5;
+    --surface:   #ffffff;
+    --surface2:  #f9f9fb;
+    --surface3:  #f0f0f3;
+    --border:    rgba(0,0,0,0.06);
+    --border2:   rgba(0,0,0,0.1);
+    --text:      #18181b;
+    --text2:     #52525b;
+    --text3:     #a1a1aa;
+    --gold:      #b8932a;
+    --gold-bg:   rgba(184,147,42,0.08);
+    --gold-bd:   rgba(184,147,42,0.2);
+    --green:     #16a34a;
+    --green-bg:  rgba(22,163,74,0.08);
+    --amber:     #d97706;
+    --amber-bg:  rgba(217,119,6,0.08);
+    --red:       #dc2626;
+    --red-bg:    rgba(220,38,38,0.08);
+    --blue:      #2563eb;
+    --blue-bg:   rgba(37,99,235,0.08);
+    --purple:    #7c3aed;
+    --purple-bg: rgba(124,58,237,0.08);
+    --shadow:    0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+    overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+input { font-family: inherit; }
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.shell { display: flex; min-height: 100vh; }
+
+/* ═══════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════ */
+.sidebar {
+    width: 232px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.3s;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.wordmark {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 0.04em;
+}
+.wordmark em { color: var(--gold); font-style: normal; }
+.wordmark-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: var(--text3);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-top: 3px;
+}
+.sidebar-nav { flex: 1; padding: 16px 12px; }
+.nav-group { margin-bottom: 20px; }
+.nav-group-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: var(--text3);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 6px;
+}
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    transition: all 0.18s;
+    margin-bottom: 1px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+.nav-item i { width: 14px; font-size: 12px; flex-shrink: 0; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+    background: var(--gold-bg);
+    color: var(--gold);
+    border-color: var(--gold-bd);
+    font-weight: 600;
+}
+.nav-item .pill {
+    margin-left: auto;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--red);
+    color: #fff;
+}
+.nav-item .pill.amber { background: var(--amber); color: #000; }
+
+.sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.sys-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); position: relative; flex-shrink: 0; }
+.pulse::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--green);
+    opacity: 0.25;
+    animation: pulseRing 2s ease-in-out infinite;
+}
+@keyframes pulseRing { 0%,100%{transform:scale(1);opacity:.25} 50%{transform:scale(1.8);opacity:0} }
+
+/* ═══════════════════════════════════════
+   TOP NAV (mobile + theme toggle)
+═══════════════════════════════════════ */
+.topnav {
+    position: fixed;
+    top: 0; left: 232px; right: 0;
+    height: 60px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    z-index: 50;
+    transition: background 0.3s, left 0.35s;
+}
+.topnav-left { display: flex; align-items: center; gap: 14px; }
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 18px;
+    padding: 4px;
+}
+.topnav-breadcrumb {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+}
+.topnav-right { display: flex; align-items: center; gap: 10px; }
+
+/* Search */
+.topnav-search {
+    position: relative;
+}
+.topnav-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 11px;
+    pointer-events: none;
+}
+.topnav-search input {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 9px;
+    padding: 8px 14px 8px 32px;
+    font-size: 12px;
+    color: var(--text);
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s, width 0.3s;
+}
+.topnav-search input::placeholder { color: var(--text3); }
+.topnav-search input:focus { border-color: var(--gold-bd); width: 260px; }
+
+/* Theme toggle */
+.theme-toggle {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+.theme-toggle:hover { color: var(--gold); border-color: var(--gold-bd); }
+
+/* Logout */
+.topnav-logout {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--red-bg);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 9px;
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.topnav-logout:hover { background: var(--red); color: #fff; }
+
+/* ═══════════════════════════════════════
+   MAIN
+═══════════════════════════════════════ */
+.main {
+    flex: 1;
+    margin-left: 232px;
+    padding-top: 60px;
+    min-width: 0;
+    transition: margin-left 0.35s;
+}
+.main-inner { padding: 28px; }
+
+/* Page header */
+.page-head {
+    margin-bottom: 28px;
+    opacity: 0;
+    transform: translateY(12px);
+}
+.page-head h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+}
+.page-head p {
+    font-size: 13px;
+    color: var(--text3);
+    margin-top: 5px;
+}
+
+/* ═══════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════ */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+    opacity: 0;
+    transform: translateY(16px);
+}
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.stat-card .accent-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+}
+.stat-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+.stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: var(--text3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+}
+.stat-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 5px;
+}
+
+/* ═══════════════════════════════════════
+   PANELS
+═══════════════════════════════════════ */
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: background 0.3s, border-color 0.3s;
+}
+.panel-hd {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+.panel-hd-left .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+}
+.panel-hd-left .panel-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+}
+.panel-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+}
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.grid-main-side { display: grid; grid-template-columns: 1fr 320px; gap: 18px; }
+
+/* Spacing helpers */
+.mb-4 { margin-bottom: 14px; }
+.mb-5 { margin-bottom: 18px; }
+.mb-6 { margin-bottom: 22px; }
+
+/* ═══════════════════════════════════════
+   FILTER TABS
+═══════════════════════════════════════ */
+.ftabs {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    flex-wrap: wrap;
+}
+.ftab {
+    padding: 6px 14px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    border: 1px solid transparent;
+    background: none;
+    transition: all 0.18s;
+    letter-spacing: 0.03em;
+}
+.ftab:hover { color: var(--text); background: var(--surface3); }
+.ftab.active { background: var(--gold-bg); color: var(--gold); border-color: var(--gold-bd); }
+
+/* ═══════════════════════════════════════
+   MEMBER ROWS
+═══════════════════════════════════════ */
+.member-list { max-height: 480px; overflow-y: auto; }
+.member-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+.member-row:last-child { border-bottom: none; }
+.member-row:hover { background: var(--surface2); }
+.avatar {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+.avatar.disabled-av { color: var(--text3); }
+.member-info { flex: 1; min-width: 0; }
+.member-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.member-name.disabled-name { color: var(--text3); text-decoration: line-through; }
+.member-email {
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+}
+.member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ═══════════════════════════════════════
+   BADGES
+═══════════════════════════════════════ */
+.badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+.b-artist  { background: var(--gold-bg);   color: var(--gold);   border: 1px solid var(--gold-bd); }
+.b-brand   { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+.b-ok      { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(34,197,94,0.2); }
+.b-pend    { background: var(--amber-bg);  color: var(--amber);  border: 1px solid rgba(245,158,11,0.2); }
+.b-dis     { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(239,68,68,0.2); }
+.b-accept  { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(34,197,94,0.2); }
+.b-decline { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(239,68,68,0.2); }
+.b-guest   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(96,165,250,0.2); }
+
+/* ═══════════════════════════════════════
+   ACTION BUTTONS
+═══════════════════════════════════════ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: none;
+    transition: all 0.18s;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+}
+.btn-approve { background: var(--gold); color: #000; }
+.btn-approve:hover { background: #e8c93d; transform: scale(1.04); }
+.btn-disable { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+.btn-disable:hover { background: var(--amber); color: #000; }
+.btn-enable  { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+.btn-enable:hover  { background: var(--green); color: #fff; }
+.btn-delete  { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.15); }
+.btn-delete:hover  { background: var(--red); color: #fff; }
+.btn-view    { background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); }
+.btn-view:hover    { color: var(--text); border-color: var(--border2); }
+
+/* ═══════════════════════════════════════
+   BOOKING PIPELINE BAR
+═══════════════════════════════════════ */
+.pipeline { padding: 18px 20px; }
+.pipe-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.pipe-row:last-child { margin-bottom: 0; }
+.pipe-label { font-size: 12px; color: var(--text2); width: 72px; flex-shrink: 0; }
+.pipe-track {
+    flex: 1;
+    height: 7px;
+    background: var(--surface3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.pipe-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); width: 0; }
+.pipe-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    width: 20px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   BOOKING ROWS
+═══════════════════════════════════════ */
+.booking-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+.booking-row:last-child { border-bottom: none; }
+.booking-row:hover { background: var(--surface2); }
+.booking-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.booking-info { flex: 1; min-width: 0; }
+.booking-title { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.booking-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.booking-quote { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+   INQUIRY ROWS
+═══════════════════════════════════════ */
+.inq-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+.inq-row:last-child { border-bottom: none; }
+.inq-row:hover { background: var(--surface2); }
+.inq-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--purple-bg);
+    border: 1px solid rgba(167,139,250,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    color: var(--purple);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.inq-info { flex: 1; min-width: 0; }
+.inq-title { font-size: 12px; font-weight: 600; color: var(--text); }
+.inq-msg {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ═══════════════════════════════════════
+   CONVERSATION ROWS
+═══════════════════════════════════════ */
+.convo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+}
+.convo-row:last-child { border-bottom: none; }
+.convo-row:hover { background: var(--surface2); }
+.convo-av {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--blue-bg);
+    border: 1px solid rgba(96,165,250,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    color: var(--blue);
+    flex-shrink: 0;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+}
+.convo-info { flex: 1; min-width: 0; }
+.convo-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.convo-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.convo-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.msg-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text3);
+}
+
+/* ═══════════════════════════════════════
+   PENDING QUEUE
+═══════════════════════════════════════ */
+.pend-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+.pend-item:last-child { border-bottom: none; }
+.pend-item:hover { background: var(--surface2); }
+.pend-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.pend-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.pend-role { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.pend-email { font-size: 11px; color: var(--text3); margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pend-actions { display: flex; gap: 6px; }
+.pend-approve { flex: 1; padding: 8px; background: var(--gold); color: #000; font-size: 10px; font-weight: 700; border-radius: 8px; text-align: center; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; display: block; }
+.pend-approve:hover { background: #e8c93d; }
+
+/* ═══════════════════════════════════════
+   CHART
+═══════════════════════════════════════ */
+.chart-wrap { padding: 16px 20px; height: 200px; position: relative; }
+
+/* ═══════════════════════════════════════
+   MODAL (delete confirm)
+═══════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 28px;
+    width: 360px;
+    max-width: 90vw;
+    box-shadow: var(--shadow-lg);
+    animation: modalIn 0.25s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(0.95)translateY(8px)} to{opacity:1;transform:scale(1)translateY(0)} }
+.modal-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--red-bg);
+    border: 1px solid rgba(239,68,68,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    color: var(--red);
+    margin-bottom: 16px;
+}
+.modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.modal-msg { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; }
+.modal-cancel { flex: 1; padding: 10px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+.modal-cancel:hover { color: var(--text); }
+.modal-confirm { flex: 1; padding: 10px; background: var(--red); border: none; border-radius: 9px; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; transition: all 0.2s; }
+.modal-confirm:hover { background: #dc2626; }
+
+/* ═══════════════════════════════════════
+   MOBILE OVERLAY
+═══════════════════════════════════════ */
+.mob-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 55;
+}
+.mob-overlay.show { display: block; }
+
+/* ═══════════════════════════════════════
+   EMPTY
+═══════════════════════════════════════ */
+.empty { padding: 36px 20px; text-align: center; font-size: 12px; color: var(--text3); }
+
+/* ═══════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 1200px) {
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .grid-main-side { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .topnav { left: 0; }
+    .main { margin-left: 0; }
+    .hamburger { display: flex; }
+    .topnav-search input { width: 160px; }
+    .topnav-search input:focus { width: 190px; }
+    .main-inner { padding: 16px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .member-actions { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .topnav-search { display: none; }
+}
+
+/* Anim helper */
+.fade-up { opacity: 0; transform: translateY(14px); }
+</style>
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-icon"><i class="fas fa-trash-alt"></i></div>
+        <div class="modal-title">Delete Account</div>
+        <div class="modal-msg">This will <strong>permanently delete</strong> this account along with all associated data. This action cannot be undone.</div>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <form id="deleteForm" method="POST" style="flex:1;">
+                {% csrf_token %}
+                <button type="submit" class="modal-confirm" style="width:100%;">Delete Forever</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
+
+<div class="shell">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="wordmark">AZERS<em>SQUAD</em></div>
+        <div class="wordmark-sub">Command Center</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-group-label">Overview</div>
+            <button class="nav-item active" onclick="showSection('overview', this)">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-label">Members</div>
+            <button class="nav-item" onclick="showSection('members', this)">
+                <i class="fas fa-users"></i> All Members
+                {% if pending_users %}<span class="pill amber">{{ pending_users }}</span>{% endif %}
+            </button>
+            <button class="nav-item" onclick="showSection('pending', this)">
+                <i class="fas fa-clock"></i> Approval Queue
+                {% if pending_users %}<span class="pill">{{ pending_users }}</span>{% endif %}
+            </button>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-label">Activity</div>
+            <button class="nav-item" onclick="showSection('bookings', this)">
+                <i class="fas fa-calendar-alt"></i> Bookings
+            </button>
+            <button class="nav-item" onclick="showSection('inquiries', this)">
+                <i class="fas fa-envelope"></i> Brand Inquiries
+            </button>
+            <button class="nav-item" onclick="showSection('chats', this)">
+                <i class="fas fa-comments"></i> All Chats
+            </button>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-label">Site</div>
+            <a class="nav-item" href="{% url 'core:home' %}" target="_blank">
+                <i class="fas fa-external-link-alt"></i> Public Site
+            </a>
+            <a class="nav-item" href="{% url 'core:artist_list' %}" target="_blank">
+                <i class="fas fa-music"></i> Talent Roster
+            </a>
+            <a class="nav-item" href="{% url 'core:brand_list' %}" target="_blank">
+                <i class="fas fa-store"></i> Brand Directory
+            </a>
+        </div>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sys-status">
+            <div class="pulse"></div>
+            <div>
+                <div style="font-size:11px;font-weight:600;color:var(--text);">System Online</div>
+                <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:1px;">All services operational</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- ══════════ TOP NAV ══════════ -->
+<div class="topnav" id="topnav">
+    <div class="topnav-left">
+        <button class="hamburger" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+        <span class="topnav-breadcrumb" id="breadcrumb">Admin › Dashboard</span>
+    </div>
+    <div class="topnav-right">
+        <div class="topnav-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="globalSearch" placeholder="Search members..." autocomplete="off">
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+            <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+        <form method="post" action="{% url 'core:logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="topnav-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<main class="main">
+<div class="main-inner">
+
+<!-- ══════════ SECTION: OVERVIEW ══════════ -->
+<div id="sec-overview" class="section-content">
+
+    <div class="page-head" id="pageHead">
+        <h1>Good day, {{ request.user.username|title }} 👋</h1>
+        <p>Here's what's happening across Azers Squad right now.</p>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+            <div class="accent-line" style="background:var(--gold);"></div>
+            <div class="stat-icon" style="background:var(--gold-bg);color:var(--gold);">
+                <i class="fas fa-microphone-alt"></i>
+            </div>
+            <div class="stat-label">Artists</div>
+            <div class="stat-value">{{ total_artists }}</div>
+            <div class="stat-sub">{{ pending_users }} awaiting approval</div>
+        </div>
+        <div class="stat-card">
+            <div class="accent-line" style="background:var(--purple);"></div>
+            <div class="stat-icon" style="background:var(--purple-bg);color:var(--purple);">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="stat-label">Brands</div>
+            <div class="stat-value">{{ total_brands }}</div>
+            <div class="stat-sub">{{ new_this_month }} joined this month</div>
+        </div>
+        <div class="stat-card">
+            <div class="accent-line" style="background:var(--amber);"></div>
+            <div class="stat-icon" style="background:var(--amber-bg);color:var(--amber);">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-label">Bookings</div>
+            <div class="stat-value">{{ total_bookings }}</div>
+            <div class="stat-sub">{{ pending_bookings }} pending review</div>
+        </div>
+        <div class="stat-card">
+            <div class="accent-line" style="background:var(--blue);"></div>
+            <div class="stat-icon" style="background:var(--blue-bg);color:var(--blue);">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-label">Conversations</div>
+            <div class="stat-value">{{ total_conversations }}</div>
+            <div class="stat-sub">{{ guest_conversations }} guest chats</div>
+        </div>
+        <div class="stat-card">
+            <div class="accent-line" style="background:var(--green);"></div>
+            <div class="stat-icon" style="background:var(--green-bg);color:var(--green);">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <div class="stat-label">Inquiries</div>
+            <div class="stat-value">{{ total_inquiries }}</div>
+            <div class="stat-sub">Brand messages received</div>
+        </div>
+    </div>
+
+    <div class="grid-2 mb-5">
+        <!-- Booking Pipeline -->
+        <div class="panel fade-up">
+            <div class="panel-hd">
+                <div class="panel-hd-left">
+                    <div class="panel-title">Booking Pipeline</div>
+                    <div class="panel-sub">Artist booking status breakdown</div>
+                </div>
+                <span class="panel-count">{{ total_bookings }} total</span>
+            </div>
+            <div class="pipeline">
+                {% if total_bookings > 0 %}
+                <div class="pipe-row">
+                    <span class="pipe-label">Pending</span>
+                    <div class="pipe-track">
+                        <div class="pipe-fill" data-pct="{% widthratio pending_bookings total_bookings 100 %}" style="background:var(--amber);"></div>
+                    </div>
+                    <span class="pipe-num">{{ pending_bookings }}</span>
+                </div>
+                <div class="pipe-row">
+                    <span class="pipe-label">Accepted</span>
+                    <div class="pipe-track">
+                        <div class="pipe-fill" data-pct="{% widthratio accepted_bookings total_bookings 100 %}" style="background:var(--green);"></div>
+                    </div>
+                    <span class="pipe-num">{{ accepted_bookings }}</span>
+                </div>
+                <div class="pipe-row">
+                    <span class="pipe-label">Declined</span>
+                    <div class="pipe-track">
+                        <div class="pipe-fill" data-pct="{% widthratio declined_bookings total_bookings 100 %}" style="background:var(--red);"></div>
+                    </div>
+                    <span class="pipe-num">{{ declined_bookings }}</span>
+                </div>
+                {% else %}
+                <div class="empty">No bookings yet.</div>
+                {% endif %}
+            </div>
+            <!-- Doughnut chart -->
+            {% if total_bookings > 0 %}
+            <div style="padding:0 20px 20px;height:160px;display:flex;justify-content:center;">
+                <canvas id="bookingChart"></canvas>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Bookings -->
+        <div class="panel fade-up">
+            <div class="panel-hd">
+                <div class="panel-hd-left">
+                    <div class="panel-title">Recent Bookings</div>
+                    <div class="panel-sub">Latest artist requests</div>
+                </div>
+            </div>
+            {% for booking in recent_bookings %}
+            <div class="booking-row">
+                <div class="booking-dot" style="background:{% if booking.status == 'Accepted' %}var(--green){% elif booking.status == 'Declined' %}var(--red){% else %}var(--amber){% endif %};"></div>
+                <div class="booking-info">
+                    <div class="booking-title">{{ booking.customer_name }} → {{ booking.artist.stage_name }}</div>
+                    <div class="booking-sub">{{ booking.event_date }} · {{ booking.customer_email }}</div>
+                </div>
+                <span class="badge {% if booking.status == 'Accepted' %}b-accept{% elif booking.status == 'Declined' %}b-decline{% else %}b-pend{% endif %}">{{ booking.status }}</span>
+                <span class="booking-quote">₦{{ booking.total_quote|floatformat:0 }}</span>
+            </div>
+            {% empty %}<div class="empty">No bookings yet.</div>{% endfor %}
+        </div>
+    </div>
+
+    <div class="grid-2 mb-5">
+        <!-- Brand Inquiries -->
+        <div class="panel fade-up">
+            <div class="panel-hd">
+                <div class="panel-hd-left">
+                    <div class="panel-title">Brand Inquiries</div>
+                    <div class="panel-sub">Messages sent to brands</div>
+                </div>
+                <span class="panel-count">{{ total_inquiries }}</span>
+            </div>
+            {% for inq in recent_inquiries %}
+            <div class="inq-row">
+                <div class="inq-icon"><i class="fas fa-envelope"></i></div>
+                <div class="inq-info">
+                    <div class="inq-title">
+                        {% if inq.sender %}{{ inq.sender.username }}{% else %}Guest{% endif %}
+                        → {{ inq.brand.brand_name }}
+                    </div>
+                    <div class="inq-msg">{{ inq.message|truncatechars:80 }}</div>
+                </div>
+            </div>
+            {% empty %}<div class="empty">No inquiries yet.</div>{% endfor %}
+        </div>
+
+        <!-- Active Conversations -->
+        <div class="panel fade-up">
+            <div class="panel-hd">
+                <div class="panel-hd-left">
+                    <div class="panel-title">All Conversations</div>
+                    <div class="panel-sub">Guest + artist chats</div>
+                </div>
+                <span class="panel-count">{{ total_conversations }}</span>
+            </div>
+            {% for convo in all_conversations %}
+            <div class="convo-row">
+                <div class="convo-av">
+                    {% if convo.is_guest_chat %}
+                        {% if convo.guest_name %}{{ convo.guest_name|slice:":1"|upper }}{% else %}?{% endif %}
+                    {% else %}
+                        {% with convo.participants.first as p %}{{ p.username|slice:":1"|upper }}{% endwith %}
+                    {% endif %}
+                </div>
+                <div class="convo-info">
+                    <div class="convo-name">
+                        {% if convo.is_guest_chat %}
+                            {{ convo.guest_name|default:"Anonymous Guest" }}
+                        {% else %}
+                            {% with convo.participants.first as p %}{{ p.username|default:"User" }}{% endwith %} {% endcomment %}
+                        {% comment %} {% endif %}
+                        → {{ convo.receiver.username }}
+                    </div>
+                    <div class="convo-sub">{{ convo.messages.count }} message{{ convo.messages.count|pluralize }}</div>
+                </div>
+                <div class="convo-meta">
+                    {% if convo.is_guest_chat %}<span class="badge b-guest">Guest</span>{% endif %}
+                    <span class="msg-count">{{ convo.messages.count }} msg</span>
+                </div>
+            </div>
+            {% empty %}<div class="empty">No conversations yet.</div>{% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ SECTION: MEMBERS ══════════ -->
+<div id="sec-members" class="section-content" style="display:none;">
+    <div class="page-head" style="opacity:1;transform:none;">
+        <h1>Members</h1>
+        <p>All registered users — approve, disable, or remove accounts.</p>
+    </div>
+    <div class="panel mb-5">
+        <div class="ftabs">
+            <button class="ftab active" onclick="filterMembers('all',this)">All ({{ recent_users|length }})</button>
+            <button class="ftab" onclick="filterMembers('artist',this)">Artists</button>
+            <button class="ftab" onclick="filterMembers('brand',this)">Brands</button>
+            <button class="ftab" onclick="filterMembers('pending',this)">Pending {% if pending_users %}({{ pending_users }}){% endif %}</button>
+            <button class="ftab" onclick="filterMembers('disabled',this)">Disabled {% if disabled_users %}({{ disabled_users }}){% endif %}</button>
+        </div>
+        <div class="member-list" id="memberList">
+            {% for u in recent_users %}
+            <div class="member-row"
+                 data-role="{{ u.role }}"
+                 data-approved="{{ u.is_approved|yesno:'1,0' }}"
+                 data-active="{{ u.is_active|yesno:'1,0' }}"
+                 data-search="{{ u.username|lower }} {{ u.email|lower }} {{ u.role|lower }}">
+                <div class="avatar {% if not u.is_active %}disabled-av{% endif %}">{{ u.username|slice:":1"|upper }}</div>
+                <div class="member-info">
+                    <div class="member-name {% if not u.is_active %}disabled-name{% endif %}">{{ u.username }}</div>
+                    <div class="member-email">{{ u.email }}</div>
+                </div>
+                <div class="member-actions">
+                    <span class="badge {% if u.role == 'artist' %}b-artist{% else %}b-brand{% endif %}">{{ u.role }}</span>
+                    {% if not u.is_active %}
+                        <span class="badge b-dis">Disabled</span>
+                    {% elif u.is_approved %}
+                        <span class="badge b-ok">Verified</span>
+                    {% else %}
+                        <span class="badge b-pend">Pending</span>
+                    {% endif %}
+                    {% if not u.is_approved and u.is_active %}
+                        <a href="{% url 'core:approve_user' u.id %}" class="btn btn-approve"><i class="fas fa-check"></i> Approve</a>
+                    {% endif %}
+                    {% if u.is_active %}
+                        <a href="{% url 'core:toggle_user_active' u.id %}" class="btn btn-disable"><i class="fas fa-ban"></i> Disable</a>
+                    {% else %}
+                        <a href="{% url 'core:toggle_user_active' u.id %}" class="btn btn-enable"><i class="fas fa-check-circle"></i> Enable</a>
+                    {% endif %}
+                    <button class="btn btn-delete" onclick="confirmDelete('{% url 'core:delete_user' u.id %}', '{{ u.username }}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+            {% empty %}<div class="empty">No members found.</div>{% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ SECTION: PENDING ══════════ -->
+<div id="sec-pending" class="section-content" style="display:none;">
+    <div class="page-head" style="opacity:1;transform:none;">
+        <h1>Approval Queue</h1>
+        <p>{{ pending_users }} account{{ pending_users|pluralize }} waiting for your review.</p>
+    </div>
+    <div class="grid-main-side">
+        <div class="panel">
+            {% for u in pending_user_list %}
+            <div class="pend-item">
+                <div class="pend-top">
+                    <div>
+                        <div class="pend-name">{{ u.username }}</div>
+                        <div class="pend-role">Registered as {{ u.role }}</div>
+                    </div>
+                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);">{{ u.date_joined|timesince }} ago</span>
+                </div>
+                <div class="pend-email">{{ u.email }}</div>
+                <div class="pend-actions">
+                    <a href="{% url 'core:approve_user' u.id %}" class="pend-approve">
+                        <i class="fas fa-check"></i> Approve Account
+                    </a>
+                    <a href="{% url 'core:toggle_user_active' u.id %}" class="btn btn-delete" style="padding:8px 12px;">
+                        <i class="fas fa-times"></i> Reject
+                    </a>
+                </div>
+            </div>
+            {% empty %}<div class="empty" style="padding:60px 20px;">🎉 All caught up! No pending approvals.</div>{% endfor %}
+        </div>
+        <div>
+            <div class="panel">
+                <div class="panel-hd"><div class="panel-hd-left"><div class="panel-title">Queue Stats</div></div></div>
+                <div style="padding:16px;">
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:12px;color:var(--text2);">Pending approval</span>
+                        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--amber);">{{ pending_users }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:12px;color:var(--text2);">Total artists</span>
+                        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text);">{{ total_artists }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                        <span style="font-size:12px;color:var(--text2);">Total brands</span>
+                        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text);">{{ total_brands }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;">
+                        <span style="font-size:12px;color:var(--text2);">Disabled accounts</span>
+                        <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red);">{{ disabled_users }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ SECTION: BOOKINGS ══════════ -->
+<div id="sec-bookings" class="section-content" style="display:none;">
+    <div class="page-head" style="opacity:1;transform:none;">
+        <h1>Artist Bookings</h1>
+        <p>All booking requests across the platform.</p>
+    </div>
+    <div class="panel">
+        <div class="panel-hd">
+            <div class="panel-hd-left">
+                <div class="panel-title">All Bookings</div>
+                <div class="panel-sub">{{ total_bookings }} total</div>
+            </div>
+        </div>
+        <div class="ftabs">
+            <button class="ftab active" onclick="filterBookings('all',this)">All</button>
+            <button class="ftab" onclick="filterBookings('Pending',this)">Pending</button>
+            <button class="ftab" onclick="filterBookings('Accepted',this)">Accepted</button>
+            <button class="ftab" onclick="filterBookings('Declined',this)">Declined</button>
+        </div>
+        <div id="bookingList">
+            {% for booking in recent_bookings %}
+            <div class="booking-row" data-status="{{ booking.status }}">
+                <div class="booking-dot" style="background:{% if booking.status == 'Accepted' %}var(--green){% elif booking.status == 'Declined' %}var(--red){% else %}var(--amber){% endif %};"></div>
+                <div class="booking-info">
+                    <div class="booking-title">{{ booking.customer_name }} → {{ booking.artist.stage_name }}</div>
+                    <div class="booking-sub">{{ booking.customer_email }} · Event: {{ booking.event_date }}</div>
+                </div>
+                <span class="badge {% if booking.status == 'Accepted' %}b-accept{% elif booking.status == 'Declined' %}b-decline{% else %}b-pend{% endif %}">{{ booking.status }}</span>
+                <span class="badge {% if booking.payment_status == 'Paid' %}b-ok{% elif booking.payment_status == 'Partially Paid' %}b-pend{% else %}b-dis{% endif %}">
+                    {{ booking.payment_status|default:"Unpaid" }}
+                </span>
+                <span class="booking-quote">₦{{ booking.total_quote|floatformat:0 }}</span>
+            </div>
+            {% empty %}<div class="empty">No bookings yet.</div>{% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ SECTION: INQUIRIES ══════════ -->
+<div id="sec-inquiries" class="section-content" style="display:none;">
+    <div class="page-head" style="opacity:1;transform:none;">
+        <h1>Brand Inquiries</h1>
+        <p>All messages sent to brands through the platform.</p>
+    </div>
+    <div class="panel">
+        <div class="panel-hd">
+            <div class="panel-hd-left">
+                <div class="panel-title">All Inquiries</div>
+                <div class="panel-sub">{{ total_inquiries }} total messages</div>
+            </div>
+        </div>
+        {% for inq in recent_inquiries %}
+        <div class="inq-row" style="padding:16px 20px;">
+            <div class="inq-icon"><i class="fas fa-envelope"></i></div>
+            <div class="inq-info">
+                <div class="inq-title" style="font-size:13px;">
+                    <strong>{% if inq.sender %}{{ inq.sender.username }}{% else %}Guest{% endif %}</strong>
+                    → <strong>{{ inq.brand.brand_name }}</strong>
+                </div>
+                <div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.6;">{{ inq.message }}</div>
+                {% if inq.sender %}<div style="font-size:10px;color:var(--text3);margin-top:6px;">{{ inq.sender.email }}</div>{% endif %}
+            </div>
+        </div>
+        {% empty %}<div class="empty">No inquiries yet.</div>{% endfor %}
+    </div>
+</div>
+
+<!-- ══════════ SECTION: CHATS ══════════ -->
+<div id="sec-chats" class="section-content" style="display:none;">
+    <div class="page-head" style="opacity:1;transform:none;">
+        <h1>All Conversations</h1>
+        <p>Every chat thread — guest bookings and artist communications.</p>
+    </div>
+    <div class="panel">
+        <div class="panel-hd">
+            <div class="panel-hd-left">
+                <div class="panel-title">Chat Log</div>
+                <div class="panel-sub">{{ total_conversations }} conversations · {{ guest_conversations }} guest</div>
+            </div>
+        </div>
+        <div class="ftabs">
+            <button class="ftab active" onclick="filterChats('all',this)">All</button>
+            <button class="ftab" onclick="filterChats('guest',this)">Guest</button>
+            <button class="ftab" onclick="filterChats('member',this)">Member</button>
+        </div>
+        <div id="chatList">
+            {% for convo in all_conversations %}
+            <div class="convo-row" data-guest="{{ convo.is_guest_chat|yesno:'1,0' }}" style="cursor:default;">
+                <div class="convo-av">
+                    {% if convo.is_guest_chat %}
+                        {% if convo.guest_name %}{{ convo.guest_name|slice:":1"|upper }}{% else %}?{% endif %}
+                    {% else %}
+                        {% with convo.participants.first as p %}{% if p %}{{ p.username|slice:":1"|upper }}{% else %}U{% endif %}{% endwith %}
+                    {% endif %}
+                </div>
+                <div class="convo-info">
+                    <div class="convo-name">
+                        {% if convo.is_guest_chat %}
+                            {{ convo.guest_name|default:"Anonymous Guest" }}
+                        {% else %}
+                            {% with convo.participants.first as p %}{{ p.username|default:"Unknown" }}{% endwith %}
+                        {% endif %}
+                        <span style="color:var(--text3);font-weight:400;"> → </span>
+                        {{ convo.receiver.username }}
+                    </div>
+                    <div class="convo-sub">
+                        {{ convo.messages.count }} message{{ convo.messages.count|pluralize }}
+                        {% if convo.is_guest_chat %}· Guest chat (UUID: {{ convo.guest_uuid|slice:":8" }}...){% endif %}
+                    </div>
+                </div>
+                <div class="convo-meta">
+                    {% if convo.is_guest_chat %}<span class="badge b-guest">Guest</span>{% else %}<span class="badge b-ok">Member</span>{% endif %}
+                    <span class="msg-count">{{ convo.messages.count }} msg</span>
+                </div>
+            </div>
+            {% empty %}<div class="empty">No conversations yet.</div>{% endfor %}
+        </div>
+    </div>
+</div>
+
+</div><!-- /main-inner -->
+</main>
+</div><!-- /shell -->
+
+<script>
+// ══════════════════════════════════
+// THEME
+// ══════════════════════════════════
+const root = document.documentElement;
+const savedTheme = localStorage.getItem('azers_theme') || 'dark';
+root.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('azers_theme', next);
+    updateThemeIcon(next);
+    if (window.bookingChartInst) {
+        const tc = getComputedStyle(root).getPropertyValue('--text3').trim();
+        window.bookingChartInst.options.plugins.legend.labels.color = tc;
+        window.bookingChartInst.update();
+    }
+});
+
+function updateThemeIcon(theme) {
+    const icon = document.getElementById('themeIcon');
+    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+// ══════════════════════════════════
+// SIDEBAR NAV — section switching
+// ══════════════════════════════════
+const breadcrumbs = {
+    overview:  'Admin › Dashboard',
+    members:   'Admin › Members',
+    pending:   'Admin › Approval Queue',
+    bookings:  'Admin › Bookings',
+    inquiries: 'Admin › Brand Inquiries',
+    chats:     'Admin › Conversations',
+};
+
+function showSection(name, btn) {
+    document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+    document.getElementById('sec-' + name).style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('breadcrumb').textContent = breadcrumbs[name] || 'Admin';
+    if (window.innerWidth < 768) closeSidebar();
+}
+
+// ══════════════════════════════════
+// MOBILE SIDEBAR
+// ══════════════════════════════════
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('mobOverlay').classList.add('show');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('mobOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════════
+// GLOBAL SEARCH
+// ══════════════════════════════════
+document.getElementById('globalSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    // Switch to members section if not already
+    if (q.length > 0) showSection('members', document.querySelector('.nav-item[onclick*="members"]'));
+    document.querySelectorAll('.member-row').forEach(row => {
+        row.style.display = (row.dataset.search||'').includes(q) ? '' : 'none';
+    });
+});
+
+// ══════════════════════════════════
+// MEMBER FILTER
+// ══════════════════════════════════
+function filterMembers(type, btn) {
+    document.querySelectorAll('#memberList .ftab, .ftabs .ftab').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    document.querySelectorAll('.member-row').forEach(row => {
+        const role     = row.dataset.role;
+        const approved = row.dataset.approved === '1';
+        const active   = row.dataset.active === '1';
+        let show = false;
+        if (type === 'all')      show = true;
+        else if (type === 'artist')   show = role === 'artist';
+        else if (type === 'brand')    show = role === 'brand';
+        else if (type === 'pending')  show = !approved && active;
+        else if (type === 'disabled') show = !active;
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+// ══════════════════════════════════
+// BOOKING FILTER
+// ══════════════════════════════════
+function filterBookings(status, btn) {
+    document.querySelectorAll('#sec-bookings .ftab').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    document.querySelectorAll('#bookingList .booking-row').forEach(row => {
+        row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+    });
+}
+
+// ══════════════════════════════════
+// CHAT FILTER
+// ══════════════════════════════════
+function filterChats(type, btn) {
+    document.querySelectorAll('#sec-chats .ftab').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    document.querySelectorAll('#chatList .convo-row').forEach(row => {
+        const isGuest = row.dataset.guest === '1';
+        let show = type === 'all' || (type === 'guest' && isGuest) || (type === 'member' && !isGuest);
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+// ══════════════════════════════════
+// DELETE MODAL
+// ══════════════════════════════════
+function confirmDelete(url, username) {
+    document.getElementById('deleteModal').classList.add('show');
+    document.getElementById('deleteForm').action = url;
+    document.querySelector('.modal-msg').innerHTML =
+        `This will <strong>permanently delete</strong> the account <strong>"${username}"</strong> and all associated data. This cannot be undone.`;
+}
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('show');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+
+// ══════════════════════════════════
+// GSAP ENTRANCE ANIMATIONS
+// ══════════════════════════════════
+gsap.to('#pageHead',   { opacity:1, y:0, duration:0.6, delay:0.1, ease:'power3.out' });
+gsap.to('#statsRow',   { opacity:1, y:0, duration:0.6, delay:0.2, ease:'power3.out' });
+gsap.to('.fade-up',    { opacity:1, y:0, duration:0.6, stagger:0.1, delay:0.35, ease:'power3.out' });
+
+// ══════════════════════════════════
+// ANIMATE PIPELINE BARS
+// ══════════════════════════════════
+setTimeout(() => {
+    document.querySelectorAll('.pipe-fill').forEach(el => {
+        el.style.width = (el.dataset.pct || 0) + '%';
+    });
+}, 500);
+
+// ══════════════════════════════════
+// BOOKING DOUGHNUT CHART
+// ══════════════════════════════════
+const bookingCtx = document.getElementById('bookingChart');
+if (bookingCtx) {
+    const tc = getComputedStyle(root).getPropertyValue('--text3').trim();
+    window.bookingChartInst = new Chart(bookingCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Accepted', 'Declined'],
+            datasets: [{
+                data: [{{ pending_bookings }}, {{ accepted_bookings }}, {{ declined_bookings }}],
+                backgroundColor: ['#f59e0b', '#22c55e', '#ef4444'],
+                borderWidth: 0,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: tc,
+                        font: { family: 'DM Sans', size: 11 },
+                        boxWidth: 10,
+                        padding: 14,
+                    }
+                }
+            }
+        }
+    });
+}
+</script> {% endcomment %}
+

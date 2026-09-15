@@ -1,0 +1,423 @@
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600;1,700&family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+:root {
+    --gold: #d4af37;
+    --black: #080808;
+    --cream: #F9F8F3;
+}
+* { box-sizing: border-box; }
+
+/* ── Page Header ── */
+.page-header {
+    background: var(--black);
+    padding: 100px 24px 80px;
+    position: relative;
+    overflow: hidden;
+}
+.page-header::after {
+    content: 'BRANDS';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(6rem, 15vw, 14rem);
+    color: rgba(255,255,255,0.03);
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+/* ── Filter Bar ── */
+.filter-bar {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 20px 24px;
+    position: sticky;
+    top: 72px;
+    z-index: 40;
+}
+.filter-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+.search-wrap svg {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0,0,0,0.25);
+    pointer-events: none;
+}
+.search-input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--cream);
+    color: #111;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: rgba(0,0,0,0.3); }
+.filter-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: var(--gold);
+    color: #000;
+    transition: all 0.2s;
+}
+.filter-btn:hover { background: #c9a42e; }
+.result-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(0,0,0,0.35);
+    white-space: nowrap;
+}
+
+/* ── Brands Section ── */
+.brands-section {
+    background: var(--black);
+    padding: 60px 24px 100px;
+    min-height: 60vh;
+}
+.brands-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+@media (max-width: 900px) { .brands-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 580px) { .brands-grid { grid-template-columns: 1fr; } }
+
+/* ── Brand Card ── */
+.brand-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 24px;
+    padding: 28px;
+    text-decoration: none;
+    display: block;
+    transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+    opacity: 0;
+    transform: translateY(30px);
+    position: relative;
+    overflow: hidden;
+}
+.brand-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 24px;
+}
+.brand-card:hover {
+    border-color: rgba(212,175,55,0.35);
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+.brand-card:hover::before { opacity: 1; }
+
+.brand-avatar {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    background: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--gold);
+}
+.brand-avatar img { width:100%; height:100%; object-fit:cover; }
+
+.brand-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+.brand-verified {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+}
+.brand-bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.7;
+    margin: 16px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.brand-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 16px 0;
+}
+.brand-stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.brand-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.35);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.brand-cta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.3s ease;
+}
+.brand-card:hover .brand-cta { gap: 14px; }
+
+/* ── Empty State ── */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px 24px;
+    border: 1px dashed rgba(255,255,255,0.07);
+    border-radius: 24px;
+}
+.empty-state h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-style: italic;
+    color: rgba(255,255,255,0.15);
+    margin-bottom: 12px;
+}
+.empty-state p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.2);
+}
+
+/* ── Pagination ── */
+.pagination-wrap {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.page-btn {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.2s;
+}
+.page-btn:hover { border-color: var(--gold); color: var(--gold); }
+.page-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+.page-btn.disabled { opacity: 0.2; pointer-events: none; }
+.page-ellipsis {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.2);
+    padding: 0 4px;
+}
+
+/* ── CTA strip at bottom ── */
+.brand-cta-strip {
+    background: var(--black);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 80px 24px;
+    text-align: center;
+}
+</style>
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+    <div style="max-width:1200px;margin:0 auto;position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="height:1px;width:36px;background:var(--gold);"></div>
+            <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);">The Exchange</span>
+        </div>
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,7vw,6rem);font-weight:700;color:#fff;line-height:0.95;margin-bottom:20px;">
+            Brands &amp; <em style="color:var(--gold);">Makers</em>
+        </h1>
+        <p style="font-family:'DM Sans';font-size:14px;color:rgba(255,255,255,0.35);max-width:440px;line-height:1.8;font-weight:300;">
+            Products and services from Nigeria's most creative and innovative businesses.
+        </p>
+    </div>
+</div>
+
+<!-- ── Filter Bar ── -->
+<div class="filter-bar">
+    <form method="GET" action="" class="filter-inner">
+        <div class="search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" name="search" class="search-input" placeholder="Search brands by name..." value="{{ search_query }}">
+        </div>
+        <button type="submit" class="filter-btn">Search</button>
+        {% if search_query %}
+        <a href="{% url 'core:brand_list' %}" style="font-family:'DM Sans';font-size:11px;font-weight:700;color:rgba(0,0,0,0.3);text-decoration:none;letter-spacing:0.1em;white-space:nowrap;">✕ Clear</a>
+        {% endif %}
+        <span class="result-count">{{ brands.paginator.count }} brand{{ brands.paginator.count|pluralize }} listed</span>
+    </form>
+</div>
+
+<!-- ── Brand Grid ── -->
+<div class="brands-section">
+    <div class="brands-grid" id="brandsGrid">
+        {% for brand in brands %}
+        <a href="{% url 'core:brand_detail' brand.id %}" class="brand-card">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+                <div class="brand-avatar">
+                    {% if brand.display_picture %}
+                        <img src="{{ brand.display_picture }}" alt="{{ brand.brand_name }}">
+                    {% else %}
+                        {{ brand.brand_name|slice:":1" }}
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="brand-name">{{ brand.brand_name }}</h3>
+                    <span class="brand-verified">✦ Squad Verified</span>
+                </div>
+            </div>
+
+            {% if brand.description %}
+            <p class="brand-bio">{{ brand.description }}</p>
+            {% else %}
+            <p class="brand-bio">A verified Nigerian brand offering quality products and services through the Azers Squad marketplace.</p>
+            {% endif %}
+
+            <div class="brand-divider"></div>
+
+            <div class="brand-stats">
+                <span class="brand-tag">{{ brand.products.count }} Product{{ brand.products.count|pluralize }}</span>
+                <span class="brand-tag">{{ brand.services.count }} Service{{ brand.services.count|pluralize }}</span>
+            </div>
+
+            <div class="brand-cta">
+                Explore Store
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+        </a>
+        {% empty %}
+        <div class="empty-state">
+            <h3>No brands found</h3>
+            <p>Try a different search term, or check back soon.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if brands.has_other_pages %}
+    <div class="pagination-wrap">
+        {% if brands.has_previous %}
+            <a href="?page={{ brands.previous_page_number }}&search={{ search_query }}" class="page-btn">←</a>
+        {% else %}
+            <span class="page-btn disabled">←</span>
+        {% endif %}
+
+        {% for num in brands.paginator.page_range %}
+            {% if brands.number == num %}
+                <span class="page-btn active">{{ num }}</span>
+            {% elif num > brands.number|add:'-3' and num < brands.number|add:'3' %}
+                <a href="?page={{ num }}&search={{ search_query }}" class="page-btn">{{ num }}</a>
+            {% elif num == 1 or num == brands.paginator.num_pages %}
+                <a href="?page={{ num }}&search={{ search_query }}" class="page-btn">{{ num }}</a>
+            {% elif num == brands.number|add:'-3' or num == brands.number|add:'3' %}
+                <span class="page-ellipsis">…</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if brands.has_next %}
+            <a href="?page={{ brands.next_page_number }}&search={{ search_query }}" class="page-btn">→</a>
+        {% else %}
+            <span class="page-btn disabled">→</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- ── Bottom CTA ── -->
+<div class="brand-cta-strip">
+    <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:16px;">Are You a Brand?</span>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:#fff;margin-bottom:16px;">
+        List Your Business on <em style="color:var(--gold);">Azers Squad</em>
+    </h2>
+    <p style="font-family:'DM Sans';font-size:14px;color:rgba(255,255,255,0.3);max-width:400px;margin:0 auto 32px;line-height:1.8;">
+        Reach Nigeria's most talented creatives and an engaged audience of event buyers.
+    </p>
+    <a href="{% url 'core:brand_signup' %}" style="display:inline-block;padding:16px 40px;background:var(--gold);color:#000;font-family:'DM Sans';font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;border-radius:100px;text-decoration:none;transition:all 0.3s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='var(--gold)'">
+        Register Your Brand →
+    </a>
+</div>
+
+<script>
+const cards = document.querySelectorAll('.brand-card');
+cards.forEach((card, i) => {
+    gsap.to(card, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        delay: 0.05 + i * 0.08,
+        ease: 'power3.out'
+    });
+});
+</script>
+
+{% endblock %}

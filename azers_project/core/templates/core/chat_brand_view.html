@@ -1,0 +1,75 @@
+{% extends 'core/base_auth.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-6xl mx-auto flex gap-6 h-[85vh]">
+        
+        <div class="hidden lg:block w-72 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Inquiry Details</h2>
+            <div class="space-y-6">
+                <div>
+                    <p class="text-[10px] text-[#d4af37] font-bold uppercase">Client Name</p>
+                    <p class="text-sm font-bold text-gray-800">{{ conversation.guest_name }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-[#d4af37] font-bold uppercase">Topic</p>
+                    <span class="inline-block mt-1 px-2 py-1 bg-gray-100 rounded text-[9px] font-bold text-gray-500">
+                        {{ conversation.subject_type }}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-[10px] text-[#d4af37] font-bold uppercase">Email</p>
+                    <p class="text-xs text-gray-500 break-all">{{ conversation.visitor_email }}</p>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-50">
+                <p class="text-[9px] text-gray-400 uppercase font-medium">Session ID: {{ conversation.guest_uuid|slice:":8" }}</p>
+            </div>
+        </div>
+
+        <div class="flex-grow bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col border border-gray-100">
+            <div class="p-4 bg-white border-b border-gray-100 flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-800">Chat with {{ conversation.guest_name }}</span>
+                <span class="text-[9px] bg-green-100 text-green-600 px-2 py-1 rounded-full font-black uppercase tracking-tighter">Live Lead</span>
+            </div>
+
+            <div id="chat-log" 
+     hx-get="{% url 'core:brand_chat_room' conversation.guest_uuid %}" 
+     hx-trigger="every 3s" 
+     hx-select="#chat-log" 
+     hx-swap="innerHTML" 
+     class="flex-grow overflow-y-auto p-6 space-y-4">
+                
+                {% for msg in chat_messages %}
+                    <div class="flex {% if not msg.is_from_guest %}justify-end{% else %}justify-start{% endif %}">
+                        <div class="max-w-[70%]">
+                            <div class="p-3.5 rounded-2xl {% if not msg.is_from_guest %}bg-[#0F172A] text-white rounded-br-none shadow-md{% else %}bg-white border border-gray-200 text-gray-800 rounded-bl-none{% endif %}">
+                                {% if msg.image %}
+                                    <img src="{{ msg.image.url }}" class="rounded-lg mb-2 max-h-48 object-cover">
+                                {% endif %}
+                                <p class="text-sm leading-relaxed">{{ msg.text }}</p>
+                            </div>
+                            <p class="text-[8px] text-gray-400 mt-1 uppercase {% if not msg.is_from_guest %}text-right{% endif %}">
+                                {{ msg.timestamp|date:"g:i A" }}
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div id="scroll-anchor"></div>
+            </div>
+
+            {% include 'core/partials/chat_input_form.html' %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatLog = document.getElementById('chat-log');
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+        if (evt.detail.target.id === 'chat-log') {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

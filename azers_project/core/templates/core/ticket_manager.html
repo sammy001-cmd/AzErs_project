@@ -1,0 +1,175 @@
+{% extends "core/base_auth.html" %}
+{% block title %}Ticket Manager — Azers Squad{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+    /* Premium Ticket Design */
+    .cool-ticket-card {
+        background: linear-gradient(135deg, #0F172A 0%, #020617 100%);
+        border: 1px solid #d4af37;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        color: white;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .ticket-id-ribbon {
+        position: absolute;
+        top: 15px;
+        right: -35px;
+        background: #d4af37;
+        color: black;
+        padding: 5px 40px;
+        transform: rotate(45deg);
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .user-photo-frame {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        border: 2px solid #d4af37;
+        border-radius: 50%;
+        padding: 3px;
+        background: rgba(212,175,55,0.1);
+    }
+
+    .user-photo-frame img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .scan-line {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background: rgba(212,175,55,0.5);
+        box-shadow: 0 0 15px #d4af37;
+        top: 0;
+        animation: scan 2.5s linear infinite;
+    }
+
+    @keyframes scan {
+        0% { top: 0%; }
+        100% { top: 100%; }
+    }
+
+    .btn-approve {
+        background: #d4af37;
+        color: black;
+        transition: all 0.3s ease;
+    }
+    .btn-approve:hover {
+        background: white;
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="min-h-screen bg-[#F8FAFC] pb-20">
+    <!-- Navbar (Matches your Dashboard) -->
+    <div class="bg-white/80 backdrop-blur-md border-b border-gray-100 py-4 px-8 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="{% url 'core:brand_dashboard' %}" class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
+                <h1 class="text-xl font-serif font-bold text-gray-900">Ticket <span class="italic text-[#d4af37]">Manager</span></h1>
+            </a>
+            <div class="flex items-center gap-4">
+                <span class="px-3 py-1 bg-gray-900 text-white text-[10px] font-black uppercase rounded-full">Event Control</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Sidebar: Active Events -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Active Event Tiers</h3>
+                {% for ticket in tickets %}
+                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 mb-4">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-bold text-gray-900">{{ ticket.event_name }}</h4>
+                        <span class="text-[#d4af37] font-serif font-black">₦{{ ticket.price }}</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">{{ ticket.event_date|date:"F d, Y @ H:i" }}</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-[9px] font-bold text-gray-500">
+                            CAPACITY: <span class="text-gray-900">{{ ticket.total_capacity }}</span>
+                        </div>
+                        <a href="#" class="text-[9px] font-black text-blue-600 uppercase">Edit Details</a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-400 italic">No tickets created yet.</p>
+                {% endfor %}
+                
+                <a href="{% url 'core:add_ticket' %}" class="block text-center py-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl text-[10px] font-black uppercase text-gray-400 hover:border-[#d4af37] hover:text-[#d4af37] transition-all mt-4">
+                    + Create New Tier
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content: Verifications -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="bg-[#0F172A] rounded-[2.5rem] p-8 text-white relative overflow-hidden">
+                <h2 class="text-2xl font-serif">Pending <span class="italic text-[#d4af37]">Verifications</span></h2>
+                <p class="text-slate-400 text-xs mt-1">Review receipts and issue personalized digital passes.</p>
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-[#d4af37]/10 rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for purchase in pending_verifications %}
+                <div class="bg-white rounded-[2rem] border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <!-- Receipt Preview Header -->
+                    <div class="p-4 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
+                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Order #{{ purchase.id }}</span>
+                        <a href="{{ purchase.payment_receipt.url }}" target="_blank" class="text-[9px] font-black text-[#d4af37] uppercase underline">View Receipt</a>
+                    </div>
+
+                    <div class="p-6">
+                        <!-- Holder Info -->
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-100 shadow-sm">
+                                <img src="{{ purchase.user_photo.url }}" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">{{ purchase.user_name }}</h4>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-tighter">{{ purchase.ticket.event_name }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Form -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <form action="{% url 'core:approve_ticket' purchase.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full py-3 bg-[#d4af37] text-black text-[9px] font-black uppercase rounded-xl hover:scale-105 transition-all">
+                                    Approve Pass
+                                </button>
+                            </form>
+                            <form action="#" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full py-3 bg-red-50 text-red-600 text-[9px] font-black uppercase rounded-xl hover:bg-red-600 hover:text-white transition-all">
+                                    Decline
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full py-20 bg-white rounded-[2rem] border border-dashed border-gray-200 text-center">
+                    <p class="text-gray-400 text-xs italic">All caught up! No pending payments to verify.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

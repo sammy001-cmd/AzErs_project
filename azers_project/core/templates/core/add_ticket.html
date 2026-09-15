@@ -1,0 +1,55 @@
+{% extends "core/base_auth.html" %}
+{% block content %}
+<div class="min-h-screen bg-[#F8FAFC] py-12 px-4">
+    <div class="max-w-2xl mx-auto bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
+        <div class="bg-[#0F172A] p-8 text-white">
+            <h2 class="text-2xl font-serif">Create <span class="italic text-[#d4af37]">Access Tier</span></h2>
+            <p class="text-slate-400 text-xs">Set up a new ticket for your brand's upcoming event.</p>
+        </div>
+
+        <form method="POST" class="p-8 space-y-6">
+            {% csrf_token %}
+            
+            <div class="space-y-4">
+                {% for field in form %}
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="text-red-500 text-[10px] mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-[#d4af37] text-black font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-black hover:text-white transition-all shadow-lg shadow-[#d4af37]/20">
+                Generate Ticket Tier
+            </button>
+            
+            <a href="{% url 'core:ticket_manager' %}" class="block text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                Cancel and Go Back
+            </a>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-input, input, textarea, select {
+        width: 100%;
+        padding: 12px 16px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        font-size: 13px;
+        outline: none;
+        transition: all 0.3s;
+    }
+    .form-input:focus, input:focus {
+        border-color: #d4af37;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.05);
+    }
+</style>
+{% endblock %}

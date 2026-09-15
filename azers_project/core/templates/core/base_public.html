@@ -5,10 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Azers Squad | Premium Talent Agency{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     
     <style>
         :root {
@@ -79,6 +81,7 @@
             <ul class="hidden md:flex items-center gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">
                 <li><a href="{% url 'core:home' %}" class="hover:text-[#d4af37] transition-colors">Home</a></li>
                 <li><a href="{% url 'core:artist_list' %}" class="hover:text-[#d4af37] transition-colors">Talent</a></li>
+                <li><a href="{% url 'core:brand_list' %}" class="hover:text-[#d4af37] transition-colors">Brands</a></li>
                 
                 {% if user.is_authenticated %}
                     <li class="pl-4 border-l border-gray-200">
@@ -120,6 +123,7 @@
             <ul class="space-y-8 text-sm font-black uppercase tracking-[0.3em] text-gray-800">
                 <li><a href="{% url 'core:home' %}" class="block hover:text-[#d4af37] transition-colors">Home</a></li>
                 <li><a href="{% url 'core:artist_list' %}" class="block hover:text-[#d4af37] transition-colors">Talent</a></li>
+                <li><a href="{% url 'core:brand_list' %}" class="hover:text-[#d4af37] transition-colors">Brands</a></li>
                 <hr class="border-gray-100">
                 {% if user.is_authenticated %}
                     <li>

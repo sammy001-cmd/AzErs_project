@@ -1,0 +1,61 @@
+{% extends 'core/base_public.html' %}
+{% block content %}
+<div class="min-h-screen bg-[#F9F8F3] py-8 px-4">
+    <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[85vh]">
+        
+        <div class="px-6 py-5 bg-[#0F172A] text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#d4af37] flex items-center justify-center font-black text-black">
+                    {{ conversation.receiver.brand.brand_name|slice:":1" }}
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-tight">{{ conversation.receiver.brand.brand_name }}</h1>
+                    <p class="text-[9px] text-[#d4af37] uppercase font-black tracking-widest">Verified Brand</p>
+                </div>
+            </div>
+            <a href="{% url 'core:home' %}" class="text-[10px] font-bold uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity">Exit Chat</a>
+        </div>
+
+        <div id="chat-log" 
+     hx-get="{% url 'core:brand_chat_room' conversation.guest_uuid %}" 
+     hx-trigger="every 3s" 
+     hx-select="#chat-log" 
+     hx-swap="innerHTML" 
+     class="flex-grow overflow-y-auto p-6 space-y-4">
+            
+            {% for msg in chat_messages %}
+                <div class="flex {% if msg.is_from_guest %}justify-end{% else %}justify-start{% endif %}">
+                    <div class="max-w-[75%]">
+                        <div class="p-4 rounded-2xl shadow-sm {% if msg.is_from_guest %}bg-[#d4af37] text-black rounded-br-none{% else %}bg-white border border-gray-100 text-gray-800 rounded-bl-none{% endif %}">
+                            {% if msg.image %}
+                                <img src="{{ msg.image.url }}" class="rounded-lg mb-2 w-full object-cover max-h-64">
+                            {% endif %}
+                            <p class="text-sm leading-relaxed">{{ msg.text }}</p>
+                        </div>
+                        <p class="text-[8px] text-gray-400 mt-1 uppercase {% if msg.is_from_guest %}text-right{% endif %}">
+                            {{ msg.timestamp|date:"g:i A" }}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <div id="scroll-anchor"></div>
+        </div>
+
+        {% include 'core/partials/chat_input_form.html' %}
+    </div>
+</div>
+
+<script>
+    // Scrolls to bottom on load
+    const chatLog = document.getElementById('chat-log');
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    // HTMX listener to scroll when new messages arrive
+    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+        if (evt.detail.target.id === 'chat-log') {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

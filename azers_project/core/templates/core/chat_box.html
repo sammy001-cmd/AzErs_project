@@ -1,0 +1,386 @@
+{% extends 'core/base_public.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-[90vh] bg-[#0A0A0A] py-6 md:py-10 px-4 font-sans text-white">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 h-[85vh] lg:h-[780px]">
+        
+        <!-- Sidebar -->
+        <div class="hidden lg:flex lg:col-span-1 bg-[#111111] border border-white/5 rounded-[2.5rem] p-8 flex-col shadow-2xl">
+            <div class="text-center mb-10">
+                <div class="relative inline-block">
+                    <div class="w-28 h-28 rounded-full border-2 border-[#d4af37]/30 p-1 mx-auto mb-6 shadow-2xl shadow-[#d4af37]/5">
+                        <div class="w-full h-full rounded-full overflow-hidden bg-black border border-white/10">
+                            {% if conversation.receiver.artist.profile_pic %}
+                                <img src="{{ conversation.receiver.artist.profile_pic.url }}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-3xl font-black text-[#d4af37]">
+                                    {{ conversation.receiver.artist.stage_name|slice:":1" }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="absolute bottom-6 right-2 h-4 w-4 bg-green-500 border-4 border-[#111111] rounded-full"></div>
+                </div>
+                <h2 class="text-xl font-black uppercase tracking-tighter leading-tight">{{ conversation.receiver.artist.stage_name }}</h2>
+                <p class="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] mt-1">Elite Talent</p>
+            </div>
+
+            <div class="space-y-6 pt-8 border-t border-white/5">
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-[#d4af37] font-black uppercase tracking-widest mb-1">Performance</p>
+                    <p class="text-sm font-bold text-gray-200">{{ booking.event_date|date:"D, d M Y" }}</p>
+                </div>
+                <div class="px-4">
+                    <p class="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-1">Session Protocol</p>
+                    <p class="text-[10px] font-mono text-gray-400">ID: #{{ conversation.guest_uuid|slice:":8"|upper }}</p>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-6">
+                <a href="{% url 'core:home' %}" class="block text-center py-4 rounded-2xl border border-white/10 text-[9px] font-black uppercase tracking-widest hover:bg-red-600 hover:border-red-600 transition-all duration-300">
+                    Exit Secure Session
+                </a>
+            </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="lg:col-span-3 flex flex-col bg-[#0F0F0F] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+            
+            <!-- Header -->
+            <div class="px-8 py-5 bg-[#141414] border-b border-white/5 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="flex gap-1">
+                        <span class="w-1 h-1 bg-red-500 rounded-full animate-pulse"></span>
+                        <span class="w-1 h-1 bg-red-500 rounded-full animate-pulse delay-75"></span>
+                    </div>
+                    <span class="text-white font-black uppercase text-[10px] tracking-[0.3em]">Direct Transmission</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[8px] font-black text-gray-500 uppercase tracking-widest mr-2">Encrypted</span>
+                    <i class="fas fa-lock text-[#d4af37] text-[10px]"></i>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="chat-log" class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-3 scrollbar-hide" style="background-color:#0e0e0e; background-image:url('https://www.transparenttextures.com/patterns/carbon-fibre.png');">
+                {% for msg in chat_messages %}
+                    {% if msg.is_from_guest %}
+                    <!-- GUEST = ME = RIGHT = GOLD -->
+                    <div class="chat-row chat-row--mine flex justify-end items-end gap-2">
+                        <div class="max-w-[68%]">
+                            <div class="chat-bubble chat-bubble--mine bg-[#d4af37] text-black text-[14px] font-semibold px-4 py-2.5 rounded-2xl rounded-br-none shadow-lg">
+                                {{ msg.text }}
+                            </div>
+                            <p class="text-[10px] text-gray-500 mt-1 text-right pr-1 flex items-center justify-end gap-1">
+                                {{ msg.timestamp|date:"H:i" }}
+                                <span class="text-[#d4af37] text-[11px]">✓✓</span>
+                            </p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- ARTIST = THEM = LEFT = DARK -->
+                    <div class="chat-row chat-row--theirs flex justify-start items-end gap-2">
+                        <div class="h-8 w-8 rounded-full bg-[#1a1a1a] border border-white/10 flex items-center justify-center text-[11px] font-black text-[#d4af37] shrink-0 mb-5">
+                            {{ conversation.receiver.artist.stage_name|slice:":1" }}
+                        </div>
+                        <div class="max-w-[68%]">
+                            <div class="chat-bubble chat-bubble--theirs bg-[#202020] text-gray-100 text-[14px] px-4 py-2.5 rounded-2xl rounded-bl-none border border-white/5 shadow-lg">
+                                {{ msg.text }}
+                            </div>
+                            <p class="text-[10px] text-gray-500 mt-1 pl-1">
+                                {{ msg.timestamp|date:"H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Input -->
+            <div class="p-4 md:p-5 bg-[#141414] border-t border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="flex-1 flex items-center bg-[#1E1E1E] rounded-full border border-white/10 px-5 py-3 focus-within:border-[#d4af37]/40 focus-within:shadow-[0_0_15px_rgba(212,175,55,0.07)] transition-all duration-300">
+                        <input id="chat-message-input" type="text"
+                            class="flex-1 bg-transparent border-none text-[14px] text-white focus:ring-0 placeholder-gray-600 font-medium"
+                            placeholder="Message..."
+                            autocomplete="off">
+                    </div>
+                    <button id="chat-message-submit"
+                        class="h-12 w-12 bg-[#d4af37] text-black rounded-full flex items-center justify-center hover:scale-105 active:scale-90 transition-all shadow-lg shrink-0">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    #chat-log { scroll-behavior: smooth; }
+    .chat-row { display: flex; width: 100%; margin: 0.75rem 0; }
+    .chat-row--mine { justify-content: flex-end; }
+    .chat-row--theirs { justify-content: flex-start; }
+    .chat-bubble { max-width: min(68vw, 34rem); overflow-wrap: anywhere; }
+    .chat-bubble--mine { background: #d4af37; color: #090909; border-radius: 1rem 1rem 0.2rem 1rem; }
+    .chat-bubble--theirs { background: #202020; color: #f3f4f6; border: 1px solid rgba(255,255,255,.08); border-radius: 1rem 1rem 1rem 0.2rem; }
+    input:focus { outline: none !important; box-shadow: none !important; }
+    @keyframes msgIn {
+        from { opacity: 0; transform: translateY(6px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .new-msg { animation: msgIn 0.22s ease-out forwards; }
+</style>
+
+<script>
+    const roomName = "{{ conversation.id }}";
+    const artistInitial = "{{ conversation.receiver.artist.stage_name|slice:':1' }}";
+    const chatLog = document.querySelector('#chat-log');
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    // --- Unread Badge on Page Title ---
+    let unreadCount = 0;
+    const originalTitle = document.title;
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            unreadCount = 0;
+            document.title = originalTitle;
+        }
+    });
+
+    // --- WebSocket ---
+    const chatSocket = new WebSocket(
+        (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+        + window.location.host
+        + '/ws/chat/' + roomName + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // Guest view: is_from_guest=true → I sent it (right/gold), false → artist sent it (left/dark)
+        const sentByMe = data.is_from_guest === true;
+
+        // Increment badge only when tab is hidden and message is from artist
+        if (!sentByMe && document.visibilityState === 'hidden') {
+            unreadCount++;
+            document.title = `(${unreadCount}) New Message — AzersSquad`;
+        }
+
+        let msgHtml = '';
+        if (sentByMe) {
+            msgHtml = `
+            <div class="chat-row chat-row--mine flex justify-end items-end gap-2 new-msg">
+                <div class="max-w-[68%]">
+                    <div class="chat-bubble chat-bubble--mine bg-[#d4af37] text-black text-[14px] font-semibold px-4 py-2.5 rounded-2xl rounded-br-none shadow-lg">
+                        ${data.message}
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1 text-right pr-1 flex items-center justify-end gap-1">
+                        Just now <span class="text-[#d4af37] text-[11px]">✓✓</span>
+                    </p>
+                </div>
+            </div>`;
+        } else {
+            msgHtml = `
+            <div class="chat-row chat-row--theirs flex justify-start items-end gap-2 new-msg">
+                <div class="h-8 w-8 rounded-full bg-[#1a1a1a] border border-white/10 flex items-center justify-center text-[11px] font-black text-[#d4af37] shrink-0 mb-5">
+                    ${artistInitial}
+                </div>
+                <div class="max-w-[68%]">
+                    <div class="chat-bubble chat-bubble--theirs bg-[#202020] text-gray-100 text-[14px] px-4 py-2.5 rounded-2xl rounded-bl-none border border-white/5 shadow-lg">
+                        ${data.message}
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1 pl-1">Just now</p>
+                </div>
+            </div>`;
+        }
+
+        chatLog.insertAdjacentHTML('beforeend', msgHtml);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    chatSocket.onclose = function() {
+        console.warn('WebSocket disconnected.');
+    };
+
+    const messageInput = document.querySelector('#chat-message-input');
+    const messageSubmit = document.querySelector('#chat-message-submit');
+
+    messageSubmit.onclick = function() {
+        const message = messageInput.value.trim();
+        if (message !== "") {
+            chatSocket.send(JSON.stringify({ 'message': message }));
+            messageInput.value = '';
+        }
+    };
+
+    messageInput.onkeyup = function(e) {
+        if (e.keyCode === 13) { messageSubmit.click(); }
+    };
+</script>
+{% endblock %}
+
+{% comment %} {% extends 'core/base_public.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-[90vh] bg-[#0A0A0A] py-6 md:py-10 px-4 font-sans text-white">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 h-[85vh] lg:h-[780px]">
+        
+        <div class="hidden lg:flex lg:col-span-1 bg-[#111111] border border-white/5 rounded-[2.5rem] p-8 flex-col shadow-2xl">
+            <div class="text-center mb-10">
+                <div class="relative inline-block">
+                    <div class="w-28 h-28 rounded-full border-2 border-[#d4af37]/30 p-1 mx-auto mb-6 shadow-2xl shadow-[#d4af37]/5">
+                        <div class="w-full h-full rounded-full overflow-hidden bg-black border border-white/10">
+                            {% if conversation.receiver.artist.profile_pic %}
+                                <img src="{{ conversation.receiver.artist.profile_pic.url }}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-3xl font-black text-[#d4af37]">
+                                    {{ conversation.receiver.artist.stage_name|slice:":1" }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="absolute bottom-6 right-2 h-4 w-4 bg-green-500 border-4 border-[#111111] rounded-full"></div>
+                </div>
+                <h2 class="text-xl font-black uppercase tracking-tighter leading-tight">{{ conversation.receiver.artist.stage_name }}</h2>
+                <p class="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] mt-1">Elite Talent</p>
+            </div>
+
+            <div class="space-y-6 pt-8 border-t border-white/5">
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-[#d4af37] font-black uppercase tracking-widest mb-1">Performance</p>
+                    <p class="text-sm font-bold text-gray-200">{{ booking.event_date|date:"D, d M Y" }}</p>
+                </div>
+                <div class="px-4">
+                    <p class="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-1">Session Protocol</p>
+                    <p class="text-[10px] font-mono text-gray-400">ID: #{{ conversation.guest_uuid|slice:":8"|upper }}</p>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-6">
+                <a href="{% url 'core:home' %}" class="block text-center py-4 rounded-2xl border border-white/10 text-[9px] font-black uppercase tracking-widest hover:bg-red-600 hover:border-red-600 transition-all duration-300">
+                    Exit Secure Session
+                </a>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 flex flex-col bg-[#0F0F0F] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+            
+            <div class="px-8 py-6 bg-[#141414] border-b border-white/5 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="flex gap-1">
+                        <span class="w-1 h-1 bg-red-500 rounded-full animate-pulse"></span>
+                        <span class="w-1 h-1 bg-red-500 rounded-full animate-pulse delay-75"></span>
+                    </div>
+                    <span class="text-white font-black uppercase text-[10px] tracking-[0.3em]">Direct Transmission</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[8px] font-black text-gray-500 uppercase tracking-widest mr-2">Encrypted</span>
+                    <i class="fas fa-lock text-[#d4af37] text-[10px]"></i>
+                </div>
+            </div>
+
+            <div id="chat-log" class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 scrollbar-hide bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+                {% for msg in messages %}
+                <div class="flex {% if msg.is_from_guest %}justify-end{% else %}justify-start{% endif %}">
+                    <div class="max-w-[85%] md:max-w-[70%] group">
+                        <div class="px-6 py-3.5 rounded-2xl md:rounded-[1.8rem] text-[14px] leading-relaxed shadow-xl transition-all
+                            {% if msg.is_from_guest %}
+                                bg-[#d4af37] text-black font-bold rounded-br-none shadow-[#d4af37]/5
+                            {% else %}
+                                bg-[#1A1A1A] text-gray-200 rounded-bl-none border border-white/10 shadow-black/40
+                            {% endif %}">
+                            {{ msg.text }}
+                        </div>
+                        <p class="text-[8px] text-gray-600 mt-2 font-black uppercase tracking-[0.2em] {% if msg.is_from_guest %}text-right{% endif %}">
+                            {{ msg.timestamp|date:"H:i" }}
+                            {% if msg.is_from_guest %}
+                                <span class="ml-1 text-[#d4af37]">PROCESSED</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="p-6 md:p-8 bg-[#141414] border-t border-white/5">
+                <div class="relative flex items-center bg-black rounded-2xl md:rounded-full border border-white/10 p-1.5 focus-within:border-[#d4af37]/50 focus-within:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500">
+                    <input id="chat-message-input" type="text" 
+                        class="w-full bg-transparent border-none py-4 px-6 text-[14px] text-white focus:ring-0 placeholder-gray-700 font-medium" 
+                        placeholder="Send secure message..."
+                        autocomplete="off">
+                    
+                    <button id="chat-message-submit" 
+                        class="h-12 w-12 bg-[#d4af37] text-black rounded-xl md:rounded-full flex items-center justify-center hover:scale-105 active:scale-90 transition-all shadow-lg shadow-[#d4af37]/20 shrink-0">
+                        <i class="fas fa-arrow-up text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    #chat-log { scroll-behavior: smooth; }
+    
+    /* Clean up focus states */
+    input:focus { outline: none !important; box-shadow: none !important; }
+
+    @keyframes entry {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .new-msg { animation: entry 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+</style>
+
+<script>
+    const roomName = "{{ conversation.id }}";
+    const isGuest = "{{ is_guest }}" === "True";
+    const chatLog = document.querySelector('#chat-log');
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    const chatSocket = new WebSocket(
+        (window.location.protocol === 'https:' ? 'wss://' : 'ws://') 
+        + window.location.host 
+        + '/ws/chat/' + roomName + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const sentByMe = isGuest ? data.is_from_guest : (data.sender_id == "{{ request.user.id }}");
+
+        const msgHtml = `
+            <div class="flex ${sentByMe ? 'justify-end' : 'justify-start'} new-msg">
+                <div class="max-w-[85%] md:max-w-[70%] group">
+                    <div class="px-6 py-3.5 rounded-2xl md:rounded-[1.8rem] text-[14px] leading-relaxed shadow-xl ${sentByMe ? 'bg-[#d4af37] text-black font-bold rounded-br-none' : 'bg-[#1A1A1A] text-gray-200 rounded-bl-none border border-white/10'}">
+                        ${data.message}
+                    </div>
+                    <p class="text-[8px] text-gray-600 mt-2 font-black uppercase tracking-[0.2em] ${sentByMe ? 'text-right' : ''}">
+                        SECURE TRANSMISSION ${sentByMe ? '<span class="ml-1 text-[#d4af37]">PROCESSED</span>' : ''}
+                    </p>
+                </div>
+            </div>`;
+        
+        chatLog.insertAdjacentHTML('beforeend', msgHtml);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    const messageInput = document.querySelector('#chat-message-input');
+    const messageSubmit = document.querySelector('#chat-message-submit');
+
+    messageSubmit.onclick = function() {
+        const message = messageInput.value.trim();
+        if(message !== "") {
+            chatSocket.send(JSON.stringify({ 'message': message }));
+            messageInput.value = '';
+        }
+    };
+
+    messageInput.onkeyup = function(e) {
+        if (e.keyCode === 13) { messageSubmit.click(); }
+    };
+</script>
+{% endblock %}
+ {% endcomment %}

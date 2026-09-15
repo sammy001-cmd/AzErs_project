@@ -1,0 +1,83 @@
+{% extends "core/base_auth.html" %}
+{% block content %}
+<div class="min-h-screen bg-[#F8FAFC] py-12 px-4">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Left Side: Instructions & Payment -->
+        <div class="space-y-6">
+            <div class="bg-[#0F172A] p-8 rounded-[2rem] text-white">
+                <h2 class="text-2xl font-serif mb-4">Secure your <span class="italic text-[#d4af37]">Access</span></h2>
+                <p class="text-slate-400 text-xs mb-8">Follow the steps below to join the {{ ticket.brand.brand_name }} squad for this event.</p>
+                
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <span class="w-6 h-6 rounded-full bg-[#d4af37] text-black text-[10px] flex items-center justify-center font-black">1</span>
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-[#d4af37]">Transfer Payment</p>
+                            <p class="text-sm font-bold mt-1">₦{{ ticket.price }}</p>
+                            <p class="text-[11px] text-slate-400 mt-2">Transfer to the brand's verified account. Ensure you save your receipt/screenshot.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <p class="text-[9px] text-slate-500 uppercase font-black mb-2">Account Details</p>
+                        <p class="text-sm font-mono tracking-wider">
+                            {% if ticket.brand.account_number and ticket.brand.bank_name %}
+                                {{ ticket.brand.account_number }} | {{ ticket.brand.bank_name }}
+                            {% else %}
+                                Account details not set yet
+                            {% endif %}
+                        </p>
+                        <p class="text-[10px] text-slate-300 mt-1 uppercase">{{ ticket.brand.brand_name }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: The Form -->
+        <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Your Full Name</label>
+                    <input type="text" name="user_name" required class="form-input" placeholder="Name to appear on ticket">
+                </div>
+                <!-- Inside your <form> tag -->
+<div>
+    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Gmail Address</label>
+    <input type="email" name="email" required class="form-input" placeholder="Where should we send your ticket?">
+    <p class="text-[9px] text-gray-400 mt-1 italic">* Ensure this is a valid Gmail address.</p>
+</div>
+
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Clear Headshot (Face)</label>
+                    <input type="file" name="user_photo" accept="image/*" required class="form-input">
+                    <p class="text-[9px] text-gray-400 mt-1 italic">* This will be printed on your digital pass for security.</p>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Upload Payment Receipt</label>
+                    <input type="file" name="payment_receipt" accept="image/*" required class="form-input">
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-[#d4af37] hover:text-black transition-all">
+                    Submit for Verification
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        font-size: 13px;
+        outline: none;
+    }
+</style>
+{% endblock %}

@@ -2,131 +2,410 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<script src="https://cdn.tailwindcss.com"></script>
-
-<div class="min-h-screen bg-[#F9F8F3] py-16 px-6 lg:px-12">
-    <div class="max-w-7xl mx-auto">
-        
-        <div class="text-center mb-16 animate__animated animate__fadeIn">
-            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-[#d4af37]">Discover</span>
-            <h2 class="text-5xl font-serif font-bold text-gray-900 mt-2">Available <span class="italic text-[#d4af37]">Artists</span></h2>
-            <div class="h-1 w-12 bg-[#d4af37] mx-auto mt-6"></div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {% for artist in artists %}
-            <div class="group relative bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 animate__animated animate__fadeInUp" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
-                
-                <div class="relative h-[300px] overflow-hidden">
-                    {% if artist.profile_picture %}
-                        <img src="{{ artist.profile_picture.url }}" alt="{{ artist.stage_name }}" 
-                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    {% else %}
-                        <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-                            <span class="text-gray-300 text-6xl">👤</span>
-                        </div>
-                    {% endif %}
-                    
-                    <div class="absolute top-4 left-4">
-                        <span class="bg-white/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-gray-800 shadow-sm">
-                            {{ artist.genre|default:"Vocalist" }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="p-8 text-center">
-                    <h3 class="text-2xl font-serif font-bold text-gray-900 mb-1 tracking-tight">{{ artist.stage_name }}</h3>
-                    <p class="text-[10px] text-[#d4af37] font-black uppercase tracking-[0.2em] mb-4">
-                        Starting from ₦{{ artist.price_tag|default:"0" }}
-                    </p>
-                    
-                    <p class="text-sm text-gray-500 line-clamp-2 mb-6 italic leading-relaxed">
-                        "{{ artist.bio|default:"Professional artist ready to elevate your event with a unique performance." }}"
-                    </p>
-
-                    <a href="{% url 'core:artist_detail' artist.id %}" 
-                       class="inline-block w-full py-4 border border-gray-100 rounded-xl text-[11px] font-black uppercase tracking-widest text-gray-400 group-hover:bg-[#d4af37] group-hover:text-white group-hover:border-[#d4af37] transition-all duration-300">
-                        View Full Portfolio
-                    </a>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full text-center py-20">
-                <p class="text-gray-400 font-serif italic text-xl">The stage is currently quiet. Check back soon.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600;1,700&family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 <style>
-    /* Ensures the bio doesn't break the card height */
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;  
-        overflow: hidden;
-    }
+:root {
+    --gold: #d4af37;
+    --black: #080808;
+    --cream: #F9F8F3;
+}
+
+* { box-sizing: border-box; }
+
+/* ── Page Header ── */
+.page-header {
+    background: var(--black);
+    padding: 100px 24px 80px;
+    position: relative;
+    overflow: hidden;
+}
+.page-header::after {
+    content: 'TALENT';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(6rem, 15vw, 14rem);
+    color: rgba(255,255,255,0.03);
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+/* ── Search & Filter Bar ── */
+.filter-bar {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 20px 24px;
+    position: sticky;
+    top: 72px;
+    z-index: 40;
+}
+.filter-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+.search-wrap svg {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0,0,0,0.25);
+    pointer-events: none;
+}
+.search-input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--cream);
+    color: #111;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: rgba(0,0,0,0.3); }
+
+.genre-select {
+    padding: 12px 16px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--cream);
+    color: #111;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+.genre-select:focus { border-color: var(--gold); }
+
+.filter-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: var(--gold);
+    color: #000;
+    transition: all 0.2s;
+}
+.filter-btn:hover { background: #c9a42e; }
+
+.result-count {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(0,0,0,0.35);
+    white-space: nowrap;
+}
+
+/* ── Artist Grid ── */
+.artists-section {
+    background: var(--cream);
+    padding: 60px 24px 100px;
+}
+.artists-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+@media (max-width: 900px) { .artists-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 580px) { .artists-grid { grid-template-columns: 1fr; } }
+
+/* ── Artist Card ── */
+.artist-card {
+    background: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease;
+    opacity: 0;
+    transform: translateY(30px);
+}
+.artist-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+}
+.card-image {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    background: #111;
+}
+.card-image img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.23,1,0.32,1);
+}
+.artist-card:hover .card-image img { transform: scale(1.06); }
+.card-image-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    color: var(--gold);
+}
+.genre-badge {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(212,175,55,0.3);
+}
+.card-body {
+    padding: 24px 24px 28px;
+}
+.artist-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.1;
+    margin-bottom: 6px;
+}
+.artist-price {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    display: block;
+}
+.artist-bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(0,0,0,0.4);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.card-cta {
+    display: block;
+    text-align: center;
+    padding: 13px 20px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: var(--black);
+    color: var(--gold);
+    transition: all 0.3s ease;
+}
+.card-cta:hover {
+    background: var(--gold);
+    color: #000;
+}
+
+/* ── Empty State ── */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px 24px;
+}
+.empty-state h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-style: italic;
+    color: rgba(0,0,0,0.2);
+    margin-bottom: 12px;
+}
+.empty-state p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(0,0,0,0.3);
+}
+
+/* ── Pagination ── */
+.pagination-wrap {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.page-btn {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    color: rgba(0,0,0,0.4);
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    transition: all 0.2s;
+}
+.page-btn:hover { border-color: var(--gold); color: var(--gold); }
+.page-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+.page-btn.disabled { opacity: 0.3; pointer-events: none; }
+.page-ellipsis {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(0,0,0,0.3);
+    padding: 0 4px;
+}
 </style>
-{% endblock %}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{% comment %} {% extends "core/base_public.html" %}
-{% load static %}
-{% block content %}
-<h2 class="mb-4">Available Artists</h2>
-
-<div class="row">
-  {% for artist in artists %}
-  <div class="col-md-4 mb-4">
-    <div class="card h-100 shadow-sm">
-      {% if artist.profile_picture %}
-      <img
-        src="{{ artist.profile_picture.url }}"
-        alt="{{ artist.stage_name }}"
-        style="height: 150px; border-radius: 10px"
-      />
-      {% else %}
-      <img
-        src="{% static 'images/default-artist.png' %}"
-        alt="Default Artist"
-        style="height: 150px; border-radius: 10px"
-      />
-      {% endif %}
-
-      <div class="card-body">
-        <h5 class="card-title">{{ artist.stage_name }}</h5>
-        <p class="card-text">
-          <strong>Genre:</strong> {{ artist.genre }} <br />
-          <strong>Price:</strong> ₦{{ artist.price_tag }} <br />
-          <em>{{ artist.bio|default:"No bio yet" }}</em>
+<!-- ── Page Header ── -->
+<div class="page-header">
+    <div style="max-width:1200px;margin:0 auto;position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="height:1px;width:36px;background:var(--gold);"></div>
+            <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);">Azers Squad</span>
+        </div>
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,7vw,6rem);font-weight:700;color:#fff;line-height:0.95;margin-bottom:20px;">
+            Our <em style="color:var(--gold);">Talent</em><br>Roster
+        </h1>
+        <p style="font-family:'DM Sans';font-size:14px;color:rgba(255,255,255,0.35);max-width:440px;line-height:1.8;font-weight:300;">
+            Verified, elite Nigerian creatives ready to elevate your next event or collaboration.
         </p>
-        <a href="{% url 'core:artist_detail' artist.id %}" class="btn btn-primary"
-          >View Profile</a
-        >
-      </div>
     </div>
-  </div>
-  {% empty %}
-  <p>No artists available.</p>
-  {% endfor %}
 </div>
+
+<!-- ── Filter Bar ── -->
+<div class="filter-bar">
+    <form method="GET" action="" class="filter-inner">
+        <div class="search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" name="search" class="search-input" placeholder="Search artists by name..." value="{{ search_query }}">
+        </div>
+        <select name="genre" class="genre-select">
+            <option value="">All Genres</option>
+            <option value="afrobeats" {% if genre_query == "afrobeats" %}selected{% endif %}>Afrobeats</option>
+            <option value="highlife" {% if genre_query == "highlife" %}selected{% endif %}>Highlife</option>
+            <option value="afropop" {% if genre_query == "afropop" %}selected{% endif %}>Afropop</option>
+            <option value="rnb" {% if genre_query == "rnb" %}selected{% endif %}>R&B</option>
+            <option value="hiphop" {% if genre_query == "hiphop" %}selected{% endif %}>Hip-Hop</option>
+            <option value="gospel" {% if genre_query == "gospel" %}selected{% endif %}>Gospel</option>
+            <option value="comedian" {% if genre_query == "comedian" %}selected{% endif %}>Comedian</option>
+            <option value="dancer" {% if genre_query == "dancer" %}selected{% endif %}>Dancer</option>
+            <option value="photographer" {% if genre_query == "photographer" %}selected{% endif %}>Photographer</option>
+            <option value="mc" {% if genre_query == "mc" %}selected{% endif %}>MC / Host</option>
+        </select>
+        <button type="submit" class="filter-btn">Filter</button>
+        {% if search_query or genre_query %}
+        <a href="{% url 'core:artist_list' %}" style="font-family:'DM Sans';font-size:11px;font-weight:700;color:rgba(0,0,0,0.3);text-decoration:none;letter-spacing:0.1em;white-space:nowrap;">✕ Clear</a>
+        {% endif %}
+        <span class="result-count">{{ artists.paginator.count }} artist{{ artists.paginator.count|pluralize }} found</span>
+    </form>
+</div>
+
+<!-- ── Artist Grid ── -->
+<div class="artists-section">
+    <div class="artists-grid" id="artistsGrid">
+        {% for artist in artists %}
+        <div class="artist-card">
+            <div class="card-image">
+                {% if artist.profile_picture %}
+                    <img src="{{ artist.profile_picture.url }}" alt="{{ artist.stage_name }}" loading="lazy">
+                {% else %}
+                    <div class="card-image-placeholder">{{ artist.stage_name|slice:":1" }}</div>
+                {% endif %}
+                <span class="genre-badge">{{ artist.genre|default:"Artist" }}</span>
+            </div>
+            <div class="card-body">
+                <h3 class="artist-name">{{ artist.stage_name }}</h3>
+                <span class="artist-price">From ₦{{ artist.price_tag|default:"0" }}</span>
+                <p class="artist-bio">{{ artist.bio|default:"Professional artist ready to elevate your event with a unique, unforgettable performance." }}</p>
+                <a href="{% url 'core:artist_detail' artist.id %}" class="card-cta">View Profile →</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <h3>No artists found</h3>
+            <p>Try adjusting your search or filter.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if artists.has_other_pages %}
+    <div class="pagination-wrap">
+        {% if artists.has_previous %}
+            <a href="?page={{ artists.previous_page_number }}&search={{ search_query }}&genre={{ genre_query }}" class="page-btn">←</a>
+        {% else %}
+            <span class="page-btn disabled">←</span>
+        {% endif %}
+
+        {% for num in artists.paginator.page_range %}
+            {% if artists.number == num %}
+                <span class="page-btn active">{{ num }}</span>
+            {% elif num > artists.number|add:'-3' and num < artists.number|add:'3' %}
+                <a href="?page={{ num }}&search={{ search_query }}&genre={{ genre_query }}" class="page-btn">{{ num }}</a>
+            {% elif num == 1 or num == artists.paginator.num_pages %}
+                <a href="?page={{ num }}&search={{ search_query }}&genre={{ genre_query }}" class="page-btn">{{ num }}</a>
+            {% elif num == artists.number|add:'-3' or num == artists.number|add:'3' %}
+                <span class="page-ellipsis">…</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if artists.has_next %}
+            <a href="?page={{ artists.next_page_number }}&search={{ search_query }}&genre={{ genre_query }}" class="page-btn">→</a>
+        {% else %}
+            <span class="page-btn disabled">→</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Stagger card entrance
+const cards = document.querySelectorAll('.artist-card');
+cards.forEach((card, i) => {
+    gsap.to(card, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        delay: 0.05 + i * 0.08,
+        ease: 'power3.out'
+    });
+});
+</script>
+
 {% endblock %}
- {% endcomment %}

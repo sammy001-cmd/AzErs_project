@@ -60,12 +60,21 @@
                             <h2 class="text-3xl font-serif mb-2">Workspace <span class="italic text-[#d4af37]">Overview</span></h2>
                             <p class="text-slate-400 text-sm max-w-sm">Manage your high-end inventory and track service requests.</p>
                         </div>
-                        <div class="flex flex-wrap gap-3">
-                            <a href="{% url 'core:add_product' %}" class="px-5 py-3.5 bg-[#d4af37] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-all active:scale-95 shadow-lg shadow-[#d4af37]/20">
+                        <div class="w-full md:w-auto grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                            <a href="{% url 'core:add_product' %}" class="px-5 py-3.5 bg-[#d4af37] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white transition-all active:scale-95 shadow-lg shadow-[#d4af37]/20 text-center">
                                 + New Product
                             </a>
-                            <a href="{% url 'core:add_service' %}" class="px-5 py-3.5 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 backdrop-blur-sm transition-all">
+                            <a href="{% url 'core:add_service' %}" class="px-5 py-3.5 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 backdrop-blur-sm transition-all text-center">
                                 + Add Service
+                            </a>
+                            <a href="{% url 'core:ticket_manager' %}" class="relative isolate overflow-hidden px-5 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-[0.18em] text-black transition-all duration-300 active:scale-95 shadow-xl shadow-[#d4af37]/30 hover:shadow-2xl hover:shadow-[#d4af37]/40 group bg-gradient-to-r from-[#d4af37] via-[#f1cf67] to-[#fff1c2] text-center">
+                                <span class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.85),transparent_45%)] opacity-70 group-hover:opacity-90 transition-opacity"></span>
+                                <span class="relative z-10 inline-flex items-center justify-center gap-2 w-full">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 5V4a2 2 0 10-4 0v1M8 5V4a2 2 0 10-4 0v1m12 0H8a2 2 0 00-2 2v2h12V7a2 2 0 00-2-2zM6 11v6a2 2 0 002 2h8a2 2 0 002-2v-6H6z"></path>
+                                    </svg>
+                                    Issue Ticket
+                                </span>
                             </a>
                         </div>
                     </div>
@@ -80,6 +89,25 @@
                         <svg class="w-4 h-4 absolute left-4 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] border border-gray-100 p-5 md:p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Live Chat Rooms</h3>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-[#d4af37]">{{ brand_chats|length }} Active</span>
+                    </div>
+                    <div class="space-y-2">
+                        {% for convo in brand_chats %}
+                        <a href="{% url 'core:brand_chat_room' convo.guest_uuid %}" class="block p-3 rounded-2xl border border-gray-100 hover:border-[#d4af37]/40 hover:bg-[#d4af37]/5 transition-all">
+                            <p class="text-xs font-bold text-gray-900">
+                                {% if convo.guest_name %}{{ convo.guest_name }}{% else %}{{ convo.participants.first.username|default:"Member" }}{% endif %}
+                            </p>
+                            <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-1">Updated {{ convo.updated_at|timesince }} ago</p>
+                        </a>
+                        {% empty %}
+                        <p class="text-xs text-gray-400 italic">No chat inquiries yet.</p>
+                        {% endfor %}
                     </div>
                 </div>
 

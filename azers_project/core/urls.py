@@ -20,6 +20,7 @@ urlpatterns = [
 
     # Artist
     path("artists/", views.artist_list, name="artist_list"),
+    path('brands/', views.brand_list, name='brand_list'),
     path("artist/<int:pk>/", views.artist_detail, name="artist_detail"),
     # path("seller/<int:seller_id>/", views.seller_detail, name="seller_detail"),
 
@@ -45,6 +46,8 @@ urlpatterns = [
     path("awaiting-approval/", views.awaiting_approval, name="awaiting_approval"),
 
     path("brand/<int:pk>/", views.brand_detail, name="brand_detail"),
+    path("brand/<int:brand_id>/chat/", views.start_brand_chat, name="start_brand_chat"),
+    path("brand/chat/<uuid:guest_uuid>/", views.brand_chat_room, name="brand_chat_room"),
     path("brand/dashboard/", views.brand_dashboard, name="brand_dashboard"),
     path("brand/edit/", views.edit_brand_profile, name="edit_brand_profile"),
 
@@ -65,7 +68,7 @@ urlpatterns = [
     path('admin-dashboard/approve/<int:user_id>/', views.approve_user, name='approve_user'),
     # Marketplace & Public Brand Store
     path("marketplace/", views.marketplace, name="marketplace"),
-    path("brand/store/<int:pk>/", views.brand_storefront, name="brand_storefront"),
+    # path("brand/store/<int:pk>/", views.brand_storefront, name="brand_storefront"),
     path('track-lead/<int:product_id>/', views.track_lead, name='track_lead'),
 
     path('brand/product/delete/<int:pk>/', views.delete_product, name='delete_product'),
@@ -75,7 +78,18 @@ urlpatterns = [
 
     path('booking/verify/<uuid:secret_id>/', views.verify_payment, name='verify_payment'),
 
-
+    path('book/<int:artist_id>/', views.initiate_booking_chat, name='initiate_booking'),
+    path('chat/g/<uuid:guest_uuid>/', views.public_chat_room, name='public_chat_room'),
+    path('chat/<int:room_id>/', views.chat_room, name='chat_room'),
+    path('portal/<uuid:guest_uuid>/', views.public_chat_room, name='public_chat_room'),
+    path('chat/send/<int:convo_id>/', views.send_msg, name='send_msg'),
+    path('admin-panel/toggle/<int:user_id>/', views.toggle_user_active, name='toggle_user_active'),
+    path('admin-panel/delete/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('dashboard/tickets/', views.brand_ticket_manager, name='ticket_manager'),
+    path('dashboard/tickets/approve/<int:purchase_id>/', views.approve_ticket, name='approve_ticket'),
+    path('dashboard/tickets/add/', views.add_ticket, name='add_ticket'),
+    path('ticket/purchase/<int:ticket_id>/', views.purchase_ticket, name='purchase_ticket'),
+    path('pass/<str:pass_id>/', views.view_digital_pass, name='view_digital_pass'),
     # path('booking/pdf/<uuid:secret_id>/', views.download_booking_pdf, name='download_pdf'),
     
 

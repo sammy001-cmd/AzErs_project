@@ -1,0 +1,4 @@
+.env
+azers_project/.env
+__pycache__/
+*.py[cod]

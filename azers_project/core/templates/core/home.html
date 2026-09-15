@@ -1,4 +1,1045 @@
-{% extends "core/base_public.html" %} 
+{% extends "core/base_public.html" %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600;1,700&family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --gold: #d4af37;
+    --black: #080808;
+    --cream: #F9F8F3;
+    --warm: #F0EBE1;
+}
+
+.font-display { font-family: 'Cormorant Garamond', serif; }
+.font-heading { font-family: 'Bebas Neue', sans-serif; }
+.font-body { font-family: 'DM Sans', sans-serif; }
+
+/* Grain overlay */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* HERO */
+#hero {
+    position: relative;
+    min-height: 100vh;
+    background: var(--black);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hero-mosaic {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+    opacity: 0.22;
+}
+.hero-mosaic img { width:100%;height:100%;object-fit:cover;filter:grayscale(50%); }
+.hero-mosaic .span-2 { grid-row: span 2; }
+.hero-fade {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 55%;
+    background: linear-gradient(to bottom, transparent, var(--black));
+    pointer-events: none;
+}
+.hero-fade-cream {
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 180px;
+    background: linear-gradient(to bottom, transparent, var(--cream));
+    pointer-events: none;
+    z-index: 2;
+}
+.hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 0 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.hero-title-line { overflow: hidden; line-height: 0.9; }
+.hero-title-word { display: inline-block; }
+
+/* Magnetic btn */
+.magnetic-wrap { display: inline-block; }
+.magnetic-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 40px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+.btn-primary { background: var(--gold); color: #000; box-shadow: 0 20px 60px rgba(212,175,55,0.3); }
+.btn-primary:hover { background: #fff; }
+.btn-secondary { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+.btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Marquee */
+.marquee-outer { overflow: hidden; background: var(--gold); padding: 14px 0; }
+.marquee-inner { display: flex; width: max-content; }
+.marquee-track { display: flex; gap: 48px; padding-right: 48px; animation: marqueeAnim 20s linear infinite; white-space: nowrap; }
+@keyframes marqueeAnim { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+.marquee-outer:hover .marquee-track { animation-play-state: paused; }
+
+/* Stats */
+.stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    line-height: 1;
+    color: var(--gold);
+    display: block;
+}
+
+/* Artist cards */
+.artist-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+@media (max-width: 768px) { .artist-grid { grid-template-columns: 1fr; } }
+.artist-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    cursor: pointer;
+    background: #111;
+}
+.artist-card img { width:100%;height:100%;object-fit:cover;transition:transform 0.9s cubic-bezier(0.23,1,0.32,1); }
+.artist-card:hover img { transform: scale(1.07); }
+.artist-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 55%, transparent 100%);
+}
+.artist-card-body { position: absolute; bottom: 0; left: 0; right: 0; padding: 28px; }
+.artist-card-cta {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 10px 20px;
+    background: var(--gold);
+    color: #000;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border-radius: 12px;
+    text-decoration: none;
+    transform: translateY(8px);
+    opacity: 0;
+    transition: all 0.35s ease;
+}
+.artist-card:hover .artist-card-cta { transform: translateY(0); opacity: 1; }
+.artist-placeholder {
+    width:100%;height:100%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue';font-size:6rem;color:var(--gold);
+}
+
+/* Brand cards */
+.brand-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 24px;
+    padding: 28px;
+    transition: all 0.4s ease;
+    text-decoration: none;
+    display: block;
+}
+.brand-card:hover {
+    background: rgba(212,175,55,0.06);
+    border-color: rgba(212,175,55,0.35);
+    transform: translateY(-6px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+}
+.brand-avatar {
+    width: 60px; height: 60px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    background: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--gold);
+}
+.brand-tag {
+    font-family: 'DM Sans'; font-size: 9px; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.45);
+    border-radius: 8px;
+}
+
+/* Step card */
+.step-card {
+    padding: 36px 24px;
+    border-radius: 24px;
+    background: var(--cream);
+    text-align: center;
+}
+.step-num {
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-family: 'Bebas Neue'; font-size: 1.5rem;
+}
+
+/* CTA */
+.cta-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    margin: 0 auto;
+    animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+    0%,100% { opacity:1; transform:scaleY(1); }
+    50% { opacity:0.3; transform:scaleY(0.6); }
+}
+
+/* Sections default visible — GSAP will animate them */
+section { opacity: 1; }
+</style>
+
+<!-- GSAP + ScrollTrigger only (no Lenis) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+    <div class="hero-mosaic" id="heroMosaic">
+    {% for artist in featured_artists %}
+        {% if artist.profile_picture %}
+            <img {% if forloop.first %}class="span-2"{% endif %} 
+                 src="{{ artist.profile_picture.url }}" alt="{{ artist.stage_name }}">
+        {% endif %}
+    {% endfor %}
+</div>
+    {% comment %} <div class="hero-mosaic" id="heroMosaic">
+        <img class="span-2" src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop" alt="">
+        <img src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=600&auto=format&fit=crop" alt="">
+        <img src="https://images.unsplash.com/photo-1501386761578-eaa54b4e6b10?q=80&w=600&auto=format&fit=crop" alt="">
+        <img src="https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=600&auto=format&fit=crop" alt="">
+        <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=600&auto=format&fit=crop" alt="">
+    </div> {% endcomment %}
+    <div class="hero-fade"></div>
+    <div class="hero-fade-cream"></div>
+
+    <!-- Orbs -->
+    <div style="position:absolute;top:20%;left:8%;width:400px;height:400px;background:radial-gradient(circle,rgba(212,175,55,0.1),transparent 70%);border-radius:50%;pointer-events:none;"></div>
+    <div style="position:absolute;bottom:25%;right:6%;width:280px;height:280px;background:radial-gradient(circle,rgba(212,175,55,0.07),transparent 70%);border-radius:50%;pointer-events:none;"></div>
+
+    <div class="hero-content">
+        <div id="heroTag" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:32px;opacity:0;">
+            <div style="height:1px;width:40px;background:var(--gold);"></div>
+            <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);">Nigeria's Premier Talent Agency</span>
+            <div style="height:1px;width:40px;background:var(--gold);"></div>
+        </div>
+
+        <h1 id="heroTitle" style="font-family:'Cormorant Garamond',serif;font-size:clamp(4.5rem,11vw,9.5rem);font-weight:700;line-height:0.88;color:#fff;margin-bottom:32px;"></h1>
+
+        <p id="heroSub" style="font-family:'DM Sans';font-size:clamp(0.9rem,1.4vw,1.05rem);color:rgba(255,255,255,0.4);max-width:500px;margin:0 auto 48px;line-height:1.8;font-weight:300;opacity:0;">
+            Connecting Nigeria's most gifted creatives with brands that demand excellence. Music. Fashion. Performance. Culture.
+        </p>
+
+        <div id="heroCtas" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;opacity:0;">
+            <div class="magnetic-wrap">
+                <a href="{% url 'core:artist_list' %}" class="magnetic-btn btn-primary">
+                    Explore Talent
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+            <div class="magnetic-wrap">
+                <a href="{% url 'core:brand_list' %}" class="magnetic-btn btn-secondary">View brands</a>
+            </div>
+        </div>
+
+        <div id="scrollInd" style="margin-top:80px;opacity:0;">
+            <p style="font-family:'DM Sans';font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.4em;text-transform:uppercase;margin-bottom:12px;">Scroll</p>
+            <div class="scroll-line"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ MARQUEE ══════════ -->
+<div class="marquee-outer">
+    <div class="marquee-inner">
+        <div class="marquee-track">
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">AZERS SQUAD</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">ELITE TALENT</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">BOOK NOW</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">AZERS SQUAD</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">ELITE TALENT</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">BOOK NOW</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">AZERS SQUAD</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">ELITE TALENT</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:#000;letter-spacing:0.2em;">BOOK NOW</span>
+            <span style="font-family:'Bebas Neue';font-size:1.3rem;color:rgba(0,0,0,0.3);">✦</span>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- ══════════ STATS ══════════ -->
+<section id="statsSection" style="background:var(--cream);padding:100px 24px;">
+    <div style="max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center;">
+        <div>
+            <span class="stat-num">{{ total_artists }}+</span>
+            <span style="font-family:'DM Sans';font-size:10px;color:rgba(0,0,0,0.3);letter-spacing:0.3em;text-transform:uppercase;display:block;margin-top:8px;">Artists</span>
+        </div>
+        <div>
+            <span class="stat-num">{{ total_bookings }}+</span>
+            <span style="font-family:'DM Sans';font-size:10px;color:rgba(0,0,0,0.3);letter-spacing:0.3em;text-transform:uppercase;display:block;margin-top:8px;">Bookings</span>
+        </div>
+        <div>
+            <span class="stat-num">{{ total_brands }}+</span>
+            <span style="font-family:'DM Sans';font-size:10px;color:rgba(0,0,0,0.3);letter-spacing:0.3em;text-transform:uppercase;display:block;margin-top:8px;">Brands</span>
+        </div>
+        <div>
+            <span class="stat-num">5★</span>
+            <span style="font-family:'DM Sans';font-size:10px;color:rgba(0,0,0,0.3);letter-spacing:0.3em;text-transform:uppercase;display:block;margin-top:8px;">Rated</span>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ FEATURED ARTISTS ══════════ -->
+<section style="background:var(--cream);padding:0 24px 120px;">
+    <div style="max-width:1200px;margin:0 auto;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px;">
+            <div>
+                <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <span style="display:inline-block;width:36px;height:1px;background:var(--gold);"></span>Portfolio
+                </span>
+                <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:#111;line-height:1.05;">
+                    Featured <em>Creatives</em>
+                </h2>
+            </div>
+            <a href="{% url 'core:artist_list' %}" style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,0,0,0.3);text-decoration:none;transition:color 0.3s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(0,0,0,0.3)'">
+                View All →
+            </a>
+        </div>
+
+        <div class="artist-grid" id="artistGrid">
+            {% for artist in featured_artists %}
+            <div class="artist-card">
+                {% if artist.profile_picture %}
+                    <img src="{{ artist.profile_picture.url }}" alt="{{ artist.stage_name }}">
+                {% else %}
+                    <div class="artist-placeholder">{{ artist.stage_name|slice:":1" }}</div>
+                {% endif %}
+                <div class="artist-card-overlay"></div>
+                <div class="artist-card-body">
+                    <span style="font-family:'DM Sans';font-size:9px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;">{{ artist.genre|default:"Artist" }}</span>
+                    <h3 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:#fff;line-height:1.1;">{{ artist.stage_name }}</h3>
+                    <a href="{% url 'core:artist_detail' artist.id %}" class="artist-card-cta">View Profile →</a>
+                </div>
+            </div>
+            {% empty %}
+            <div style="grid-column:span 3;text-align:center;padding:80px 0;">
+                <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-style:italic;color:rgba(0,0,0,0.2);">Curating the spotlight...</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section style="background:#fff;padding:120px 24px;">
+    <div style="max-width:1100px;margin:0 auto;">
+        <div style="text-align:center;margin-bottom:80px;">
+            <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:12px;">Process</span>
+            <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:#111;">
+                How It <em>Works</em>
+            </h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;" id="stepsGrid">
+            <div class="step-card">
+                <div class="step-num" style="background:var(--gold);color:#000;">01</div>
+                <h4 style="font-family:'DM Sans';font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#111;margin-bottom:10px;">Browse Talent</h4>
+                <p style="font-family:'DM Sans';font-size:13px;color:rgba(0,0,0,0.4);line-height:1.7;">Explore our roster of verified, elite Nigerian creatives.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num" style="background:var(--black);color:var(--gold);">02</div>
+                <h4 style="font-family:'DM Sans';font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#111;margin-bottom:10px;">Send Request</h4>
+                <p style="font-family:'DM Sans';font-size:13px;color:rgba(0,0,0,0.4);line-height:1.7;">Submit your booking details - no account needed.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num" style="background:var(--gold);color:#000;">03</div>
+                <h4 style="font-family:'DM Sans';font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#111;margin-bottom:10px;">Get Approved</h4>
+                <p style="font-family:'DM Sans';font-size:13px;color:rgba(0,0,0,0.4);line-height:1.7;">Artist reviews and opens a private encrypted chat.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num" style="background:var(--black);color:var(--gold);">04</div>
+                <h4 style="font-family:'DM Sans';font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#111;margin-bottom:10px;">Connect & Book</h4>
+                <p style="font-family:'DM Sans';font-size:13px;color:rgba(0,0,0,0.4);line-height:1.7;">Chat directly and finalise your event securely.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════ AZERS FAMILY ══════════ -->
+<section style="background:var(--cream);padding:120px 24px;">
+    <div style="max-width:1100px;margin:0 auto;text-align:center;">
+        <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:12px;">Community</span>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:#111;margin-bottom:16px;">
+            The <em>Azers Family</em>
+        </h2>
+        <p style="font-family:'DM Sans';font-size:14px;color:rgba(0,0,0,0.4);max-width:480px;margin:0 auto 60px;line-height:1.8;">
+            More than an agency - a movement. Nigeria's most dedicated creatives, united.
+        </p>
+        <!-- Avatar cluster -->
+        <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:-10px;margin-bottom:40px;">
+            {% for artist in featured_artists %}
+            <div title="{{ artist.stage_name }}" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--cream);overflow:hidden;margin:-6px;box-shadow:0 4px 20px rgba(0,0,0,0.1);background:#111;display:flex;align-items:center;justify-content:center;">
+                {% if artist.profile_picture %}
+                    <img src="{{ artist.profile_picture.url }}" style="width:100%;height:100%;object-fit:cover;" alt="{{ artist.stage_name }}">
+                {% else %}
+                    <span style="font-family:'Bebas Neue';font-size:1.8rem;color:var(--gold);">{{ artist.stage_name|slice:":1" }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <p style="font-family:'Cormorant Garamond';font-size:1.3rem;font-style:italic;color:rgba(0,0,0,0.35);">
+            {{ total_artists }}+ verified creatives and counting
+        </p>
+        <a href="{% url 'core:artist_signup' %}" style="display:inline-block;margin-top:32px;padding:16px 36px;background:var(--black);color:var(--gold);font-family:'DM Sans';font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;border-radius:100px;text-decoration:none;">
+            Join the Family →
+        </a>
+    </div>
+</section>
+
+<!-- ══════════ BRANDS ══════════ -->
+<section style="background:var(--black);padding:120px 24px;">
+    <div style="max-width:1200px;margin:0 auto;">
+        <div style="margin-bottom:60px;">
+            <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span style="display:inline-block;width:36px;height:1px;background:var(--gold);"></span>The Exchange
+            </span>
+            <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:#fff;line-height:1.05;">
+                Brands & <em style="color:var(--gold);">Makers</em>
+            </h2>
+            <p style="font-family:'DM Sans';font-size:13px;color:rgba(255,255,255,0.3);margin-top:12px;max-width:400px;line-height:1.8;">Products and services from Nigeria's most creative businesses.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;" id="brandsGrid">
+            {% for brand in featured_brands %}
+            <a href="{% url 'core:brand_detail' brand.id %}" class="brand-card">
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+                    <div class="brand-avatar">
+                        {% if brand.display_picture %}
+                            <img src="{{ brand.display_picture }}" style="width:100%;height:100%;object-fit:cover;">
+                        {% else %}
+                            {{ brand.brand_name|slice:":1" }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 style="font-family:'DM Sans';font-size:15px;font-weight:700;color:#fff;margin-bottom:4px;">{{ brand.brand_name }}</h3>
+                        <span style="font-family:'DM Sans';font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25);">Squad Verified</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+                    <span class="brand-tag">{{ brand.products.count }} Product{{ brand.products.count|pluralize }}</span>
+                    <span class="brand-tag">{{ brand.services.count }} Service{{ brand.services.count|pluralize }}</span>
+                </div>
+                <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);">Explore Store →</span>
+            </a>
+            {% empty %}
+            <div style="grid-column:span 3;text-align:center;padding:60px;border:1px dashed rgba(255,255,255,0.07);border-radius:24px;">
+                <p style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-style:italic;color:rgba(255,255,255,0.15);">Brand listings coming soon</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section style="background:var(--black);padding:140px 24px;position:relative;overflow:hidden;">
+    <div class="cta-glow"></div>
+    <div style="max-width:800px;margin:0 auto;text-align:center;position:relative;z-index:1;" id="ctaContent">
+        <span style="font-family:'DM Sans';font-size:10px;font-weight:700;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:24px;">Join the Family</span>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,8vw,7rem);font-weight:700;color:#fff;line-height:0.92;margin-bottom:24px;">
+            Are You a<br><em style="color:var(--gold);">Creative?</em>
+        </h2>
+        <p style="font-family:'DM Sans';font-size:15px;color:rgba(255,255,255,0.3);max-width:460px;margin:0 auto 48px;line-height:1.8;">
+            Get discovered by top brands, manage your bookings, and grow your career - all in one place.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+            <div class="magnetic-wrap">
+                <a href="{% url 'core:artist_signup' %}" class="magnetic-btn btn-primary">Apply as Artist</a>
+            </div>
+            <div class="magnetic-wrap">
+                <a href="{% url 'core:brand_signup' %}" class="magnetic-btn btn-secondary">Join as Brand</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── Hero title split ──
+const lines = [
+    { text: 'The', style: '' },
+    { text: 'AzErs ', style: 'color:var(--gold);font-style:italic;' },
+    {% comment %} { text: 'Meets', style: '' }, {% endcomment %}
+    { text: 'Family', style: 'font-style:italic;' },
+];
+const titleEl = document.getElementById('heroTitle');
+lines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'hero-title-line';
+    const span = document.createElement('span');
+    span.className = 'hero-title-word';
+    span.style.cssText = `transform:translateY(110%);display:inline-block;${line.style}`;
+    span.textContent = line.text;
+    div.appendChild(span);
+    titleEl.appendChild(div);
+    gsap.to(span, { y: '0%', duration: 1.1, ease: 'power4.out', delay: 0.15 + i * 0.13 });
+});
+
+// Hero elements
+gsap.to('#heroTag', { opacity: 1, duration: 0.8, delay: 0.1 });
+gsap.to('#heroSub', { opacity: 1, duration: 1, delay: 0.85, ease: 'power3.out' });
+gsap.to('#heroCtas', { opacity: 1, duration: 1, delay: 1.05, ease: 'power3.out' });
+gsap.to('#scrollInd', { opacity: 1, duration: 1, delay: 1.5 });
+
+// ── Parallax mosaic ──
+gsap.to('#heroMosaic', {
+    yPercent: 20,
+    ease: 'none',
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+});
+
+// ── Scroll-triggered section reveals ──
+const revealSections = [
+    '#statsSection',
+    '#artistGrid',
+    '#stepsGrid',
+    '#brandsGrid',
+    '#ctaContent',
+];
+revealSections.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    gsap.fromTo(el,
+        { opacity: 0, y: 60 },
+        {
+            opacity: 1, y: 0,
+            duration: 1,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: el,
+                start: 'top 85%',
+                toggleActions: 'play none none none',
+            }
+        }
+    );
+});
+
+// Artist cards stagger
+gsap.fromTo('.artist-card',
+    { opacity: 0, y: 50 },
+    {
+        opacity: 1, y: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '#artistGrid', start: 'top 80%' }
+    }
+);
+
+// Step cards stagger
+gsap.fromTo('.step-card',
+    { opacity: 0, y: 40 },
+    {
+        opacity: 1, y: 0,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '#stepsGrid', start: 'top 80%' }
+    }
+);
+
+// Brand cards stagger
+gsap.fromTo('.brand-card',
+    { opacity: 0, y: 40 },
+    {
+        opacity: 1, y: 0,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '#brandsGrid', start: 'top 80%' }
+    }
+);
+
+// ── Count-up stats ──
+document.querySelectorAll('.stat-num[data-target]').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    ScrollTrigger.create({
+        trigger: el,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+            const obj = { val: 0 };
+            gsap.to(obj, {
+                val: target,
+                duration: 2,
+                ease: 'power2.out',
+                onUpdate: () => { el.textContent = Math.round(obj.val) + '+'; }
+            });
+        }
+    });
+});
+
+// ── Magnetic buttons ──
+document.querySelectorAll('.magnetic-wrap').forEach(wrap => {
+    const btn = wrap.querySelector('.magnetic-btn');
+    wrap.addEventListener('mousemove', e => {
+        const r = wrap.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width / 2;
+        const y = e.clientY - r.top - r.height / 2;
+        gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.4, ease: 'power2.out' });
+    });
+    wrap.addEventListener('mouseleave', () => {
+        gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1,0.5)' });
+    });
+});
+</script>
+
+{% endblock %}
+
+
+
+
+{% comment %} {% extends "core/base_public.html" %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,600&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --gold: #d4af37;
+        --gold-dim: rgba(212,175,55,0.15);
+        --black: #0a0a0a;
+        --cream: #F9F8F3;
+        --gray: #6b6b6b;
+    }
+
+    .font-display { font-family: 'Cormorant Garamond', serif; }
+    .font-heading { font-family: 'Bebas Neue', sans-serif; }
+    .font-body { font-family: 'DM Sans', sans-serif; }
+
+    /* Grain overlay */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0.4;
+    }
+
+    /* Hero */
+    .hero-text-mask {
+        background: linear-gradient(180deg, #fff 60%, rgba(255,255,255,0.3));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.9s cubic-bezier(0.23,1,0.32,1), transform 0.9s cubic-bezier(0.23,1,0.32,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* Artist card */
+    .artist-card { position: relative; overflow: hidden; }
+    .artist-card img { transition: transform 0.8s cubic-bezier(0.23,1,0.32,1); }
+    .artist-card:hover img { transform: scale(1.08); }
+    .artist-card .card-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+        opacity: 0.7;
+        transition: opacity 0.5s ease;
+    }
+    .artist-card:hover .card-overlay { opacity: 1; }
+    .artist-card .card-cta {
+        transform: translateY(10px);
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    .artist-card:hover .card-cta { transform: translateY(0); opacity: 1; }
+
+    /* Gold line */
+    .gold-line {
+        display: inline-block;
+        width: 40px; height: 1px;
+        background: var(--gold);
+        vertical-align: middle;
+        margin-right: 12px;
+    }
+
+    /* Stats */
+    .stat-number {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 5rem;
+        line-height: 1;
+        color: var(--gold);
+    }
+
+    /* Brand card */
+    .brand-card {
+        border: 1px solid rgba(255,255,255,0.07);
+        transition: all 0.4s ease;
+    }
+    .brand-card:hover {
+        border-color: var(--gold);
+        background: rgba(212,175,55,0.05);
+        transform: translateY(-4px);
+    }
+
+    /* CTA section */
+    .cta-bg {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1500 50%, #0a0a0a 100%);
+    }
+
+    /* Marquee */
+    @keyframes marquee {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
+    .marquee-track { animation: marquee 20s linear infinite; }
+    .marquee-track:hover { animation-play-state: paused; }
+
+    /* How it works connector */
+    .step-connector {
+        position: absolute;
+        top: 28px; left: calc(50% + 28px);
+        width: calc(100% - 56px);
+        height: 1px;
+        background: linear-gradient(to right, var(--gold), transparent);
+    }
+
+    @media (max-width: 768px) {
+        .step-connector { display: none; }
+    }
+</style>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-black font-body">
+    <!-- BG Image -->
+    <div class="absolute inset-0">
+        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=2070&auto=format&fit=crop"
+             class="w-full h-full object-cover opacity-30">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black"></div>
+    </div>
+
+    <!-- Floating gold orb -->
+    <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-[#d4af37]/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
+        <div class="mb-6 flex items-center justify-center gap-3">
+            <div class="h-px w-12 bg-[#d4af37]"></div>
+            <span class="text-[#d4af37] text-[10px] font-black uppercase tracking-[0.5em] font-body">Nigeria's Premier Talent Agency</span>
+            <div class="h-px w-12 bg-[#d4af37]"></div>
+        </div>
+
+        <h1 class="font-display text-[clamp(4rem,12vw,9rem)] font-bold leading-[0.9] text-white mb-4">
+            Where <span class="italic text-[#d4af37]">Talent</span><br>
+            Meets <span class="italic">Legacy</span>
+        </h1>
+
+        <p class="font-body text-gray-400 text-base md:text-lg max-w-xl mx-auto leading-relaxed mt-8 mb-12">
+            Connecting Nigeria's most gifted creatives with brands that demand excellence. Book. Create. Perform.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{% url 'core:artist_list' %}"
+               class="font-body px-10 py-4 bg-[#d4af37] text-black text-[11px] font-black uppercase tracking-[0.3em] rounded-full hover:bg-white transition-all duration-500 shadow-2xl shadow-[#d4af37]/20">
+                Explore Talent
+            </a>
+            <a href="{% url 'core:artist_signup' %}"
+               class="font-body px-10 py-4 border border-white/20 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-full hover:border-[#d4af37] hover:text-[#d4af37] transition-all duration-500">
+                Join as Artist
+            </a>
+        </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        <span class="text-[9px] text-gray-500 font-body uppercase tracking-[0.3em]">Scroll</span>
+        <div class="w-px h-16 bg-gradient-to-b from-[#d4af37] to-transparent animate-pulse"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ MARQUEE ═══════════════════════════════ -->
+<div class="bg-[#d4af37] py-4 overflow-hidden">
+    <div class="marquee-track flex gap-12 whitespace-nowrap" style="width: max-content;">
+        {% for i in "123456789012" %}
+        <span class="font-heading text-black text-2xl tracking-widest">AZERS SQUAD</span>
+        <span class="font-heading text-black/40 text-2xl">✦</span>
+        <span class="font-heading text-black text-2xl tracking-widest">ELITE TALENT</span>
+        <span class="font-heading text-black/40 text-2xl">✦</span>
+        <span class="font-heading text-black text-2xl tracking-widest">BOOK NOW</span>
+        <span class="font-heading text-black/40 text-2xl">✦</span>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ═══════════════════════════════ STATS ═══════════════════════════════ -->
+<section class="bg-[#0a0a0a] py-24 px-6 font-body">
+    <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+        <div class="reveal">
+            <div class="stat-number">50+</div>
+            <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] mt-2">Artists</p>
+        </div>
+        <div class="reveal reveal-delay-1">
+            <div class="stat-number">200+</div>
+            <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] mt-2">Bookings</p>
+        </div>
+        <div class="reveal reveal-delay-2">
+            <div class="stat-number">30+</div>
+            <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] mt-2">Brands</p>
+        </div>
+        <div class="reveal reveal-delay-3">
+            <div class="stat-number">5★</div>
+            <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] mt-2">Rated</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ FEATURED ARTISTS ═══════════════════════════════ -->
+<section class="bg-[#F9F8F3] py-28 px-6 font-body">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div class="reveal">
+                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-[#d4af37] block mb-3">
+                    <span class="gold-line"></span>Portfolio
+                </span>
+                <h2 class="font-display text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+                    Featured<br><span class="italic">Creatives</span>
+                </h2>
+            </div>
+            <a href="{% url 'core:artist_list' %}"
+               class="reveal text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#d4af37] transition-colors flex items-center gap-2 group">
+                View All
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for artist in featured_artists %}
+            <div class="artist-card rounded-3xl overflow-hidden reveal reveal-delay-{{ forloop.counter }}" style="aspect-ratio: 3/4;">
+                {% if artist.profile_picture %}
+                    <img src="{{ artist.profile_picture.url }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
+                        <span class="font-heading text-[#d4af37] text-8xl">{{ artist.stage_name|slice:":1" }}</span>
+                    </div>
+                {% endif %}
+                <div class="card-overlay"></div>
+                <div class="absolute inset-0 flex flex-col justify-end p-8">
+                    <span class="text-[#d4af37] text-[9px] font-black uppercase tracking-[0.3em] mb-1">{{ artist.genre|default:"Artist" }}</span>
+                    <h3 class="font-display text-white text-3xl font-bold mb-4">{{ artist.stage_name }}</h3>
+                    <a href="{% url 'core:artist_detail' artist.id %}"
+                       class="card-cta inline-block py-3 px-6 bg-[#d4af37] text-black text-[9px] font-black uppercase tracking-widest text-center rounded-xl w-fit">
+                        View Profile →
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <p class="font-display text-3xl italic text-gray-300">Selecting the spotlight...</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ HOW IT WORKS ═══════════════════════════════ -->
+<section class="bg-white py-28 px-6 font-body">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-20 reveal">
+            <span class="text-[10px] font-black uppercase tracking-[0.4em] text-[#d4af37] block mb-3">
+                <span class="gold-line"></span>Process
+            </span>
+            <h2 class="font-display text-5xl md:text-6xl font-bold text-gray-900">
+                How It <span class="italic">Works</span>
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+            <!-- Step 1 -->
+            <div class="reveal text-center relative">
+                <div class="w-14 h-14 bg-[#d4af37] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#d4af37]/30">
+                    <span class="font-heading text-black text-2xl">01</span>
+                </div>
+                <div class="step-connector hidden md:block"></div>
+                <h4 class="font-body font-black uppercase text-[11px] tracking-widest text-gray-900 mb-2">Browse Talent</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Explore our roster of verified, elite Nigerian creatives.</p>
+            </div>
+            <!-- Step 2 -->
+            <div class="reveal reveal-delay-1 text-center relative">
+                <div class="w-14 h-14 bg-[#0a0a0a] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <span class="font-heading text-[#d4af37] text-2xl">02</span>
+                </div>
+                <div class="step-connector hidden md:block"></div>
+                <h4 class="font-body font-black uppercase text-[11px] tracking-widest text-gray-900 mb-2">Send Request</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Submit your booking details — no account needed.</p>
+            </div>
+            <!-- Step 3 -->
+            <div class="reveal reveal-delay-2 text-center relative">
+                <div class="w-14 h-14 bg-[#d4af37] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#d4af37]/30">
+                    <span class="font-heading text-black text-2xl">03</span>
+                </div>
+                <div class="step-connector hidden md:block"></div>
+                <h4 class="font-body font-black uppercase text-[11px] tracking-widest text-gray-900 mb-2">Get Approved</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Artist reviews and accepts. You get a private chat link.</p>
+            </div>
+            <!-- Step 4 -->
+            <div class="reveal reveal-delay-3 text-center">
+                <div class="w-14 h-14 bg-[#0a0a0a] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <span class="font-heading text-[#d4af37] text-2xl">04</span>
+                </div>
+                <h4 class="font-body font-black uppercase text-[11px] tracking-widest text-gray-900 mb-2">Connect & Book</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Chat directly and finalise your event securely.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ FEATURED BRANDS ═══════════════════════════════ -->
+<section class="bg-[#0a0a0a] py-28 px-6 font-body">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16 reveal">
+            <span class="text-[10px] font-black uppercase tracking-[0.4em] text-[#d4af37] block mb-3">
+                <span class="gold-line" style="background:#d4af37"></span>Partnerships
+            </span>
+            <h2 class="font-display text-5xl md:text-6xl font-bold text-white">
+                Featured <span class="italic text-[#d4af37]">Brands</span>
+            </h2>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-6">
+            {% for brand in featured_brands %}
+            <a href="{% url 'core:brand_detail' brand.id %}"
+               class="brand-card rounded-3xl p-6 flex flex-col items-center gap-4 w-48 text-center cursor-pointer reveal">
+                <div class="w-20 h-20 rounded-full overflow-hidden border border-white/10">
+                    {% if brand.display_picture %}
+                        <img src="{{ brand.display_picture }}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all">
+                    {% else %}
+                        <div class="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
+                            <span class="font-heading text-[#d4af37] text-3xl">{{ brand.brand_name|slice:":1" }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <h3 class="font-body text-white text-sm font-bold">{{ brand.brand_name }}</h3>
+                <span class="text-[#d4af37] text-[9px] font-black uppercase tracking-widest">Discover →</span>
+            </a>
+            {% empty %}
+            <p class="text-gray-600 text-xs uppercase tracking-widest font-body">Brand partnerships coming soon</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ CTA ═══════════════════════════════ -->
+<section class="cta-bg py-32 px-6 font-body relative overflow-hidden">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#d4af37]/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="max-w-4xl mx-auto text-center relative z-10 reveal">
+        <span class="text-[10px] font-black uppercase tracking-[0.4em] text-[#d4af37] block mb-6">
+            <span class="gold-line"></span>Join the Family
+        </span>
+        <h2 class="font-display text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
+            Are You a<br><span class="italic text-[#d4af37]">Creative?</span>
+        </h2>
+        <p class="text-gray-400 text-base max-w-xl mx-auto mb-12 leading-relaxed">
+            Join Nigeria's most exclusive talent network. Get discovered by top brands, manage bookings, and grow your career — all in one place.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'core:artist_signup' %}"
+               class="px-10 py-5 bg-[#d4af37] text-black text-[11px] font-black uppercase tracking-[0.3em] rounded-full hover:bg-white transition-all duration-500 shadow-2xl shadow-[#d4af37]/30">
+                Apply as Artist
+            </a>
+            <a href="{% url 'core:artist_list' %}"
+               class="px-10 py-5 border border-white/20 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-full hover:border-[#d4af37] hover:text-[#d4af37] transition-all duration-500">
+                Browse Talent
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+{% endblock %} {% endcomment %}
+
+
+{% comment %} {% extends "core/base_public.html" %} 
 {% load static %} 
 
 {% block content %}
@@ -94,7 +1135,7 @@
 
     </div>
 </div>
-{% endblock %}
+{% endblock %} {% endcomment %}
 
 
 
@@ -110,162 +1151,3 @@
 
 
 
-
-
-
-
-{% comment %} {% extends "core/base_public.html" %} {% load static %} {% block content %}
-<div class="home-container">
-  <!-- Featured Artists -->
-  <section class="featured-section">
-    <h2 class="section-title">Featured Creatives</h2>
-    <div class="cards-container">
-      {% for artist in featured_artists %}
-      <div class="card artist-card">
-        <div class="card-image">
-          <img
-            src="{{ artist.profile_picture.url|default:'/static/images/default-artist.png' }}"
-            alt="{{ artist.stage_name }}"
-          />
-        </div>
-        <div class="card-body">
-          <h3>{{ artist.stage_name }}</h3>
-          <p class="genre">{{ artist.genre }}</p>
-          <p class="price">₦{{ artist.price_tag }}</p>
-          <a href="{% url 'core:artist_detail' artist.id %}" class="btn"
-            >View Profile</a
-          >
-        </div>
-      </div>
-      {% empty %}
-      <p class="no-items">No featured artists yet.</p>
-      {% endfor %}
-    </div>
-  </section>
-
-  <!-- Featured Brands -->
-  <section class="featured-section mt-5">
-    <h2 class="section-title">Featured Brands</h2>
-    <div class="cards-container">
-      {% for brand in featured_brands %}
-      <div class="card brand-card">
-        <div class="card-image">
-          <img src="{{ brand.display_picture }}" alt="{{ brand.brand_name }}">
-        </div>
-        <div class="card-body">
-          <h3>{{ brand.brand_name }}</h3>
-          <p class="role">Brand</p>
-          <a
-            href="{% url 'core:brand_detail' brand.id %}"
-            class="btn btn-outline"
-            >View Brand</a
-          >
-        </div>
-      </div>
-      {% empty %}
-      <p class="no-items">No featured brands yet.</p>
-      {% endfor %}
-    </div>
-  </section>
-</div>
-
-<style>
-  .home-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4rem;
-  }
-
-  .featured-section {
-    width: 100%;
-    max-width: 1200px;
-    text-align: center;
-  }
-
-  .section-title {
-    font-size: 2rem;
-    color: #d4af37;
-    margin-bottom: 2rem;
-  }
-
-  .cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 2rem;
-  }
-
-  .card {
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    width: 250px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-align: center;
-  }
-
-  .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  }
-
-  .card-image img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-  }
-
-  .card-body h3 {
-    margin: 0.5rem 0;
-    font-size: 1.2rem;
-    color: #333;
-  }
-
-  .genre,
-  .role {
-    font-size: 0.95rem;
-    color: #777;
-    margin-bottom: 0.5rem;
-  }
-
-  .price {
-    font-weight: bold;
-    color: #28a745; /* green */
-    margin-bottom: 1rem;
-  }
-
-  .btn {
-    background-color: #d4af37;
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: bold;
-    text-decoration: none;
-    display: inline-block;
-    transition: 0.3s;
-  }
-
-  .btn:hover {
-    background-color: #b8952f;
-  }
-
-  .btn-outline {
-    background-color: transparent;
-    color: #d4af37;
-    border: 2px solid #d4af37;
-  }
-
-  .btn-outline:hover {
-    background-color: #d4af37;
-    color: #fff;
-  }
-
-  .no-items {
-    color: #555;
-    font-size: 1rem;
-    margin-top: 1rem;
-  }
-</style>
-{% endblock %}  {% endcomment %}
