@@ -62,6 +62,7 @@ if not DEBUG:
 
 INSTALLED_APPS = [
     "daphne",
+    "cloudinary",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

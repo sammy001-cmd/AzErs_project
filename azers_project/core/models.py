@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
+from cloudinary.models import CloudinaryField
 
 
 # -------------------------
@@ -40,7 +41,7 @@ class AzersCode(models.Model):
 # Base Profile (abstract)
 # -------------------------
 class BaseProfile(models.Model):
-    profile_picture = models.ImageField(upload_to="profiles/", blank=True, null=True)
+    profile_picture = CloudinaryField("image", folder="profiles", blank=True, null=True)
     bio = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -101,7 +102,7 @@ class Brand(BaseProfile):
     account_number = models.CharField(max_length=20, blank=True)
     bank_name = models.CharField(max_length=100, blank=True)
     address = models.CharField(max_length=255, blank=True)
-    profile_picture = models.ImageField(upload_to="brands/", blank=True, null=True)
+    profile_picture = CloudinaryField("image", folder="brands", blank=True, null=True)
 
     @property
     def display_picture(self):
@@ -138,7 +139,7 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     stock = models.PositiveIntegerField(default=0)
-    image = models.ImageField(upload_to="products/", blank=True, null=True)
+    image = CloudinaryField("image", folder="products", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
 
@@ -255,7 +256,7 @@ class ChatMessage(models.Model):
     
     # Explicitly track guest messages
     is_from_guest = models.BooleanField(default=False)
-    image = models.ImageField(upload_to="chat_images/", blank=True, null=True)
+    image = CloudinaryField("image", folder="chat_images", blank=True, null=True)
     text = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
@@ -330,7 +331,7 @@ class Ticket(models.Model):
     
     # The "Cool" Factor
     requires_photo = models.BooleanField(default=True, help_text="If true, users must upload a photo for the digital pass")
-    ticket_template = models.ImageField(upload_to="tickets/templates/", blank=True, null=True, help_text="The blank design we will paste the user face onto")
+    ticket_template = CloudinaryField("image", folder="tickets/templates", blank=True, null=True, help_text="The blank design we will paste the user face onto")
     
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -346,8 +347,8 @@ class TicketPurchase(models.Model):
     user_name = models.CharField(max_length=200)
     email = models.EmailField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    user_photo = models.ImageField(upload_to="ticket_holders/")
-    payment_receipt = models.ImageField(upload_to="payment_proofs/")
+    user_photo = CloudinaryField("image", folder="ticket_holders")
+    payment_receipt = CloudinaryField("image", folder="payment_proofs")
     status = models.CharField(max_length=20, default="pending", choices=[
         ('pending', 'Verifying'),
         ('approved', 'Issued'),
