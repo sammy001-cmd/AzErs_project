@@ -68,6 +68,7 @@ if not DEBUG:
 
 INSTALLED_APPS = [
     "daphne",
+    "cloudinary_storage",
     "cloudinary",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -150,6 +151,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
