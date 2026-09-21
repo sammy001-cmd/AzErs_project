@@ -159,6 +159,10 @@ STORAGES = {
     },
 }
 
+# Back-compat shim: django-cloudinary-storage's collectstatic command
+# still reads this legacy setting directly instead of STORAGES.
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 
 # Robust Cloudinary initialization for both individual keys and CLOUDINARY_URL
