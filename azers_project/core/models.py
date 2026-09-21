@@ -58,6 +58,14 @@ class Artist(BaseProfile):
     genre = models.CharField(max_length=100, blank=True)
     price_tag = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
+    @property
+    def display_picture(self):
+        if self.profile_picture:
+            if hasattr(self.profile_picture, 'url'):
+                return self.profile_picture.url
+            return str(self.profile_picture)
+        return "/static/images/default-artist.png"
+
     def __str__(self):
         return self.stage_name or self.user.username
 
