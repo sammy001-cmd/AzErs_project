@@ -155,11 +155,11 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 WHITENOISE_MANIFEST_STRICT = False
 
@@ -171,17 +171,17 @@ if cloudinary_url_env:
         cloud_name=parsed_url.hostname,
         api_key=parsed_url.username,
         api_secret=parsed_url.password,
-        secure=True
+        secure=True,
     )
 else:
     cloudinary.config(
         cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME", "yhzhrspr"),
         api_key=os.environ.get("CLOUDINARY_API_KEY", "212142717751668"),
         api_secret=os.environ.get("CLOUDINARY_API_SECRET", "rp1Gpm67A70M61mzu2mCorZyGMo"),
-        secure=True
+        secure=True,
     )
-    
-    
+
+
 # Redirect after login if none specified
 LOGIN_REDIRECT_URL = '/'  # or you can redirect to a dashboard later
 LOGIN_URL = '/login/'     # path for @login_required decorator to redirect
