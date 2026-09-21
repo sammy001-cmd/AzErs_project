@@ -242,9 +242,13 @@ section { opacity: 1; }
 <section id="hero">
     <div class="hero-mosaic" id="heroMosaic">
     {% for artist in featured_artists %}
-        {% if artist.profile_picture %}
+        {% if artist.profile_picture and artist.profile_picture.name %}
             <img {% if forloop.first %}class="span-2"{% endif %} 
                  src="{{ artist.profile_picture.url }}" alt="{{ artist.stage_name }}">
+        {% else %}
+            <!-- Safe fallback stock image if artist hasn't uploaded a picture yet -->
+            <img {% if forloop.first %}class="span-2"{% endif %} 
+                 src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop" alt="Azers Artist">
         {% endif %}
     {% endfor %}
 </div>
@@ -365,7 +369,7 @@ section { opacity: 1; }
         <div class="artist-grid" id="artistGrid">
             {% for artist in featured_artists %}
             <div class="artist-card">
-                {% if artist.profile_picture %}
+                {% if artist.profile_picture and artist.profile_picture.name %}
                     <img src="{{ artist.profile_picture.url }}" alt="{{ artist.stage_name }}">
                 {% else %}
                     <div class="artist-placeholder">{{ artist.stage_name|slice:":1" }}</div>
@@ -435,7 +439,7 @@ section { opacity: 1; }
         <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:-10px;margin-bottom:40px;">
             {% for artist in featured_artists %}
             <div title="{{ artist.stage_name }}" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--cream);overflow:hidden;margin:-6px;box-shadow:0 4px 20px rgba(0,0,0,0.1);background:#111;display:flex;align-items:center;justify-content:center;">
-                {% if artist.profile_picture %}
+                {% if artist.profile_picture and artist.profile_picture.name %}
                     <img src="{{ artist.profile_picture.url }}" style="width:100%;height:100%;object-fit:cover;" alt="{{ artist.stage_name }}">
                 {% else %}
                     <span style="font-family:'Bebas Neue';font-size:1.8rem;color:var(--gold);">{{ artist.stage_name|slice:":1" }}</span>
@@ -470,8 +474,8 @@ section { opacity: 1; }
             <a href="{% url 'core:brand_detail' brand.id %}" class="brand-card">
                 <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
                     <div class="brand-avatar">
-                        {% if brand.display_picture %}
-                            <img src="{{ brand.display_picture }}" style="width:100%;height:100%;object-fit:cover;">
+                        {% if brand.display_picture and brand.display_picture|stringformat:"s" %}
+                            <img src="{{ brand.display_picture.url|default:brand.display_picture }}" style="width:100%;height:100%;object-fit:cover;">
                         {% else %}
                             {{ brand.brand_name|slice:":1" }}
                         {% endif %}
