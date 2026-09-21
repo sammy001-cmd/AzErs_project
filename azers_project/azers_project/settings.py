@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import dj_database_url
 import cloudinary
+import urllib.parse
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -154,12 +155,27 @@ STORAGES = {
     },
 }
 
-cloudinary.config(
-    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-    secure=True
-)
+
+
+# Robust Cloudinary initialization for both individual keys and CLOUDINARY_URL
+cloudinary_url_env = os.environ.get("CLOUDINARY_URL")
+if cloudinary_url_env:
+    parsed_url = urllib.parse.urlparse(cloudinary_url_env)
+    cloudinary.config(
+        cloud_name=parsed_url.hostname,
+        api_key=parsed_url.username,
+        api_secret=parsed_url.password,
+        secure=True
+    )
+else:
+    cloudinary.config(
+        cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME", "yhzhrspr"),
+        api_key=os.environ.get("CLOUDINARY_API_KEY", "212142717751668"),
+        api_secret=os.environ.get("CLOUDINARY_API_SECRET", "rp1Gpm67A70M61mzu2mCorZyGMo"),
+        secure=True
+    )
+    
+    
 # Redirect after login if none specified
 LOGIN_REDIRECT_URL = '/'  # or you can redirect to a dashboard later
 LOGIN_URL = '/login/'     # path for @login_required decorator to redirect
