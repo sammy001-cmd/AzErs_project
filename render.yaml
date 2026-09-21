@@ -3,7 +3,7 @@ services:
     name: azers-squad
     runtime: python
     rootDir: azers_project
-    buildCommand: ./build.sh
+    buildCommand: bash ./build.sh
     startCommand: daphne -b 0.0.0.0 -p $PORT azers_project.asgi:application
     envVars:
       - key: PYTHON_VERSION
@@ -11,6 +11,8 @@ services:
       - key: DEBUG
         value: "False"
       - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
         sync: false
       - key: SECRET_KEY
         generateValue: true
