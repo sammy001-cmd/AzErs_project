@@ -163,7 +163,7 @@ STORAGES = {
 # still reads this legacy setting directly instead of STORAGES.
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-
+WHITENOISE_MANIFEST_STRICT = False
 
 # Robust Cloudinary initialization for both individual keys and CLOUDINARY_URL
 cloudinary_url_env = os.environ.get("CLOUDINARY_URL")
