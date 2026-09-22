@@ -30,7 +30,12 @@ class MemberSignupForm(UserCreationForm):
 
     def clean(self):
         cleaned = super().clean()
-        role = cleaned.get('role') or self.initial.get('role') or 'artist'
+        role = (
+            cleaned.get('role')
+            or self.fields['role'].initial
+            or self.initial.get('role')
+            or 'artist'
+        )
         code_text = cleaned.get('azers_code', '').strip()
 
         if role == 'artist':
@@ -138,6 +143,15 @@ class BrandSignupForm(MemberSignupForm):
         self.fields['role'].initial = 'brand'
         self.fields['role'].required = False
         self.fields['brand_name'].required = True
+
+    def clean(self):
+        if self.is_bound:
+            self.data = self.data.copy()
+            self.data['role'] = 'brand'
+        self.cleaned_data['role'] = 'brand'
+        cleaned = super().clean()
+        cleaned['role'] = 'brand'
+        return cleaned
 
     def clean_profile_picture(self):
         profile_picture = self.cleaned_data.get('profile_picture')
