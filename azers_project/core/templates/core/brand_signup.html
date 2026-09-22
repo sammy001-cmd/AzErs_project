@@ -42,6 +42,19 @@
                 </div>
                 {% endif %}
 
+                {% if form.errors %}
+                <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+                  <p class="text-[10px] text-red-700 font-black uppercase tracking-widest mb-2">Please check:</p>
+                  <ul class="list-disc list-inside space-y-1">
+                    {% for field in form %}
+                      {% for error in field.errors %}
+                        <li class="text-[10px] text-red-600 font-bold">{{ field.label }}: {{ error }}</li>
+                      {% endfor %}
+                    {% endfor %}
+                  </ul>
+                </div>
+                {% endif %}
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="form-field-wrapper">
                         <label class="label-style">Admin Username</label>
@@ -57,8 +70,8 @@
 
                 <div class="form-field-wrapper">
                     <label class="label-style">Registered Business Name</label>
-                    {{ form.business_name }}
-                    {% for error in form.business_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+                  {{ form.brand_name }}
+                  {% for error in form.brand_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -70,6 +83,7 @@
                     <div class="form-field-wrapper">
                         <label class="label-style">Confirm Password</label>
                         {{ form.password2 }}
+                      {% for error in form.password2.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
                     </div>
                 </div>
 
@@ -81,6 +95,7 @@
                             {{ form.profile_picture }}
                         </div>
                     </div>
+                      {% for error in form.profile_picture.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
                 </div>
 
                 <div class="pt-6">

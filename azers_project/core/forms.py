@@ -137,15 +137,17 @@ class BrandSignupForm(MemberSignupForm):
         self.fields['role'].widget = forms.HiddenInput()
         self.fields['role'].initial = 'brand'
         self.fields['role'].required = False
+        self.fields['brand_name'].required = True
+
+    def clean_profile_picture(self):
+        profile_picture = self.cleaned_data.get('profile_picture')
+        if profile_picture and profile_picture.size > 10 * 1024 * 1024:
+            raise forms.ValidationError('The logo must be smaller than 10 MB.')
+        return profile_picture
 
     def save(self, commit=True):
-        user = super().save(commit=False)
-        user.role = 'brand' # Explicitly force the role
-        if commit:
-            user.save()
-            # The MemberSignupForm.save() already handles 
-            # Brand.objects.create(), so we don't need to repeat it here.
-        return user
+        self.cleaned_data['role'] = 'brand'
+        return super().save(commit=commit)
 
 
 

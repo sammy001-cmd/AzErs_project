@@ -262,23 +262,11 @@ def brand_signup(request):
     if request.method == "POST":
         form = BrandSignupForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.role = 'brand'
-            user.is_approved = False
-            user.save()  # This might trigger a signal to create the Brand
-            
-            # Use update_or_create to avoid the UNIQUE constraint error
-            Brand.objects.update_or_create(
-                user=user, 
-                defaults={
-                    'brand_name': getattr(user, 'username') + "'s Brand"
-                }
-            )
-            
+            form.save()
             messages.success(request, "Submitted successfully. Await admin approval.")
             return redirect("core:home")
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.error(request, "Please correct the highlighted fields below.")
     else:
         form = BrandSignupForm()
     return render(request, "core/brand_signup.html", {"form": form})
