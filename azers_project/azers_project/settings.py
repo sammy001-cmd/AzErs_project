@@ -155,6 +155,15 @@ STORAGES = {
     },
 }
 
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME", "yhzhrspr"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY", "212142717751668"),
+    "API_SECRET": os.environ.get(
+        "CLOUDINARY_API_SECRET",
+        "rp1Gpm67A70M61mzu2mCorZyGMo",
+    ),
+}
+
 STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
 
 WHITENOISE_MANIFEST_STRICT = False

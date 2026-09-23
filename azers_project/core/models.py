@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 from cloudinary.models import CloudinaryField
+from .storage import PortfolioCloudinaryStorage
 
 
 # -------------------------
@@ -70,6 +71,10 @@ class Artist(BaseProfile):
         return self.stage_name or self.user.username
 
 
+def portfolio_upload_path(instance, filename):
+    return f"portfolios/{instance.media_type}/{filename}"
+
+
 # -------------------------
 # Portfolio model
 # -------------------------
@@ -82,7 +87,12 @@ class Portfolio(models.Model):
     )
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     description = models.TextField()
-    file = models.FileField(upload_to="portfolios/", blank=True, null=True)
+    file = models.FileField(
+        upload_to=portfolio_upload_path,
+        storage=PortfolioCloudinaryStorage(),
+        blank=True,
+        null=True,
+    )
     media_type = models.CharField(max_length=20, choices=MEDIA_TYPES, default="image")
 
     def __str__(self):
