@@ -23,9 +23,10 @@
                         <div class="relative group">
                             <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-[#F9F8F3] shadow-lg bg-gray-100">
                                 {% if form.instance.profile_picture %}
-                                    <img src="{{ form.instance.profile_picture.url }}" class="w-full h-full object-cover group-hover:opacity-75 transition-opacity">
+                                    <img id="profile-picture-preview" src="{{ form.instance.profile_picture.url }}" class="w-full h-full object-cover group-hover:opacity-75 transition-opacity">
                                 {% else %}
-                                    <div class="flex items-center justify-center h-full text-gray-300">
+                                    <img id="profile-picture-preview" class="hidden w-full h-full object-cover group-hover:opacity-75 transition-opacity" alt="Profile picture preview">
+                                    <div id="profile-picture-placeholder" class="flex items-center justify-center h-full text-gray-300">
                                         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
                                     </div>
                                 {% endif %}
@@ -109,6 +110,20 @@
         color: #9ca3af;
     }
 </style>
+<script>
+    const profilePictureInput = document.getElementById('id_profile_picture');
+    const profilePicturePreview = document.getElementById('profile-picture-preview');
+    const profilePicturePlaceholder = document.getElementById('profile-picture-placeholder');
+
+    profilePictureInput?.addEventListener('change', (event) => {
+        const [file] = event.target.files;
+        if (!file) return;
+
+        profilePicturePreview.src = URL.createObjectURL(file);
+        profilePicturePreview.classList.remove('hidden');
+        profilePicturePlaceholder?.classList.add('hidden');
+    });
+</script>
 {% endblock %}
 
 

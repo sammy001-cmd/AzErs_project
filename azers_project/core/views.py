@@ -204,7 +204,7 @@ def edit_artist_profile(request):
         return HttpResponseForbidden("Only artists can edit.")
     artist = get_object_or_404(Artist, user=request.user)
     if request.method == "POST":
-        form = ArtistProfileForm(request.POST, instance=artist)
+        form = ArtistProfileForm(request.POST, request.FILES, instance=artist)
         if form.is_valid():
             form.save()
             messages.success(request, "Profile updated.")
