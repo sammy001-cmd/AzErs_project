@@ -155,36 +155,37 @@ STORAGES = {
     },
 }
 
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME", "yhzhrspr"),
-    "API_KEY": os.environ.get("CLOUDINARY_API_KEY", "212142717751668"),
-    "API_SECRET": os.environ.get(
-        "CLOUDINARY_API_SECRET",
-        "rp1Gpm67A70M61mzu2mCorZyGMo",
-    ),
-}
+cloudinary_url_env = os.environ.get("CLOUDINARY_URL")
+if cloudinary_url_env:
+    parsed_url = urllib.parse.urlparse(cloudinary_url_env)
+    cloudinary_credentials = {
+        "CLOUD_NAME": parsed_url.hostname,
+        "API_KEY": urllib.parse.unquote(parsed_url.username or ""),
+        "API_SECRET": urllib.parse.unquote(parsed_url.password or ""),
+    }
+else:
+    cloudinary_credentials = {
+        "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME", "yhzhrspr"),
+        "API_KEY": os.environ.get("CLOUDINARY_API_KEY", "212142717751668"),
+        "API_SECRET": os.environ.get(
+            "CLOUDINARY_API_SECRET",
+            "rp1Gpm67A70M61mzu2mCorZyGMo",
+        ),
+    }
+
+CLOUDINARY_STORAGE = cloudinary_credentials
 
 STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
 
 WHITENOISE_MANIFEST_STRICT = False
 
-# Robust Cloudinary initialization for both individual keys and CLOUDINARY_URL
-cloudinary_url_env = os.environ.get("CLOUDINARY_URL")
-if cloudinary_url_env:
-    parsed_url = urllib.parse.urlparse(cloudinary_url_env)
-    cloudinary.config(
-        cloud_name=parsed_url.hostname,
-        api_key=parsed_url.username,
-        api_secret=parsed_url.password,
-        secure=True,
-    )
-else:
-    cloudinary.config(
-        cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME", "yhzhrspr"),
-        api_key=os.environ.get("CLOUDINARY_API_KEY", "212142717751668"),
-        api_secret=os.environ.get("CLOUDINARY_API_SECRET", "rp1Gpm67A70M61mzu2mCorZyGMo"),
-        secure=True,
-    )
+# Configure the SDK from the same credentials used by django-cloudinary-storage.
+cloudinary.config(
+    cloud_name=cloudinary_credentials["CLOUD_NAME"],
+    api_key=cloudinary_credentials["API_KEY"],
+    api_secret=cloudinary_credentials["API_SECRET"],
+    secure=True,
+)
 
 
 # Redirect after login if none specified
